@@ -78,6 +78,16 @@ public class User {
         return null;
     }
 
+    public Contacto getContactoPorNombre(String nombre) {
+        for (Contacto c : contactos) {
+            if (c.getNombreUsuario().equals(nombre)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public String toString() {
         return "User{" +

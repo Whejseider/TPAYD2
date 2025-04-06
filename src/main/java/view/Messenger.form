@@ -102,6 +102,7 @@
                 <constraints border-constraint="North"/>
                 <properties>
                   <preferredSize width="0" height="85"/>
+                  <visible value="true"/>
                 </properties>
                 <border type="none"/>
                 <children>
@@ -186,6 +187,12 @@
               <minimumSize width="80" height="34"/>
               <preferredSize width="100" height="34"/>
               <text value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
+            </properties>
+          </component>
+          <component id="b11e1" class="javax.swing.JButton" binding="btnLogin">
+            <constraints/>
+            <properties>
+              <text value="Iniciar Sesión"/>
             </properties>
           </component>
         </children>

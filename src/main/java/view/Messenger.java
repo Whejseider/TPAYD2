@@ -32,17 +32,15 @@ public class Messenger extends JFrame {
     private JTextArea txtAreaConversacion;
     private JList<Contacto> listChat;
     private JScrollPane scrollPane;
+    private JButton btnLogin;
 
     public Messenger(String titulo) throws HeadlessException {
         super(titulo);
+        this.setContentPane(this.pane);
         this.setSize(1100,600);
         this.setLocationRelativeTo(null);
         this.requestFocus();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setContentPane(this.pane);
-
-        this.panelContactoInfo.setVisible(false);
-
         this.setVisible(true);
     }
 
@@ -149,5 +147,21 @@ public class Messenger extends JFrame {
 
     public void setPanelContactoInfo(JPanel panelContactoInfo) {
         this.panelContactoInfo = panelContactoInfo;
+    }
+
+    public JTextField getTxtBuscarChat() {
+        return txtBuscarChat;
+    }
+
+    public void setTxtBuscarChat(JTextField txtBuscarChat) {
+        this.txtBuscarChat = txtBuscarChat;
+    }
+
+    public JTextField getTxtMensaje() {
+        return txtMensaje;
+    }
+
+    public void setTxtMensaje(JTextField txtMensaje) {
+        this.txtMensaje = txtMensaje;
     }
 }

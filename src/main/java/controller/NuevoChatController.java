@@ -36,10 +36,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         if (!e.getValueIsAdjusting()) {
             Contacto seleccionado = this.vista.getList1().getSelectedValue();
             if (seleccionado != null) {
-                this.messengerController.iniciarChat(seleccionado);
-                this.messengerController.getVista().getLblNombreMensaje().setText(seleccionado.getNombreUsuario());
-                this.messengerController.getVista().getLblIP().setText("IP: "+ seleccionado.getIP());
-                this.messengerController.getVista().getLblPuerto().setText("Puerto: " + seleccionado.getPuerto());
+                this.messengerController.mostrarChat(seleccionado);
                 this.vista.dispose();
             }
         }

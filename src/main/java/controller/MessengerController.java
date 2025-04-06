@@ -1,6 +1,7 @@
 package controller;
 
 import model.Contacto;
+import model.Conversacion;
 import model.Mensaje;
 import model.User;
 import service.Cliente;
@@ -21,10 +22,8 @@ public class MessengerController implements ActionListener, ListSelectionListene
     private User user;
     private Contacto contactoActual;
 
-    public MessengerController(Messenger vista, User user) {
+    public MessengerController(Messenger vista) {
         this.vista = vista;
-        this.user = user;
-        this.servidor = new Servidor(this);
 
         this.vista.getBtnEnviar().addActionListener(this);
         this.vista.getBtnNuevoChat().addActionListener(this);
@@ -34,6 +33,14 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     public Messenger getVista() {
         return vista;
+    }
+
+    public void configurarServidor(){
+        this.servidor = new Servidor(this);
+    }
+
+    public void configurarCliente(){
+        this.cliente = new Cliente(this);
     }
 
     public void setVista(Messenger vista) {
@@ -64,8 +71,25 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.user = user;
     }
 
-    public void iniciarChat(Contacto contacto){
-        this.vista.getPanelContactoInfo().setVisible(true);
+    public void mostrarChat(Contacto contacto) {
+        contactoActual = contacto;
+        vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
+        vista.getLblIP().setText("IP: " + contacto.getIP());
+        vista.getLblPuerto().setText("Puerto: " + contacto.getPuerto());
+
+        // Mostrar el historial de conversación
+        Conversacion conversacion = user.getConversacionCon(contacto);
+        StringBuilder historial = new StringBuilder();
+
+        for (Mensaje mensaje : conversacion.getMensajes()) {
+            historial.append(mensaje.getContenido()).append("\n");
+        }
+
+        vista.getTxtAreaConversacion().setText(historial.toString());
+    }
+
+    public Contacto getContactoActual() {
+        return contactoActual;
     }
 
     @Override
@@ -76,6 +100,22 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getBtnEnviar()) {
+            String texto = vista.getTxtMensaje().getText().trim();
+            if (texto.isEmpty() || contactoActual == null) return;
+
+            // Crear mensaje
+            Mensaje mensaje = new Mensaje(user.getNombreUsuario(), texto);
+
+            // Obtener o crear conversación
+            Conversacion conversacion = user.getConversacionCon(contactoActual);
+            conversacion.agregarMensaje(mensaje);
+
+            // Enviar por red
+            cliente.enviarMensaje(texto, contactoActual);
+
+            // Limpiar campo y actualizar vista
+            vista.getTxtMensaje().setText("");
+            mostrarChat(contactoActual);
         }
 
         if (e.getSource() == this.vista.getBtnNuevoContacto()) {

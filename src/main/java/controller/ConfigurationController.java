@@ -55,7 +55,8 @@ public class ConfigurationController implements ActionListener {
                 System.out.println(user.toString());
 
                 Messenger messengerVista = new Messenger("Messenger");
-                MessengerController controller = new MessengerController(messengerVista, user);
+                MessengerController controller = new MessengerController(messengerVista);
+                controller.setUser(this.user);
 
                 this.vista.dispose();
             }
