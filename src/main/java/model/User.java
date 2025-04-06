@@ -1,6 +1,5 @@
 package model;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,13 +8,13 @@ public class User {
     private String IP = "";
     private Integer puerto;
     private List<Contacto> contactos;
-    private List<Mensaje> mensajes;
+    private List<Conversacion> conversaciones;
 
     public User(String nombreUsuario, Integer puerto) {
         this.nombreUsuario = nombreUsuario;
         this.setPuerto(puerto);
         this.contactos = new ArrayList<>();
-        this.mensajes = new ArrayList<>();
+        this.conversaciones = new ArrayList<>();
     }
 
     public String getNombreUsuario() {
@@ -50,24 +49,25 @@ public class User {
         return contactos;
     }
 
-    public void agregarMensaje(Mensaje mensaje){
-        this.mensajes.add(mensaje);
+    public void agregarConversacion(Conversacion conversacion){
+        this.conversaciones.add(conversacion);
     }
 
-    public List<Mensaje> getMensajes() {
-        return mensajes;
+    public List<Conversacion> getConversaciones() {
+        return this.conversaciones;
     }
 
-    public List<Mensaje> getMensajesDe(Contacto contacto) {
-        List<Mensaje> resultado = new ArrayList<>();
-        for (Mensaje m : mensajes) {
-            if (m.getIPOrigen().equals(contacto.getIP()) || contacto.getIP().equals(this.getIP())) {
-                resultado.add(m);
+    public Conversacion getConversacionCon(Contacto contacto) {
+        for (Conversacion c : conversaciones) {
+            if (c.getContacto().getIP().equals(contacto.getIP())) {
+                return c;
             }
         }
-        return resultado;
+        // Si no existe, la creamos
+        Conversacion nuevaConversacion = new Conversacion(contacto);
+        agregarConversacion(nuevaConversacion);
+        return nuevaConversacion;
     }
-
 
     public Contacto getContacto(Contacto contacto) {
         for (Contacto c : this.getContactos()) {
@@ -86,4 +86,6 @@ public class User {
                 ", puerto=" + puerto +
                 '}';
     }
+
+
 }

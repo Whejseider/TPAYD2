@@ -2,10 +2,8 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 
-public class Configuration extends JDialog {
+public class Configuracion extends JDialog {
     private JPanel pane;
     private JTextField txtUsuario;
     private JTextField txtPuerto;
@@ -16,48 +14,46 @@ public class Configuration extends JDialog {
     private JButton btnAceptar;
     private JPanel paneContenido;
     private JPanel paneBotones;
-    private JPanel puertoPanel;
 
-    public Configuration() throws HeadlessException {
+    public Configuracion() throws HeadlessException {
         super();
-        this.setSize(400,300);
+        this.setTitle("Configuración");
+        this.setSize(400,350);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-        this.requestFocus();
+        this.setModalityType(ModalityType.MODELESS);
 
+        // Panel principal
         pane = new JPanel();
-        pane.setLayout(new BorderLayout(0,40));
+        pane.setLayout(new BorderLayout());
         pane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Panel de contenido
         paneContenido = new JPanel();
-        paneContenido.setLayout(new GridLayout(4,1,10,10));
+        paneContenido.setLayout(new GridLayout(6,1,10,10));
 
         // Nombre de usuario
         lblUsuario = new JLabel("Nombre de usuario:");
         lblUsuario.setFont(new Font("Arial", Font.PLAIN, 14));
         txtUsuario = new JTextField();
-        txtUsuario.setMargin(new Insets(0,5,0,0));
+        txtUsuario.setMargin(new Insets(5,5,5,5));
 
         // Puerto
-        puertoPanel = new JPanel();
-        puertoPanel.setLayout(new BoxLayout(puertoPanel, BoxLayout.Y_AXIS));
         lblPuerto = new JLabel("Puerto:");
         lblPuerto.setFont(new Font("Arial", Font.PLAIN, 14));
         txtPuerto = new JTextField();
         txtPuerto.setMargin(new Insets(0,5,0,0));
 
 
-        // Inicializar el JLabel de error del puerto
-        lblPuertoError = new JLabel(" "); // Ponle un espacio o vacío ""
+        // Error del puerto
+        lblPuertoError = new JLabel(" ");
         lblPuertoError.setForeground(Color.RED);
-        lblPuertoError.setFont(new Font("Arial", Font.PLAIN, 12)); // Letra más pequeña
-        lblPuertoError.setVisible(false); // <-- Inicialmente oculto
-
-        puertoPanel.add(txtPuerto);
-        puertoPanel.add(lblPuertoError);
+        lblPuertoError.setFont(new Font("Arial", Font.PLAIN, 12));
+        lblPuertoError.setVisible(false);
 
         // Panel de botones
         paneBotones = new JPanel();
-        paneBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 0));
+        paneBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.setBackground(new Color(255, 255, 255)); // Color azul similar al de la imagen
@@ -73,7 +69,8 @@ public class Configuration extends JDialog {
         paneContenido.add(lblUsuario);
         paneContenido.add(txtUsuario);
         paneContenido.add(lblPuerto);
-        paneContenido.add(puertoPanel);
+        paneContenido.add(txtPuerto);
+        paneContenido.add(lblPuertoError);
 
         paneBotones.add(btnCancelar);
         paneBotones.add(btnAceptar);
@@ -84,7 +81,6 @@ public class Configuration extends JDialog {
 
         this.setContentPane(pane);
         this.setVisible(true);
-
     }
 
     public JTextField getTxtUsuario() {
@@ -129,5 +125,21 @@ public class Configuration extends JDialog {
 
     public void display(){
         this.pack();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
+
+    public void mostrarErrorPuerto(String mensaje) {
+        lblPuertoError.setText(mensaje);
+        lblPuertoError.setVisible(true);
+        this.revalidate(); // Forzar actualización del layout
+        this.repaint();    // Forzar repintado
+    }
+
+    public void limpiarErrores() {
+        lblPuertoError.setVisible(false);
+        this.revalidate();
+        this.repaint();
+    }
+
 }

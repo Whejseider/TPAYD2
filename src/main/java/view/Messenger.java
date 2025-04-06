@@ -40,6 +40,9 @@ public class Messenger extends JFrame {
         this.requestFocus();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(this.pane);
+
+        this.panelContactoInfo.setVisible(false);
+
         this.setVisible(true);
     }
 
@@ -138,5 +141,13 @@ public class Messenger extends JFrame {
 
     public void setListChat(JList<Contacto> listChat) {
         this.listChat = listChat;
+    }
+
+    public JPanel getPanelContactoInfo() {
+        return panelContactoInfo;
+    }
+
+    public void setPanelContactoInfo(JPanel panelContactoInfo) {
+        this.panelContactoInfo = panelContactoInfo;
     }
 }

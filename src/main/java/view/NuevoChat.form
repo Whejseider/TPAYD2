@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="view.NuevoChat">
+  <grid id="27dc6" binding="pane" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties>
+      <minimumSize width="300" height="250"/>
+      <preferredSize width="300" height="525"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="97dfe" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <scrollpane id="14d4b">
+            <constraints border-constraint="Center"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="578f" class="javax.swing.JList" binding="list1" default-binding="true">
+                <constraints/>
+                <properties>
+                  <fixedCellHeight value="60"/>
+                  <model>
+                    <item value="JUAN ANTORIO NORIO¨PES"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                    <item value="a"/>
+                  </model>
+                  <selectionMode value="0"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+          <grid id="88a5" binding="paneBuscar" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="North"/>
+            <properties>
+              <minimumSize width="49" height="60"/>
+              <preferredSize width="49" height="60"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="5299e" class="javax.swing.JTextField" binding="txtBuscar">
+                <constraints border-constraint="South"/>
+                <properties>
+                  <background color="-526345"/>
+                  <foreground color="-16777216"/>
+                </properties>
+              </component>
+              <component id="9f727" class="javax.swing.JLabel" binding="lblBuscar">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <text value="Buscar"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

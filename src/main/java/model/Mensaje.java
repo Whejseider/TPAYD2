@@ -1,16 +1,18 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Mensaje {
     private String contenido;
-    private LocalDate tiempo;
+    private LocalDateTime tiempo;
     private String IPOrigen;
 
     public Mensaje(String contenido, String IPOrigen) {
         this.contenido = contenido;
         this.IPOrigen = IPOrigen;
-        this.tiempo = LocalDate.now();
+        this.tiempo = LocalDateTime.now();
     }
 
     public String getContenido() {
@@ -29,7 +31,13 @@ public class Mensaje {
         this.IPOrigen = IPOrigen;
     }
 
-    public LocalDate getTiempo() {
+    public LocalDateTime getTiempo() {
         return tiempo;
+    }
+
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return "[" + tiempo.format(formatter) + "] " + IPOrigen + ": " + contenido;
     }
 }

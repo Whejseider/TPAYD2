@@ -1,10 +1,10 @@
 import controller.ConfigurationController;
-import view.Configuration;
+import view.Configuracion;
 
 public class Main {
 
     public static void main(String[] args) {
-        Configuration configuration = new Configuration();
+        Configuracion configuration = new Configuracion();
         ConfigurationController configurationController = new ConfigurationController(configuration);
     }
 }

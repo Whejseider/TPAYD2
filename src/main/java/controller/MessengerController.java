@@ -6,13 +6,15 @@ import model.User;
 import service.Cliente;
 import service.Servidor;
 import view.Messenger;
+import view.NuevoChat;
+import view.NuevoContacto;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class MessengerController implements MouseListener {
+public class MessengerController implements ActionListener {
     private Messenger vista;
     private Servidor servidor;
     private Cliente cliente;
@@ -24,9 +26,9 @@ public class MessengerController implements MouseListener {
         this.user = user;
         this.servidor = new Servidor(this);
 
-        this.vista.getBtnEnviar().addMouseListener(this);
-        this.vista.getBtnNuevoChat().addMouseListener(this);
-        this.vista.getBtnNuevoContacto().addMouseListener(this);
+        this.vista.getBtnEnviar().addActionListener(this);
+        this.vista.getBtnNuevoChat().addActionListener(this);
+        this.vista.getBtnNuevoContacto().addActionListener(this);
         this.vista.getListChat().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -37,7 +39,6 @@ public class MessengerController implements MouseListener {
                     }
                 }
             }
-
 
 
         });
@@ -75,10 +76,7 @@ public class MessengerController implements MouseListener {
         this.user = user;
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
 
-    }
     private void mostrarChat(Contacto contacto) {
         contactoActual = contacto;
         vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
@@ -86,39 +84,38 @@ public class MessengerController implements MouseListener {
         vista.getLblPuerto().setText("Puerto: " + contacto.getPuerto());
 
         StringBuilder historial = new StringBuilder();
-        for (Mensaje m : user.getMensajesDe(contacto)) {
-            historial.append(m.getContenido()).append("\n");
-        }
+//        for (Contacto c : user.getConversacionCon(contacto)) {
+//            historial.append(c.getContenido()).append("\n");
+//        }
 
         vista.getTxtAreaConversacion().setText(historial.toString());
     }
+
     @Override
-    public void mousePressed(MouseEvent e) {
-        if (e.getSource() == this.vista.getBtnEnviar()){
-            if (contactoActual != null){
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == this.vista.getBtnEnviar()) {
+            if (contactoActual != null) {
                 String contenido = vista.getTextField2().getText().trim();
-                if (!contenido.isEmpty()){
+                if (!contenido.isEmpty()) {
                     Mensaje mensaje = new Mensaje(contenido, user.getIP());
-                    user.agregarMensaje(mensaje);
+//                    user.agregarMensaje(mensaje);
                     mostrarChat(contactoActual);
                     vista.getTextField2().setText("");
                 }
             }
         }
+
+        if (e.getSource() == this.vista.getBtnNuevoContacto()) {
+            NuevoContacto nuevoContacto = new NuevoContacto();
+            NuevoContactoController nuevoContactoController = new NuevoContactoController(nuevoContacto, this.user);
+            nuevoContacto.display();
+        }
+
+        if (e.getSource() == this.vista.getBtnNuevoChat()){
+            NuevoChat nuevoChat = new NuevoChat();
+            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user);
+            nuevoChat.display();
+        }
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
 }
