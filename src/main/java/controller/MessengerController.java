@@ -64,6 +64,10 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.user = user;
     }
 
+    public void iniciarChat(Contacto contacto){
+        this.vista.getPanelContactoInfo().setVisible(true);
+    }
+
     @Override
     public void valueChanged(ListSelectionEvent e) {
 
@@ -82,7 +86,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
         if (e.getSource() == this.vista.getBtnNuevoChat()) {
             NuevoChat nuevoChat = new NuevoChat();
-            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user);
+            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user, this);
             nuevoChat.display();
         }
     }
