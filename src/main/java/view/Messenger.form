@@ -1,13 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="view.Messenger">
-  <grid id="27dc6" row-count="1" column-count="1" layout-manager="BorderLayout">
-    <margin top="0" left="0" bottom="0" right="0"/>
+  <grid id="27dc6" binding="pane" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
-      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+      <xy x="20" y="20" width="635" height="516"/>
     </constraints>
-    <properties/>
+    <properties>
+      <minimumSize width="400" height="400"/>
+      <preferredSize width="1100" height="600"/>
+    </properties>
     <border type="none"/>
-    <children/>
+    <children>
+      <grid id="4b79b" binding="panelPrincipal" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="a973a" binding="panelChats" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="West"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="7db08" binding="panelSupChats" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="North"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="e23b3" class="javax.swing.JLabel" binding="lblChats">
+                    <constraints border-constraint="West"/>
+                    <properties>
+                      <text value="Chats"/>
+                    </properties>
+                  </component>
+                  <component id="ca70e" class="javax.swing.JButton" binding="btnNuevoChat">
+                    <constraints border-constraint="East"/>
+                    <properties>
+                      <text value="Nuevo Chat"/>
+                    </properties>
+                  </component>
+                  <grid id="fb6d3" binding="panelBuscarChat" layout-manager="BorderLayout" hgap="0" vgap="0">
+                    <constraints border-constraint="South"/>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="c4fa2" class="javax.swing.JLabel" binding="lblBuscarChat">
+                        <constraints border-constraint="North"/>
+                        <properties>
+                          <text value="Buscar chat"/>
+                        </properties>
+                      </component>
+                      <component id="7915e" class="javax.swing.JTextField" binding="txtBuscarChat">
+                        <constraints border-constraint="South"/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
+              <grid id="7a2c3" binding="panelChatLista" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="Center"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="bd203" binding="scrollPane">
+                    <constraints border-constraint="Center"/>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="fd3a9" class="javax.swing.JList" binding="listChat">
+                        <constraints/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="c81bb" binding="panelConversación" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="Center"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="555c6" binding="panelEnviarMensaje" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="South"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="8f557" class="javax.swing.JButton" binding="btnEnviar">
+                    <constraints border-constraint="East"/>
+                    <properties>
+                      <text value="Enviar"/>
+                    </properties>
+                  </component>
+                  <component id="e528c" class="javax.swing.JTextField" binding="txtMensaje">
+                    <constraints border-constraint="Center"/>
+                    <properties/>
+                  </component>
+                </children>
+              </grid>
+              <grid id="62638" binding="panelContactoInfo" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <preferredSize width="0" height="85"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <grid id="79bb9" binding="panelNombreContacto" layout-manager="BorderLayout" hgap="0" vgap="0">
+                    <constraints border-constraint="Center"/>
+                    <properties>
+                      <preferredSize width="168" height="85"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <grid id="29f0" binding="panelNombreContactoAux" layout-manager="BorderLayout" hgap="0" vgap="0">
+                        <constraints border-constraint="Center"/>
+                        <properties>
+                          <minimumSize width="168" height="64"/>
+                          <preferredSize width="168" height="64"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="2754c" class="javax.swing.JLabel" binding="lblNombreMensaje">
+                            <constraints border-constraint="Center"/>
+                            <properties>
+                              <text value="Nombre del contacto"/>
+                            </properties>
+                          </component>
+                          <grid id="741f0" binding="panelPuertoIpChat" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+                            <constraints border-constraint="South"/>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <component id="a18cf" class="javax.swing.JLabel" binding="lblIP">
+                                <constraints/>
+                                <properties>
+                                  <text value="IP:localhost"/>
+                                </properties>
+                              </component>
+                              <component id="138f8" class="javax.swing.JLabel" binding="lblPuerto">
+                                <constraints/>
+                                <properties>
+                                  <text value="Puerto:9999"/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                        </children>
+                      </grid>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
+              <component id="c7586" class="javax.swing.JTextArea" binding="txtAreaConversacion">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <lineWrap value="true"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="35185" binding="panelOpciones" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="West"/>
+        <properties>
+          <maximumSize width="300" height="32767"/>
+          <minimumSize width="80" height="44"/>
+          <preferredSize width="110" height="44"/>
+        </properties>
+        <clientProperties>
+          <html.disable class="java.lang.Boolean" value="false"/>
+        </clientProperties>
+        <border type="none"/>
+        <children>
+          <component id="83b01" class="javax.swing.JButton" binding="btnNuevoContacto">
+            <constraints/>
+            <properties>
+              <actionCommand value="nuevoContacto"/>
+              <autoscrolls value="false"/>
+              <horizontalTextPosition value="11"/>
+              <label value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
+              <minimumSize width="80" height="34"/>
+              <preferredSize width="100" height="34"/>
+              <text value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
   </grid>
 </form>
