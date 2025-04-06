@@ -6,6 +6,7 @@ import model.Mensaje;
 import model.User;
 import service.Cliente;
 import service.Servidor;
+import view.Configuracion;
 import view.Messenger;
 import view.NuevoChat;
 import view.NuevoContacto;
@@ -29,6 +30,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.vista.getBtnNuevoChat().addActionListener(this);
         this.vista.getBtnNuevoContacto().addActionListener(this);
         this.vista.getListChat().addListSelectionListener(this);
+        this.vista.getBtnLogin().addActionListener(this);
     }
 
     public Messenger getVista() {
@@ -100,6 +102,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getBtnEnviar()) {
+            this.configurarCliente();
             String texto = vista.getTxtMensaje().getText().trim();
             if (texto.isEmpty() || contactoActual == null) return;
 
@@ -128,6 +131,12 @@ public class MessengerController implements ActionListener, ListSelectionListene
             NuevoChat nuevoChat = new NuevoChat();
             NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user, this);
             nuevoChat.display();
+        }
+
+        if (e.getSource() == this.vista.getBtnLogin()){
+            Configuracion configuracion = new Configuracion();
+            ConfigurationController configurationController = new ConfigurationController(configuracion, this);
+            configuracion.display();
         }
     }
 
