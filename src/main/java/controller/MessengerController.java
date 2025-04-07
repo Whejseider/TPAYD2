@@ -26,7 +26,6 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     public MessengerController(Messenger vista) {
         this.vista = vista;
-
         this.vista.getBtnEnviar().addActionListener(this);
         this.vista.getBtnNuevoChat().addActionListener(this);
         this.vista.getBtnNuevoContacto().addActionListener(this);
@@ -80,6 +79,8 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     public void mostrarChat(Contacto contacto) {
         contactoActual = contacto;
+
+        vista.getPanelContactoInfo().setVisible(true);
         vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
         vista.getLblIP().setText("IP: " + contacto.getIP());
         vista.getLblPuerto().setText("Puerto: " + contacto.getPuerto());
@@ -89,10 +90,10 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
         for (Mensaje mensaje : conversacion.getMensajes()) {
             if (mensaje.getRemitente().getNombreUsuario().equals(user.getNombreUsuario())) {
-                // Mensaje enviado por el usuario actual (a la izquierda)
+                // izquierda <<<
                 historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.toString()).append("\n");
             } else {
-                // Mensaje recibido del contacto (a la derecha)
+                // derecha >>>
                 historial.append(contacto.getNombreUsuario()).append(": ")
                         .append(mensaje.getContenido()).append("\n").append(mensaje.toString()).append("\n");
             }
@@ -124,17 +125,22 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getBtnEnviar()) {
-            this.configurarCliente();
             String texto = vista.getTxtMensaje().getText().trim();
             if (texto.isEmpty() || contactoActual == null) return;
 
+            this.configurarCliente();
+
             String contenido = this.vista.getTxtMensaje().getText().trim();
 
-            // Limpiar campo y actualizar vista
+            DefaultListModel<Contacto> listModel = vista.getListModel();
+            if (!listModel.contains(contactoActual)) {
+                listModel.addElement(contactoActual);
+                vista.getListChat().setSelectedValue(contactoActual, true);
+            }
+
             vista.getTxtMensaje().setText("");
             mostrarChat(contactoActual);
 
-            // Enviar por red
             cliente.enviarMensaje(contenido, contactoActual);
         }
 

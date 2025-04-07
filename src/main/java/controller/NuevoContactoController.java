@@ -41,8 +41,6 @@ public class NuevoContactoController implements ActionListener {
             String ip = this.vista.getTxtIP().getText().trim();
 
             /*TODO: Si esta vacio debe mostrar el no mbre que el mismo contacto eligio,
-               esto supongo que se hace cuando tenga
-             * la conexion hecha mas tarde!!
              */
             if (userName.isEmpty()) {
             }
@@ -82,7 +80,6 @@ public class NuevoContactoController implements ActionListener {
 
                 this.user.agregarContacto(contacto);
 
-                // Cerrar el diálogo
                 this.vista.dispose();
             }
         }

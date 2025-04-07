@@ -5,7 +5,7 @@ import java.util.*;
 
 public class User implements Serializable {
     private String nombreUsuario;
-    private String IP = "127.0.0.1"; //DEFAULT
+    private String IP = "127.0.0.1"; //TODO
     private Integer puerto;
     private Map<String, Contacto> contactos;
     private Map<Contacto, Conversacion> conversaciones;
@@ -42,23 +42,7 @@ public class User implements Serializable {
     }
 
     public void agregarContacto(Contacto contacto) {
-        Objects.requireNonNull(contacto, "El contacto no puede ser nulo");
-        Objects.requireNonNull(contacto.getNombreUsuario(), "El nombre de usuario del contacto no puede ser nulo");
-
-        // putIfAbsent es útil: solo añade si la clave (nombre) no existe aún.
-        // Devuelve null si se añadió, o el contacto existente si ya estaba.
-        Contacto existente = this.contactos.putIfAbsent(contacto.getNombreUsuario(), contacto);
-
-        if (existente == null) {
-            System.out.println("Contacto añadido: " + contacto.getNombreUsuario());
-            // Opcional: Crear conversación vacía aquí si lo deseas
-            // getConversacionCon(nuevoContacto);
-        } else {
-            System.out.println("Intento de añadir contacto duplicado (nombre ya existe): " + contacto.getNombreUsuario());
-            // Puedes decidir si quieres actualizar el contacto existente con datos del nuevo
-            // o simplemente ignorarlo.
-            // Ejemplo de actualización: this.contactos.put(nuevoContacto.getNombreUsuario(), nuevoContacto);
-        }
+        this.contactos.putIfAbsent(contacto.getNombreUsuario(), contacto);
     }
 
     public List<Contacto> getContactos() {

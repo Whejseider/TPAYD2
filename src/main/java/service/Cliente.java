@@ -35,8 +35,6 @@ public class Cliente {
                 this.messengerController.mostrarChat(destino);
             }
 
-//            this.messengerController.getVista().getTxtAreaConversacion().append("YO:" + contenido);
-
             out.close();
             socket.close();
         } catch (Exception e) {

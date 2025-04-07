@@ -54,6 +54,9 @@ public class Messenger extends JFrame {
         listModel.addElement(c);
     }
 
+    public DefaultListModel<Contacto> getListModel() {
+        return listModel;
+    }
 
     public JButton getBtnNuevoContacto() {
         return btnNuevoContacto;
@@ -246,7 +249,7 @@ public class Messenger extends JFrame {
         panelContactoInfo = new JPanel();
         panelContactoInfo.setLayout(new BorderLayout(0, 0));
         panelContactoInfo.setPreferredSize(new Dimension(0, 85));
-        panelContactoInfo.setVisible(true);
+        panelContactoInfo.setVisible(false);
         panelConversación.add(panelContactoInfo, BorderLayout.NORTH);
         panelNombreContacto = new JPanel();
         panelNombreContacto.setLayout(new BorderLayout(0, 0));

@@ -67,6 +67,10 @@ public class ConfigurationController implements ActionListener {
                 this.messengerController.getVista().getBtnLogin().setVisible(false);
                 this.messengerController.getVista().getBtnLogin().setEnabled(false);
                 this.messengerController.configurarServidor();
+                this.messengerController.getVista().setTitle(this.messengerController.getVista().getTitle() +
+                        " - Usuario: " + this.user.getNombreUsuario() +
+                        "  IP: " + this.user.getIP() +
+                        "  Puerto: " + this.user.getPuerto());
                 this.vista.dispose();
             }
         }

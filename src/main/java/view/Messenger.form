@@ -102,7 +102,7 @@
                 <constraints border-constraint="North"/>
                 <properties>
                   <preferredSize width="0" height="85"/>
-                  <visible value="true"/>
+                  <visible value="false"/>
                 </properties>
                 <border type="none"/>
                 <children>

@@ -24,9 +24,11 @@ public class Servidor {
     public void iniciarServidor() {
         new Thread(() -> {
             try {
+
                 Integer puerto = this.messengerController.getUser().getPuerto();
                 ServerSocket s = new ServerSocket(puerto);
                 this.messengerController.getVista().getTxtAreaConversacion().append("Esperando conexiones en puerto: " + puerto + "\n");
+
                 while (true) {
                     Socket soc = s.accept();
                     ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
@@ -34,12 +36,11 @@ public class Servidor {
                     Mensaje mensajeRecibido = (Mensaje) in.readObject();
                     if (mensajeRecibido == null) continue;
 
-                    // Extraer el remitente (ahora es un objeto User completo)
+
                     User usuarioRemitente = mensajeRecibido.getRemitente();
                     String contenido = mensajeRecibido.getContenido();
 
-                    // Verificar si el remitente ya está en la lista de contactos
-                    Contacto contactoRemitente = messengerController.getUser().getContactoPorNombre(usuarioRemitente.getNombreUsuario());
+                    Contacto contactoRemitente = this.messengerController.getUser().getContactoPorNombre(usuarioRemitente.getNombreUsuario());
 
                     if (contactoRemitente == null) {
                         // Crear nuevo contacto con la información del user recibido
@@ -55,17 +56,15 @@ public class Servidor {
                     }
 
                     // Obtener o crear la conversación
-                    Conversacion conversacion = messengerController.getUser().getConversacionCon(contactoRemitente);
+                    Conversacion conversacion = this.messengerController.getUser().getConversacionCon(contactoRemitente);
                     conversacion.agregarMensaje(mensajeRecibido);
 
-                    // Actualizar la vista si corresponde
-                    if (contactoRemitente.equals(messengerController.getContactoActual())) {
-                        messengerController.mostrarChat(contactoRemitente);
+                    if (contactoRemitente.equals(this.messengerController.getContactoActual())) {
+                        this.messengerController.mostrarChat(contactoRemitente);
                     } else {
                         contactoRemitente.setTieneMensajesNuevos(true);
+                        this.messengerController.getVista().getListChat().repaint();
                     }
-
-                    System.out.println("Mensaje recibido de " + usuarioRemitente.getNombreUsuario() + ": " + contenido);
 
                     in.close();
                     soc.close();
@@ -75,7 +74,6 @@ public class Servidor {
                 e.printStackTrace();
                 this.messengerController.getVista().getTxtAreaConversacion().append(e.getMessage() + "\n");
             }
-            this.messengerController.getVista().getTxtAreaConversacion().append("fin");
         }).start();
     }
 
