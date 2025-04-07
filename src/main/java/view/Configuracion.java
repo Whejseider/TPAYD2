@@ -56,12 +56,12 @@ public class Configuracion extends JDialog {
         paneBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
 
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(255, 255, 255)); // Color azul similar al de la imagen
+        btnCancelar.setBackground(new Color(255, 255, 255));
         btnCancelar.setForeground(Color.GRAY);
         btnCancelar.setPreferredSize(new Dimension(120, 40));
 
         btnAceptar = new JButton("Aceptar");
-        btnAceptar.setBackground(new Color(33, 150, 243)); // Color azul similar al de la imagen
+        btnAceptar.setBackground(new Color(33, 150, 243));
         btnAceptar.setForeground(Color.WHITE);
         btnAceptar.setPreferredSize(new Dimension(120, 40));
 

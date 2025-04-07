@@ -34,6 +34,7 @@
                   <component id="ca70e" class="javax.swing.JButton" binding="btnNuevoChat">
                     <constraints border-constraint="East"/>
                     <properties>
+                      <enabled value="false"/>
                       <margin top="5" left="5" bottom="5" right="5"/>
                       <text value="Nuevo Chat"/>
                     </properties>
@@ -77,20 +78,7 @@
                           <fixedCellHeight value="60"/>
                           <fixedCellWidth value="-1"/>
                           <minimumSize width="150" height="728"/>
-                          <model>
-                            <item value="JUAN"/>
-                            <item value="PEPE"/>
-                            <item value="LORIS"/>
-                            <item value="SAPE"/>
-                            <item value="JEJE"/>
-                            <item value="JEJE"/>
-                            <item value="KLAS"/>
-                            <item value="LKJSA"/>
-                            <item value="dasasd"/>
-                            <item value="saddsa"/>
-                            <item value="dsa"/>
-                            <item value="ads"/>
-                          </model>
+                          <model/>
                           <preferredSize width="200" height="728"/>
                           <selectionMode value="0"/>
                           <visibleRowCount value="8"/>
@@ -115,6 +103,7 @@
                   <component id="8f557" class="javax.swing.JButton" binding="btnEnviar">
                     <constraints border-constraint="East"/>
                     <properties>
+                      <enabled value="false"/>
                       <text value="Enviar"/>
                     </properties>
                   </component>
@@ -178,15 +167,24 @@
                   </grid>
                 </children>
               </grid>
-              <component id="c7586" class="javax.swing.JTextArea" binding="txtAreaConversacion">
+              <scrollpane id="4041e">
                 <constraints border-constraint="Center"/>
-                <properties>
-                  <editable value="false"/>
-                  <focusable value="false"/>
-                  <lineWrap value="true"/>
-                  <wrapStyleWord value="true"/>
-                </properties>
-              </component>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="c7586" class="javax.swing.JTextArea" binding="txtAreaConversacion">
+                    <constraints/>
+                    <properties>
+                      <editable value="false"/>
+                      <focusable value="false"/>
+                      <lineWrap value="true"/>
+                      <margin top="5" left="5" bottom="5" right="5"/>
+                      <text value=""/>
+                      <wrapStyleWord value="true"/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
             </children>
           </grid>
         </children>
@@ -215,6 +213,7 @@
             <properties>
               <actionCommand value="nuevoContacto"/>
               <autoscrolls value="false"/>
+              <enabled value="false"/>
               <horizontalTextPosition value="11"/>
               <label value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
               <margin top="5" left="5" bottom="5" right="5"/>

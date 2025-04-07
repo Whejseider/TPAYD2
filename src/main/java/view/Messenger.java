@@ -4,6 +4,7 @@ import model.Contacto;
 import utils.ContactoListRenderer;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class Messenger extends JFrame {
@@ -204,7 +205,7 @@ public class Messenger extends JFrame {
         pane = new JPanel();
         pane.setLayout(new BorderLayout(0, 0));
         pane.setMinimumSize(new Dimension(400, 400));
-        pane.setPreferredSize(new Dimension(800, 600));
+        pane.setPreferredSize(new Dimension(950, 600));
         panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BorderLayout(0, 0));
         pane.add(panelPrincipal, BorderLayout.CENTER);
@@ -218,6 +219,7 @@ public class Messenger extends JFrame {
         lblChats.setText("Chats");
         panelSupChats.add(lblChats, BorderLayout.WEST);
         btnNuevoChat = new JButton();
+        btnNuevoChat.setEnabled(false);
         btnNuevoChat.setMargin(new Insets(5, 5, 5, 5));
         btnNuevoChat.setText("Nuevo Chat");
         panelSupChats.add(btnNuevoChat, BorderLayout.EAST);
@@ -233,24 +235,16 @@ public class Messenger extends JFrame {
         panelChatLista.setLayout(new BorderLayout(0, 0));
         panelChats.add(panelChatLista, BorderLayout.CENTER);
         scrollPane = new JScrollPane();
+        scrollPane.setHorizontalScrollBarPolicy(31);
+        scrollPane.setOpaque(true);
+        scrollPane.setPreferredSize(new Dimension(200, 488));
         panelChatLista.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         listChat = new JList();
         listChat.setFixedCellHeight(60);
         listChat.setFixedCellWidth(-1);
         listChat.setMinimumSize(new Dimension(150, 728));
         final DefaultListModel defaultListModel1 = new DefaultListModel();
-        defaultListModel1.addElement("JUAN");
-        defaultListModel1.addElement("PEPE");
-        defaultListModel1.addElement("LORIS");
-        defaultListModel1.addElement("SAPE");
-        defaultListModel1.addElement("JEJE");
-        defaultListModel1.addElement("JEJE");
-        defaultListModel1.addElement("KLAS");
-        defaultListModel1.addElement("LKJSA");
-        defaultListModel1.addElement("dasasd");
-        defaultListModel1.addElement("saddsa");
-        defaultListModel1.addElement("dsa");
-        defaultListModel1.addElement("ads");
         listChat.setModel(defaultListModel1);
         listChat.setPreferredSize(new Dimension(200, 728));
         listChat.setSelectionMode(0);
@@ -263,6 +257,7 @@ public class Messenger extends JFrame {
         panelEnviarMensaje.setLayout(new BorderLayout(0, 0));
         panelConversación.add(panelEnviarMensaje, BorderLayout.SOUTH);
         btnEnviar = new JButton();
+        btnEnviar.setEnabled(false);
         btnEnviar.setText("Enviar");
         panelEnviarMensaje.add(btnEnviar, BorderLayout.EAST);
         txtMensaje = new JTextField();
@@ -293,12 +288,16 @@ public class Messenger extends JFrame {
         lblPuerto = new JLabel();
         lblPuerto.setText("Puerto:9999");
         panelPuertoIpChat.add(lblPuerto);
+        final JScrollPane scrollPane1 = new JScrollPane();
+        panelConversación.add(scrollPane1, BorderLayout.CENTER);
         txtAreaConversacion = new JTextArea();
         txtAreaConversacion.setEditable(false);
         txtAreaConversacion.setFocusable(false);
         txtAreaConversacion.setLineWrap(true);
+        txtAreaConversacion.setMargin(new Insets(5, 5, 5, 5));
+        txtAreaConversacion.setText("");
         txtAreaConversacion.setWrapStyleWord(true);
-        panelConversación.add(txtAreaConversacion, BorderLayout.CENTER);
+        scrollPane1.setViewportView(txtAreaConversacion);
         panelOpciones = new JPanel();
         panelOpciones.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         panelOpciones.setMaximumSize(new Dimension(300, 32767));
@@ -313,6 +312,7 @@ public class Messenger extends JFrame {
         btnNuevoContacto = new JButton();
         btnNuevoContacto.setActionCommand("nuevoContacto");
         btnNuevoContacto.setAutoscrolls(false);
+        btnNuevoContacto.setEnabled(false);
         btnNuevoContacto.setHorizontalTextPosition(11);
         btnNuevoContacto.setLabel("<html><center>Nuevo<br>Contacto</center></html>");
         btnNuevoContacto.setMargin(new Insets(5, 5, 5, 5));
