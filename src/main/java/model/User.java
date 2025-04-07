@@ -1,22 +1,19 @@
 package model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class User implements Serializable {
     private String nombreUsuario;
     private String IP = "127.0.0.1"; //DEFAULT
     private Integer puerto;
-    private List<Contacto> contactos;
+    private Map<String, Contacto> contactos;
     private Map<Contacto, Conversacion> conversaciones;
 
     public User(String nombreUsuario, Integer puerto) {
         this.nombreUsuario = nombreUsuario;
         this.setPuerto(puerto);
-        this.contactos = new ArrayList<>();
+        this.contactos = new LinkedHashMap();
         this.conversaciones = new HashMap<>();
     }
 
@@ -45,13 +42,27 @@ public class User implements Serializable {
     }
 
     public void agregarContacto(Contacto contacto) {
-        if (!this.contactos.contains(contacto)) {
-            this.contactos.add(contacto);
+        Objects.requireNonNull(contacto, "El contacto no puede ser nulo");
+        Objects.requireNonNull(contacto.getNombreUsuario(), "El nombre de usuario del contacto no puede ser nulo");
+
+        // putIfAbsent es útil: solo añade si la clave (nombre) no existe aún.
+        // Devuelve null si se añadió, o el contacto existente si ya estaba.
+        Contacto existente = this.contactos.putIfAbsent(contacto.getNombreUsuario(), contacto);
+
+        if (existente == null) {
+            System.out.println("Contacto añadido: " + contacto.getNombreUsuario());
+            // Opcional: Crear conversación vacía aquí si lo deseas
+            // getConversacionCon(nuevoContacto);
+        } else {
+            System.out.println("Intento de añadir contacto duplicado (nombre ya existe): " + contacto.getNombreUsuario());
+            // Puedes decidir si quieres actualizar el contacto existente con datos del nuevo
+            // o simplemente ignorarlo.
+            // Ejemplo de actualización: this.contactos.put(nuevoContacto.getNombreUsuario(), nuevoContacto);
         }
     }
 
     public List<Contacto> getContactos() {
-        return contactos;
+        return new ArrayList<>(contactos.values());
     }
 
     public Map<Contacto, Conversacion> getConversaciones() {
@@ -72,12 +83,8 @@ public class User implements Serializable {
     }
 
     public Contacto getContactoPorNombre(String nombre) {
-        for (Contacto c : contactos) {
-            if (c.getNombreUsuario().equalsIgnoreCase(nombre)) {
-                return c;
-            }
-        }
-        return null;
+        if (nombre == null) return null;
+        return this.contactos.get(nombre);
     }
 
 
@@ -90,5 +97,15 @@ public class User implements Serializable {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(nombreUsuario, user.nombreUsuario) && Objects.equals(IP, user.IP) && Objects.equals(puerto, user.puerto);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(nombreUsuario, IP, puerto);
+    }
 }
