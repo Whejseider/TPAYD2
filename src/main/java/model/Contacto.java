@@ -28,7 +28,9 @@ public class Contacto extends User implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Contacto contacto = (Contacto) o;
-        return Objects.equals(getIP(), contacto.getIP()) && Objects.equals(getPuerto(), contacto.getPuerto());
+        return Objects.equals(getIP(), contacto.getIP()) &&
+                Objects.equals(getPuerto(), contacto.getPuerto()) &&
+                Objects.equals(getNombreUsuario(), contacto.getNombreUsuario());
     }
 
     @Override

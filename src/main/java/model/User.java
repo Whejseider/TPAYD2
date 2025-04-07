@@ -2,20 +2,22 @@ package model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class User implements Serializable {
     private String nombreUsuario;
     private String IP = "127.0.0.1"; //DEFAULT
     private Integer puerto;
     private List<Contacto> contactos;
-    private List<Conversacion> conversaciones;
+    private Map<Contacto, Conversacion> conversaciones;
 
     public User(String nombreUsuario, Integer puerto) {
         this.nombreUsuario = nombreUsuario;
         this.setPuerto(puerto);
         this.contactos = new ArrayList<>();
-        this.conversaciones = new ArrayList<>();
+        this.conversaciones = new HashMap<>();
     }
 
     public String getNombreUsuario() {
@@ -43,31 +45,21 @@ public class User implements Serializable {
     }
 
     public void agregarContacto(Contacto contacto) {
-        this.contactos.add(contacto);
+        if (!this.contactos.contains(contacto)) {
+            this.contactos.add(contacto);
+        }
     }
 
     public List<Contacto> getContactos() {
         return contactos;
     }
 
-    public void agregarConversacion(Conversacion conversacion){
-        this.conversaciones.add(conversacion);
-    }
-
-    public List<Conversacion> getConversaciones() {
-        return this.conversaciones;
+    public Map<Contacto, Conversacion> getConversaciones() {
+        return conversaciones;
     }
 
     public Conversacion getConversacionCon(Contacto contacto) {
-        for (Conversacion c : conversaciones) {
-            if (c.getContacto().getIP().equals(contacto.getIP())) {
-                return c;
-            }
-        }
-        // Si no existe, la creamos
-        Conversacion nuevaConversacion = new Conversacion(contacto);
-        agregarConversacion(nuevaConversacion);
-        return nuevaConversacion;
+        return this.conversaciones.computeIfAbsent(contacto, k -> new Conversacion(contacto));
     }
 
     public Contacto getContacto(Contacto contacto) {
@@ -81,7 +73,7 @@ public class User implements Serializable {
 
     public Contacto getContactoPorNombre(String nombre) {
         for (Contacto c : contactos) {
-            if (c.getNombreUsuario().equals(nombre)) {
+            if (c.getNombreUsuario().equalsIgnoreCase(nombre)) {
                 return c;
             }
         }
