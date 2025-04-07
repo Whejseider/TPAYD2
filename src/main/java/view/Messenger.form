@@ -68,7 +68,7 @@
                     <properties>
                       <horizontalScrollBarPolicy value="31"/>
                       <opaque value="true"/>
-                      <preferredSize width="200" height="488"/>
+                      <preferredSize width="200" height="515"/>
                     </properties>
                     <border type="line"/>
                     <children>
@@ -79,7 +79,7 @@
                           <fixedCellWidth value="-1"/>
                           <minimumSize width="150" height="728"/>
                           <model/>
-                          <preferredSize width="200" height="728"/>
+                          <preferredSize width="200" height="515"/>
                           <selectionMode value="0"/>
                           <visibleRowCount value="8"/>
                         </properties>
