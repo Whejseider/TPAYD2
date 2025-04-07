@@ -1,6 +1,7 @@
 package view;
 
 import model.Contacto;
+import utils.ContactoListRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +32,7 @@ public class Messenger extends JFrame {
     private JButton btnEnviar;
     private JTextArea txtAreaConversacion;
     private JList<Contacto> listChat;
+    private DefaultListModel<Contacto> listModel;
     private JScrollPane scrollPane;
     private JButton btnLogin;
 
@@ -42,6 +44,14 @@ public class Messenger extends JFrame {
         this.requestFocus();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
+
+        this.listModel = new DefaultListModel<>();
+        this.listChat.setModel(this.listModel);
+        this.listChat.setCellRenderer(new ContactoListRenderer());
+    }
+
+    public void agregarContacto(Contacto c) {
+        listModel.addElement(c);
     }
 
 
@@ -292,4 +302,5 @@ public class Messenger extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return pane;
     }
+
 }

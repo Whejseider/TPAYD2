@@ -1,11 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User implements Serializable {
     private String nombreUsuario;
-    private String IP = "";
+    private String IP = "127.0.0.1"; //DEFAULT
     private Integer puerto;
     private List<Contacto> contactos;
     private List<Conversacion> conversaciones;

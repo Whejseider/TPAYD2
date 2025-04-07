@@ -2,9 +2,13 @@ package service;
 
 import controller.MessengerController;
 import model.Contacto;
+import model.Conversacion;
+import model.Mensaje;
+import model.User;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,41 +29,46 @@ public class Servidor {
                 this.messengerController.getVista().getTxtAreaConversacion().append("Esperando conexiones en puerto: " + puerto + "\n");
                 while (true) {
                     Socket soc = s.accept();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+                    ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 
-                    String msg = in.readLine(); // Por ejemplo: "Remitente:Mensaje"
-                    if (msg == null || msg.isEmpty()) continue;
+                    Mensaje mensajeRecibido = (Mensaje) in.readObject();
+                    if (mensajeRecibido == null) continue;
 
-                    // Desglosar el mensaje si viene como "usuario:mensaje"
-                    String[] partes = msg.split(":", 2);
-                    if (partes.length != 2) continue;
+                    // Extraer el remitente (ahora es un objeto User completo)
+                    User usuarioRemitente = mensajeRecibido.getRemitente();
+                    String contenido = mensajeRecibido.getContenido();
 
-                    String remitenteNombre = partes[0].trim();
-                    String contenido = partes[1].trim();
+                    // Verificar si el remitente ya está en la lista de contactos
+                    Contacto contactoRemitente = messengerController.getUser().getContactoPorNombre(usuarioRemitente.getNombreUsuario());
 
-                    // Buscar contacto con ese nombre (esto depende de cómo identificás contactos)
-                    Contacto remitente = messengerController.getUser().getContactoPorNombre(remitenteNombre);
+                    if (contactoRemitente == null) {
+                        // Crear nuevo contacto con la información del user recibido
+                        contactoRemitente = new Contacto(usuarioRemitente.getNombreUsuario(), usuarioRemitente.getIP(), usuarioRemitente.getPuerto());
+                        contactoRemitente.setNombreUsuario(usuarioRemitente.getNombreUsuario());
+                        contactoRemitente.setIP(soc.getInetAddress().getHostAddress());
+                        contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
 
-                    // Si no existe, lo podés ignorar o agregarlo temporalmente
-                    if (remitente == null) {
-                        // Omitimos por ahora
-                        continue;
+                        // Agregar el nuevo contacto
+                        this.messengerController.getUser().agregarContacto(contactoRemitente);
+                        this.messengerController.getVista().agregarContacto(contactoRemitente);
+                        this.messengerController.getVista().repaint();
                     }
 
-                    // Crear el mensaje
-                    model.Mensaje mensaje = new model.Mensaje(remitenteNombre, contenido);
+                    // Obtener o crear la conversación
+                    Conversacion conversacion = messengerController.getUser().getConversacionCon(contactoRemitente);
+                    conversacion.agregarMensaje(mensajeRecibido);
 
-                    // Obtener conversación y agregar mensaje
-                    model.Conversacion conversacion = messengerController.getUser().getConversacionCon(remitente);
-                    conversacion.agregarMensaje(mensaje);
-
-                    // Si el contacto está abierto en el chat, actualizar vista
-                    if (remitente.equals(messengerController.getContactoActual())) {
-                        messengerController.mostrarChat(remitente);
+                    // Actualizar la vista si corresponde
+                    if (contactoRemitente.equals(messengerController.getContactoActual())) {
+                        messengerController.mostrarChat(contactoRemitente);
+                    } else {
+                        contactoRemitente.setTieneMensajesNuevos(true);
                     }
 
-                    // (opcional) imprimir log
-                    System.out.println("Mensaje recibido de " + remitenteNombre + ": " + contenido);
+                    System.out.println("Mensaje recibido de " + usuarioRemitente.getNombreUsuario() + ": " + contenido);
+
+                    in.close();
+                    soc.close();
                 }
 
             } catch (Exception e) {

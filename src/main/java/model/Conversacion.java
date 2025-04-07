@@ -1,9 +1,10 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Conversacion {
+public class Conversacion implements Serializable {
     private Contacto contacto;
     private List<Mensaje> mensajes;
 

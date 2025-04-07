@@ -2,7 +2,12 @@ package service;
 
 import controller.MessengerController;
 import model.Contacto;
+import model.Conversacion;
+import model.Mensaje;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -16,10 +21,21 @@ public class Cliente {
     public void enviarMensaje(String contenido, Contacto destino) {
         try {
             Socket socket = new Socket(destino.getIP(), destino.getPuerto());
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-            // Mandás algo como "TuNombre:Hola!"
-            out.println(messengerController.getUser().getNombreUsuario() + ":" + contenido);
+            Mensaje mensaje = new Mensaje(contenido, this.messengerController.getUser());
+
+            out.writeObject(mensaje);
+            out.flush();
+
+            Conversacion conversacion = this.messengerController.getUser().getConversacionCon(destino);
+            conversacion.agregarMensaje(mensaje);
+
+            if (destino.equals(this.messengerController.getContactoActual())) {
+                this.messengerController.mostrarChat(destino);
+            }
+
+//            this.messengerController.getVista().getTxtAreaConversacion().append("YO:" + contenido);
 
             out.close();
             socket.close();

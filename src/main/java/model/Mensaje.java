@@ -1,17 +1,17 @@
 package model;
 
-import java.time.LocalDate;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Mensaje {
+public class Mensaje implements Serializable {
     private String contenido;
     private LocalDateTime tiempo;
-    private String IPOrigen;
+    private User remitente;
 
-    public Mensaje(String contenido, String IPOrigen) {
+    public Mensaje(String contenido, User emisor) {
         this.contenido = contenido;
-        this.IPOrigen = IPOrigen;
+        this.remitente = emisor;
         this.tiempo = LocalDateTime.now();
     }
 
@@ -23,12 +23,12 @@ public class Mensaje {
         this.contenido = contenido;
     }
 
-    public String getIPOrigen() {
-        return IPOrigen;
+    public User getRemitente() {
+        return remitente;
     }
 
-    public void setIPOrigen(String IPOrigen) {
-        this.IPOrigen = IPOrigen;
+    public void setRemitente(User remitente) {
+        this.remitente = remitente;
     }
 
     public LocalDateTime getTiempo() {
@@ -37,7 +37,8 @@ public class Mensaje {
 
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return "[" + tiempo.format(formatter) + "] " + IPOrigen + ": " + contenido;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        return "[" + tiempo.format(formatter) + "]";
+//        + remitente.getIP() + ": " + contenido;
     }
 }
