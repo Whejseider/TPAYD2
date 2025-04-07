@@ -17,10 +17,11 @@ public class ContactoListRenderer extends DefaultListCellRenderer {
             Contacto contacto = (Contacto) value;
 
             if (contacto.tieneMensajesNuevos()) {
-                label.setText("● " + contacto.getNombreUsuario());
-                label.setForeground(isSelected ? Color.WHITE : Color.GREEN);
+                label.setText(contacto.getNombreUsuario() + " - IP: " + contacto.getIP() + "  Puerto: " + contacto.getPuerto() + " ●");
+                label.setForeground(isSelected ? Color.WHITE : Color.GREEN.darker());
             } else {
-                label.setText(contacto.getNombreUsuario());
+                label.setText(contacto.getNombreUsuario() + "\n" +
+                        "IP: "+ contacto.getIP() + "  Puerto: " + contacto.getPuerto());
             }
         }
 

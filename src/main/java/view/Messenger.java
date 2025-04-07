@@ -204,7 +204,7 @@ public class Messenger extends JFrame {
         pane = new JPanel();
         pane.setLayout(new BorderLayout(0, 0));
         pane.setMinimumSize(new Dimension(400, 400));
-        pane.setPreferredSize(new Dimension(1100, 600));
+        pane.setPreferredSize(new Dimension(800, 600));
         panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BorderLayout(0, 0));
         pane.add(panelPrincipal, BorderLayout.CENTER);
@@ -218,6 +218,7 @@ public class Messenger extends JFrame {
         lblChats.setText("Chats");
         panelSupChats.add(lblChats, BorderLayout.WEST);
         btnNuevoChat = new JButton();
+        btnNuevoChat.setMargin(new Insets(5, 5, 5, 5));
         btnNuevoChat.setText("Nuevo Chat");
         panelSupChats.add(btnNuevoChat, BorderLayout.EAST);
         panelBuscarChat = new JPanel();
@@ -234,6 +235,26 @@ public class Messenger extends JFrame {
         scrollPane = new JScrollPane();
         panelChatLista.add(scrollPane, BorderLayout.CENTER);
         listChat = new JList();
+        listChat.setFixedCellHeight(60);
+        listChat.setFixedCellWidth(-1);
+        listChat.setMinimumSize(new Dimension(150, 728));
+        final DefaultListModel defaultListModel1 = new DefaultListModel();
+        defaultListModel1.addElement("JUAN");
+        defaultListModel1.addElement("PEPE");
+        defaultListModel1.addElement("LORIS");
+        defaultListModel1.addElement("SAPE");
+        defaultListModel1.addElement("JEJE");
+        defaultListModel1.addElement("JEJE");
+        defaultListModel1.addElement("KLAS");
+        defaultListModel1.addElement("LKJSA");
+        defaultListModel1.addElement("dasasd");
+        defaultListModel1.addElement("saddsa");
+        defaultListModel1.addElement("dsa");
+        defaultListModel1.addElement("ads");
+        listChat.setModel(defaultListModel1);
+        listChat.setPreferredSize(new Dimension(200, 728));
+        listChat.setSelectionMode(0);
+        listChat.setVisibleRowCount(8);
         scrollPane.setViewportView(listChat);
         panelConversación = new JPanel();
         panelConversación.setLayout(new BorderLayout(0, 0));
@@ -285,18 +306,20 @@ public class Messenger extends JFrame {
         panelOpciones.setPreferredSize(new Dimension(110, 44));
         panelOpciones.putClientProperty("html.disable", Boolean.FALSE);
         pane.add(panelOpciones, BorderLayout.WEST);
+        btnLogin = new JButton();
+        btnLogin.setMargin(new Insets(5, 5, 5, 5));
+        btnLogin.setText("Iniciar Sesión");
+        panelOpciones.add(btnLogin);
         btnNuevoContacto = new JButton();
         btnNuevoContacto.setActionCommand("nuevoContacto");
         btnNuevoContacto.setAutoscrolls(false);
         btnNuevoContacto.setHorizontalTextPosition(11);
         btnNuevoContacto.setLabel("<html><center>Nuevo<br>Contacto</center></html>");
+        btnNuevoContacto.setMargin(new Insets(5, 5, 5, 5));
         btnNuevoContacto.setMinimumSize(new Dimension(80, 34));
         btnNuevoContacto.setPreferredSize(new Dimension(100, 34));
         btnNuevoContacto.setText("<html><center>Nuevo<br>Contacto</center></html>");
         panelOpciones.add(btnNuevoContacto);
-        btnLogin = new JButton();
-        btnLogin.setText("Iniciar Sesión");
-        panelOpciones.add(btnLogin);
     }
 
     /**

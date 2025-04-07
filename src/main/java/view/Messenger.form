@@ -6,7 +6,7 @@
     </constraints>
     <properties>
       <minimumSize width="400" height="400"/>
-      <preferredSize width="1100" height="600"/>
+      <preferredSize width="950" height="600"/>
     </properties>
     <border type="none"/>
     <children>
@@ -34,6 +34,7 @@
                   <component id="ca70e" class="javax.swing.JButton" binding="btnNuevoChat">
                     <constraints border-constraint="East"/>
                     <properties>
+                      <margin top="5" left="5" bottom="5" right="5"/>
                       <text value="Nuevo Chat"/>
                     </properties>
                   </component>
@@ -63,12 +64,37 @@
                 <children>
                   <scrollpane id="bd203" binding="scrollPane">
                     <constraints border-constraint="Center"/>
-                    <properties/>
-                    <border type="none"/>
+                    <properties>
+                      <horizontalScrollBarPolicy value="31"/>
+                      <opaque value="true"/>
+                      <preferredSize width="200" height="488"/>
+                    </properties>
+                    <border type="line"/>
                     <children>
                       <component id="fd3a9" class="javax.swing.JList" binding="listChat">
                         <constraints/>
-                        <properties/>
+                        <properties>
+                          <fixedCellHeight value="60"/>
+                          <fixedCellWidth value="-1"/>
+                          <minimumSize width="150" height="728"/>
+                          <model>
+                            <item value="JUAN"/>
+                            <item value="PEPE"/>
+                            <item value="LORIS"/>
+                            <item value="SAPE"/>
+                            <item value="JEJE"/>
+                            <item value="JEJE"/>
+                            <item value="KLAS"/>
+                            <item value="LKJSA"/>
+                            <item value="dasasd"/>
+                            <item value="saddsa"/>
+                            <item value="dsa"/>
+                            <item value="ads"/>
+                          </model>
+                          <preferredSize width="200" height="728"/>
+                          <selectionMode value="0"/>
+                          <visibleRowCount value="8"/>
+                        </properties>
                       </component>
                     </children>
                   </scrollpane>
@@ -177,6 +203,13 @@
         </clientProperties>
         <border type="none"/>
         <children>
+          <component id="b11e1" class="javax.swing.JButton" binding="btnLogin">
+            <constraints/>
+            <properties>
+              <margin top="5" left="5" bottom="5" right="5"/>
+              <text value="Iniciar Sesión"/>
+            </properties>
+          </component>
           <component id="83b01" class="javax.swing.JButton" binding="btnNuevoContacto">
             <constraints/>
             <properties>
@@ -184,15 +217,10 @@
               <autoscrolls value="false"/>
               <horizontalTextPosition value="11"/>
               <label value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
+              <margin top="5" left="5" bottom="5" right="5"/>
               <minimumSize width="80" height="34"/>
               <preferredSize width="100" height="34"/>
               <text value="&lt;html&gt;&lt;center&gt;Nuevo&lt;br&gt;Contacto&lt;/center&gt;&lt;/html&gt;"/>
-            </properties>
-          </component>
-          <component id="b11e1" class="javax.swing.JButton" binding="btnLogin">
-            <constraints/>
-            <properties>
-              <text value="Iniciar Sesión"/>
             </properties>
           </component>
         </children>
