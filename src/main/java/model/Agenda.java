@@ -1,11 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class Agenda {
+public class Agenda implements Serializable {
     private HashMap<User, Contacto> contactos;
 
     public Agenda() {

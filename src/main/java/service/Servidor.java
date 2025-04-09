@@ -72,7 +72,7 @@ public class Servidor {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                this.messengerController.getVista().getTxtAreaConversacion().append(e.getMessage() + "\n");
+                this.messengerController.getVista().getTxtAreaConversacion().append("Error al establecer la conexión" + "\n");
             }
         }).start();
     }
