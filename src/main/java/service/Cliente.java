@@ -4,11 +4,9 @@ import controller.MessengerController;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
+import model.User;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class Cliente {
@@ -22,11 +20,20 @@ public class Cliente {
         try {
             Socket socket = new Socket(destino.getIP(), destino.getPuerto());
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             Mensaje mensaje = new Mensaje(contenido, this.messengerController.getUser());
 
             out.writeObject(mensaje);
             out.flush();
+
+            User destinoRecibido = (User) in.readObject();
+
+            if (destino.getNombreUsuario().equalsIgnoreCase("Usuario Desconocido")){
+                Contacto contactoModificado = new Contacto(destinoRecibido.getNombreUsuario(),destinoRecibido.getIP(), destinoRecibido.getPuerto());
+                this.messengerController.getUser().getAgenda().modificarContactoPorIP(destino, contactoModificado);
+                destino.setNombreUsuario(contactoModificado.getNombreUsuario());
+            }
 
             Conversacion conversacion = this.messengerController.getUser().getConversacionCon(destino);
             conversacion.agregarMensaje(mensaje);

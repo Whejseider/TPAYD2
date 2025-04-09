@@ -4,19 +4,12 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Contacto extends User implements Serializable {
-    private boolean tieneMensajesNuevos = false;
+    private Notificacion notificacion;
 
     public Contacto(String nombreUsuario, String IP, Integer puerto) {
         super(nombreUsuario, puerto);
         this.setIP(IP);
-    }
-
-    public boolean tieneMensajesNuevos() {
-        return tieneMensajesNuevos;
-    }
-
-    public void setTieneMensajesNuevos(boolean tieneMensajesNuevos) {
-        this.tieneMensajesNuevos = tieneMensajesNuevos;
+        this.notificacion = new Notificacion();
     }
 
     @Override
@@ -24,17 +17,11 @@ public class Contacto extends User implements Serializable {
         return getNombreUsuario() + "\n" + "IP:" + getIP() + "  " + "Puerto:" + getPuerto();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Contacto contacto = (Contacto) o;
-        return Objects.equals(getIP(), contacto.getIP()) &&
-                Objects.equals(getPuerto(), contacto.getPuerto()) &&
-                Objects.equals(getNombreUsuario(), contacto.getNombreUsuario());
+    public Notificacion getNotificacion() {
+        return notificacion;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getIP());
+    public void setNotificacion(Notificacion notificacion) {
+        this.notificacion = notificacion;
     }
 }

@@ -7,23 +7,38 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class Agenda implements Serializable {
-    private HashMap<User, Contacto> contactos;
+    private List<Contacto> contactos;
 
     public Agenda() {
-        this.contactos = new LinkedHashMap<>();
+        this.contactos = new ArrayList<>();
     }
 
     public List<Contacto> getContactos() {
-        return new ArrayList<>(contactos.values());
+        return contactos;
     }
 
-    public void agregarContacto(User user, Contacto contacto) {
-        this.contactos.putIfAbsent(user, contacto);
+    public void agregarContacto(Contacto contacto) {
+        this.contactos.add(contacto);
     }
 
     public Contacto getContactoPorUsuario(User user) {
-        if (user == null) return null; //TODO
-        return this.contactos.get(user);
+        for (Contacto c : contactos) {
+            if (c.equals(user)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public boolean modificarContactoPorIP(Contacto contactoOriginal, Contacto contactoActualizado) {
+        for (int i = 0; i < contactos.size(); i++) {
+            Contacto c = contactos.get(i);
+            if (c.getIP().equals(contactoOriginal.getIP())) {
+                contactos.set(i, contactoActualizado);
+                return true;
+            }
+        }
+        return false;
     }
 
     public Contacto getContacto(Contacto contacto) {

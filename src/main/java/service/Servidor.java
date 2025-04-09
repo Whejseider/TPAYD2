@@ -6,10 +6,7 @@ import model.Conversacion;
 import model.Mensaje;
 import model.User;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -32,10 +29,11 @@ public class Servidor {
                 while (true) {
                     Socket soc = s.accept();
                     ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+                    ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+                    out.writeObject(this.messengerController.getUser());
 
                     Mensaje mensajeRecibido = (Mensaje) in.readObject();
                     if (mensajeRecibido == null) continue;
-
 
                     User usuarioRemitente = mensajeRecibido.getRemitente();
                     String contenido = mensajeRecibido.getContenido();
@@ -45,12 +43,12 @@ public class Servidor {
                     if (contactoRemitente == null) {
                         // Crear nuevo contacto con la información del user recibido
                         contactoRemitente = new Contacto(usuarioRemitente.getNombreUsuario(), usuarioRemitente.getIP(), usuarioRemitente.getPuerto());
-                        contactoRemitente.setNombreUsuario(usuarioRemitente.getNombreUsuario());
-                        contactoRemitente.setIP(soc.getInetAddress().getHostAddress());
-                        contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
+//                        contactoRemitente.setNombreUsuario(usuarioRemitente.getNombreUsuario());
+//                        contactoRemitente.setIP(soc.getInetAddress().getHostAddress());
+//                        contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
 
                         // Agregar el nuevo contacto
-                        this.messengerController.getUser().getAgenda().agregarContacto(usuarioRemitente, contactoRemitente);
+                        this.messengerController.getUser().getAgenda().agregarContacto(contactoRemitente);
                         this.messengerController.getVista().agregarContacto(contactoRemitente);
                         this.messengerController.getVista().repaint();
                     }
@@ -62,7 +60,7 @@ public class Servidor {
                     if (contactoRemitente.equals(this.messengerController.getContactoActual())) {
                         this.messengerController.mostrarChat(contactoRemitente);
                     } else {
-                        contactoRemitente.setTieneMensajesNuevos(true);
+                        contactoRemitente.getNotificacion().setTieneMensajesNuevos(true);
                         this.messengerController.getVista().getListChat().repaint();
                     }
 

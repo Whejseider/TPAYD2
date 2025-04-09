@@ -1,7 +1,8 @@
 package view;
 
 import model.Contacto;
-import utils.ContactoListRenderer;
+import model.Conversacion;
+import utils.ChatListRenderer;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -40,7 +41,7 @@ public class Messenger extends JFrame {
     public Messenger(String titulo) throws HeadlessException {
         super(titulo);
         this.setContentPane(this.pane);
-        this.setSize(1100, 600);
+        this.setSize(750, 600);
         this.setLocationRelativeTo(null);
         this.requestFocus();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -48,7 +49,7 @@ public class Messenger extends JFrame {
 
         this.listModel = new DefaultListModel<>();
         this.listChat.setModel(this.listModel);
-        this.listChat.setCellRenderer(new ContactoListRenderer());
+        this.listChat.setCellRenderer(new ChatListRenderer());
     }
 
     public void agregarContacto(Contacto c) {
@@ -205,9 +206,10 @@ public class Messenger extends JFrame {
         pane = new JPanel();
         pane.setLayout(new BorderLayout(0, 0));
         pane.setMinimumSize(new Dimension(400, 400));
-        pane.setPreferredSize(new Dimension(950, 600));
+        pane.setPreferredSize(new Dimension(750, 600));
         panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BorderLayout(0, 0));
+        panelPrincipal.setPreferredSize(new Dimension(640, 600));
         pane.add(panelPrincipal, BorderLayout.CENTER);
         panelChats = new JPanel();
         panelChats.setLayout(new BorderLayout(0, 0));
@@ -233,6 +235,7 @@ public class Messenger extends JFrame {
         panelBuscarChat.add(txtBuscarChat, BorderLayout.SOUTH);
         panelChatLista = new JPanel();
         panelChatLista.setLayout(new BorderLayout(0, 0));
+        panelChatLista.setPreferredSize(new Dimension(220, 515));
         panelChats.add(panelChatLista, BorderLayout.CENTER);
         scrollPane = new JScrollPane();
         scrollPane.setHorizontalScrollBarPolicy(31);
@@ -252,6 +255,7 @@ public class Messenger extends JFrame {
         scrollPane.setViewportView(listChat);
         panelConversación = new JPanel();
         panelConversación.setLayout(new BorderLayout(0, 0));
+        panelConversación.setPreferredSize(new Dimension(280, 62));
         panelPrincipal.add(panelConversación, BorderLayout.CENTER);
         panelEnviarMensaje = new JPanel();
         panelEnviarMensaje.setLayout(new BorderLayout(0, 0));

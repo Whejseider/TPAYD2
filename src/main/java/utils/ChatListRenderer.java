@@ -5,7 +5,7 @@ import model.Contacto;
 import javax.swing.*;
 import java.awt.*;
 
-public class ContactoListRenderer extends DefaultListCellRenderer {
+public class ChatListRenderer extends DefaultListCellRenderer {
     @Override
     public Component getListCellRendererComponent(JList<?> list, Object value,
                                                   int index, boolean isSelected, boolean cellHasFocus) {
@@ -16,8 +16,8 @@ public class ContactoListRenderer extends DefaultListCellRenderer {
         if (value instanceof Contacto) {
             Contacto contacto = (Contacto) value;
 
-            if (contacto.tieneMensajesNuevos()) {
-                label.setText(contacto.getNombreUsuario() + " - IP: " + contacto.getIP() + "  Puerto: " + contacto.getPuerto() + " ●");
+            if (contacto.getNotificacion().tieneMensajesNuevos()) {
+                label.setText(contacto.getNombreUsuario() + " - IP: " + contacto.getIP() + "  Puerto: " + contacto.getPuerto() + "  ●");
                 label.setForeground(isSelected ? Color.WHITE : Color.GREEN.darker());
             } else {
                 label.setText(contacto.getNombreUsuario() + "\n" +

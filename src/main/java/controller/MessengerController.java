@@ -90,10 +90,8 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
         for (Mensaje mensaje : conversacion.getMensajes()) {
             if (mensaje.getRemitente().getNombreUsuario().equals(user.getNombreUsuario())) {
-                // izquierda <<<
                 historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.toString()).append("\n");
             } else {
-                // derecha >>>
                 historial.append(contacto.getNombreUsuario()).append(": ")
                         .append(mensaje.getContenido()).append("\n").append(mensaje.toString()).append("\n");
             }
@@ -112,7 +110,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
             Contacto contactoSeleccionado = this.vista.getListChat().getSelectedValue();
             if (contactoSeleccionado != null) {
 
-                contactoSeleccionado.setTieneMensajesNuevos(false);
+                contactoSeleccionado.getNotificacion().setTieneMensajesNuevos(false);
 
                 this.vista.getListChat().repaint();
 

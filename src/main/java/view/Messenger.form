@@ -6,13 +6,15 @@
     </constraints>
     <properties>
       <minimumSize width="400" height="400"/>
-      <preferredSize width="950" height="600"/>
+      <preferredSize width="750" height="600"/>
     </properties>
     <border type="none"/>
     <children>
       <grid id="4b79b" binding="panelPrincipal" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="Center"/>
-        <properties/>
+        <properties>
+          <preferredSize width="640" height="600"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="a973a" binding="panelChats" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -60,7 +62,9 @@
               </grid>
               <grid id="7a2c3" binding="panelChatLista" layout-manager="BorderLayout" hgap="0" vgap="0">
                 <constraints border-constraint="Center"/>
-                <properties/>
+                <properties>
+                  <preferredSize width="220" height="515"/>
+                </properties>
                 <border type="none"/>
                 <children>
                   <scrollpane id="bd203" binding="scrollPane">
@@ -92,7 +96,9 @@
           </grid>
           <grid id="c81bb" binding="panelConversación" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints border-constraint="Center"/>
-            <properties/>
+            <properties>
+              <preferredSize width="280" height="62"/>
+            </properties>
             <border type="none"/>
             <children>
               <grid id="555c6" binding="panelEnviarMensaje" layout-manager="BorderLayout" hgap="0" vgap="0">
