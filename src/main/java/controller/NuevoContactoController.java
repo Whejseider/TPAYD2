@@ -78,7 +78,7 @@ public class NuevoContactoController implements ActionListener {
                 contacto = new Contacto(userName, ip, puerto);
                 System.out.println(contacto.toString());
 
-                this.user.agregarContacto(contacto);
+                this.user.getAgenda().agregarContacto(contacto);
 
                 this.vista.dispose();
             }

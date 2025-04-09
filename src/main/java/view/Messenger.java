@@ -237,7 +237,7 @@ public class Messenger extends JFrame {
         scrollPane = new JScrollPane();
         scrollPane.setHorizontalScrollBarPolicy(31);
         scrollPane.setOpaque(true);
-        scrollPane.setPreferredSize(new Dimension(200, 488));
+        scrollPane.setPreferredSize(new Dimension(200, 515));
         panelChatLista.add(scrollPane, BorderLayout.CENTER);
         scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         listChat = new JList();
@@ -246,7 +246,7 @@ public class Messenger extends JFrame {
         listChat.setMinimumSize(new Dimension(150, 728));
         final DefaultListModel defaultListModel1 = new DefaultListModel();
         listChat.setModel(defaultListModel1);
-        listChat.setPreferredSize(new Dimension(200, 728));
+        listChat.setPreferredSize(new Dimension(200, 515));
         listChat.setSelectionMode(0);
         listChat.setVisibleRowCount(8);
         scrollPane.setViewportView(listChat);

@@ -21,7 +21,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         this.messengerController = messengerController;
         this.vista.getList1().addListSelectionListener(this);
 
-        for (Contacto c: this.user.getContactos()){
+        for (Contacto c: this.user.getAgenda().getContactos()){
             this.vista.agregarContacto(c);
         }
     }

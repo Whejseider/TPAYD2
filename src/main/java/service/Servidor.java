@@ -40,7 +40,7 @@ public class Servidor {
                     User usuarioRemitente = mensajeRecibido.getRemitente();
                     String contenido = mensajeRecibido.getContenido();
 
-                    Contacto contactoRemitente = this.messengerController.getUser().getContactoPorNombre(usuarioRemitente.getNombreUsuario());
+                    Contacto contactoRemitente = this.messengerController.getUser().getAgenda().getContactoPorUsuario(usuarioRemitente);
 
                     if (contactoRemitente == null) {
                         // Crear nuevo contacto con la información del user recibido
@@ -50,7 +50,7 @@ public class Servidor {
                         contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
 
                         // Agregar el nuevo contacto
-                        this.messengerController.getUser().agregarContacto(contactoRemitente);
+                        this.messengerController.getUser().getAgenda().agregarContacto(contactoRemitente);
                         this.messengerController.getVista().agregarContacto(contactoRemitente);
                         this.messengerController.getVista().repaint();
                     }

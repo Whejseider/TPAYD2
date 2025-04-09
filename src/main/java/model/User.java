@@ -7,13 +7,12 @@ public class User implements Serializable {
     private String nombreUsuario;
     private String IP = "127.0.0.1"; //TODO
     private Integer puerto;
-    private Map<String, Contacto> contactos;
+    private Agenda agenda;
     private Map<Contacto, Conversacion> conversaciones;
 
     public User(String nombreUsuario, Integer puerto) {
         this.nombreUsuario = nombreUsuario;
         this.setPuerto(puerto);
-        this.contactos = new LinkedHashMap();
         this.conversaciones = new HashMap<>();
     }
 
@@ -41,12 +40,12 @@ public class User implements Serializable {
         this.puerto = puerto;
     }
 
-    public void agregarContacto(Contacto contacto) {
-        this.contactos.putIfAbsent(contacto.getNombreUsuario(), contacto);
+    public Agenda getAgenda() {
+        return agenda;
     }
 
-    public List<Contacto> getContactos() {
-        return new ArrayList<>(contactos.values());
+    public void setAgenda(Agenda agenda) {
+        this.agenda = agenda;
     }
 
     public Map<Contacto, Conversacion> getConversaciones() {
@@ -56,21 +55,6 @@ public class User implements Serializable {
     public Conversacion getConversacionCon(Contacto contacto) {
         return this.conversaciones.computeIfAbsent(contacto, k -> new Conversacion(contacto));
     }
-
-    public Contacto getContacto(Contacto contacto) {
-        for (Contacto c : this.getContactos()) {
-            if (c.getIP().equals(contacto.getIP())) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public Contacto getContactoPorNombre(String nombre) {
-        if (nombre == null) return null;
-        return this.contactos.get(nombre);
-    }
-
 
     @Override
     public String toString() {
