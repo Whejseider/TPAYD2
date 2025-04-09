@@ -14,6 +14,7 @@ public class User implements Serializable {
         this.nombreUsuario = nombreUsuario;
         this.setPuerto(puerto);
         this.conversaciones = new HashMap<>();
+        this.agenda = new Agenda();
     }
 
     public String getNombreUsuario() {

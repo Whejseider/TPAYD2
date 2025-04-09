@@ -50,7 +50,7 @@ public class Servidor {
                         contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
 
                         // Agregar el nuevo contacto
-                        this.messengerController.getUser().getAgenda().agregarContacto(contactoRemitente);
+                        this.messengerController.getUser().getAgenda().agregarContacto(usuarioRemitente, contactoRemitente);
                         this.messengerController.getVista().agregarContacto(contactoRemitente);
                         this.messengerController.getVista().repaint();
                     }

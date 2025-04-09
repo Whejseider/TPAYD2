@@ -7,12 +7,8 @@ import java.util.List;
 
 public class Agenda {
     private HashMap<User, Contacto> contactos;
-    private User user;
-    private Contacto contacto;
 
-    public Agenda(User user, Contacto contacto) {
-        this.user = user;
-        this.contacto = contacto;
+    public Agenda() {
         this.contactos = new LinkedHashMap<>();
     }
 
@@ -20,7 +16,7 @@ public class Agenda {
         return new ArrayList<>(contactos.values());
     }
 
-    public void agregarContacto(Contacto contacto) {
+    public void agregarContacto(User user, Contacto contacto) {
         this.contactos.putIfAbsent(user, contacto);
     }
 
@@ -38,19 +34,4 @@ public class Agenda {
         return null;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Contacto getContacto() {
-        return contacto;
-    }
-
-    public void setContacto(Contacto contacto) {
-        this.contacto = contacto;
-    }
 }
