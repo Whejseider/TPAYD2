@@ -44,7 +44,6 @@ public class Configuracion extends JDialog {
         txtPuerto = new JTextField();
         txtPuerto.setMargin(new Insets(0,5,0,0));
 
-
         // Error del puerto
         lblPuertoError = new JLabel(" ");
         lblPuertoError.setForeground(Color.RED);

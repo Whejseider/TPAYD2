@@ -6,7 +6,8 @@ import model.Conversacion;
 import model.Mensaje;
 import model.User;
 
-import java.io.*;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -28,39 +29,37 @@ public class Servidor {
 
                 while (true) {
                     Socket soc = s.accept();
+                    User receptor = this.messengerController.getUser();
                     ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
                     ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
-                    out.writeObject(this.messengerController.getUser());
+                    out.writeObject(receptor);
 
-                    Mensaje mensajeRecibido = (Mensaje) in.readObject();
-                    if (mensajeRecibido == null) continue;
+                    Mensaje mensaje = (Mensaje) in.readObject();
+                    if (mensaje == null) continue;
 
-                    User usuarioRemitente = mensajeRecibido.getRemitente();
-                    String contenido = mensajeRecibido.getContenido();
+                    User emisor = mensaje.getEmisor();
+                    receptor.setNombreUsuario(this.messengerController.getUser().getNombreUsuario());
 
-                    Contacto contactoRemitente = this.messengerController.getUser().getAgenda().getContactoPorUsuario(usuarioRemitente);
+                    Contacto contacto = receptor.getAgenda().getContactoPorUsuario(emisor);
 
-                    if (contactoRemitente == null) {
-                        // Crear nuevo contacto con la información del user recibido
-                        contactoRemitente = new Contacto(usuarioRemitente.getNombreUsuario(), usuarioRemitente.getIP(), usuarioRemitente.getPuerto());
-//                        contactoRemitente.setNombreUsuario(usuarioRemitente.getNombreUsuario());
-//                        contactoRemitente.setIP(soc.getInetAddress().getHostAddress());
-//                        contactoRemitente.setPuerto(usuarioRemitente.getPuerto());
-
-                        // Agregar el nuevo contacto
-                        this.messengerController.getUser().getAgenda().agregarContacto(contactoRemitente);
-                        this.messengerController.getVista().agregarContacto(contactoRemitente);
+                    if (contacto == null) {
+                        contacto = new Contacto();
+                        contacto.setNombreUsuario(emisor.getNombreUsuario());
+                        contacto.setAlias(emisor.getNombreUsuario());
+                        contacto.setIP(emisor.getIP());
+                        contacto.setPuerto(emisor.getPuerto());
+                        receptor.getAgenda().agregarContacto(contacto);
+                        this.messengerController.getVista().agregarContacto(contacto);
                         this.messengerController.getVista().repaint();
                     }
 
-                    // Obtener o crear la conversación
-                    Conversacion conversacion = this.messengerController.getUser().getConversacionCon(contactoRemitente);
-                    conversacion.agregarMensaje(mensajeRecibido);
+                    Conversacion conversacion = receptor.getConversacionCon(contacto);
+                    conversacion.agregarMensaje(mensaje);
 
-                    if (contactoRemitente.equals(this.messengerController.getContactoActual())) {
-                        this.messengerController.mostrarChat(contactoRemitente);
+                    if (contacto.equals(this.messengerController.getContactoActual())) {
+                        this.messengerController.mostrarChat(contacto);
                     } else {
-                        contactoRemitente.getNotificacion().setTieneMensajesNuevos(true);
+                        contacto.getNotificacion().setTieneMensajesNuevos(true);
                         this.messengerController.getVista().getListChat().repaint();
                     }
 

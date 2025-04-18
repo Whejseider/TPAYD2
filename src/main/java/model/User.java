@@ -1,7 +1,9 @@
 package model;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class User implements Serializable {
     private String nombreUsuario;
@@ -10,9 +12,7 @@ public class User implements Serializable {
     private Agenda agenda;
     private Map<Contacto, Conversacion> conversaciones;
 
-    public User(String nombreUsuario, Integer puerto) {
-        this.nombreUsuario = nombreUsuario;
-        this.setPuerto(puerto);
+    public User() {
         this.conversaciones = new HashMap<>();
         this.agenda = new Agenda();
     }

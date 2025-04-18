@@ -37,11 +37,11 @@ public class MessengerController implements ActionListener, ListSelectionListene
         return vista;
     }
 
-    public void configurarServidor(){
+    public void configurarServidor() {
         this.servidor = new Servidor(this);
     }
 
-    public void configurarCliente(){
+    public void configurarCliente() {
         this.cliente = new Cliente(this);
     }
 
@@ -81,7 +81,13 @@ public class MessengerController implements ActionListener, ListSelectionListene
         contactoActual = contacto;
 
         vista.getPanelContactoInfo().setVisible(true);
-        vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
+
+        if (contacto.getAlias().isEmpty()) {
+            vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
+        } else {
+            vista.getLblNombreMensaje().setText(contacto.getAlias());
+        }
+
         vista.getLblIP().setText("IP: " + contacto.getIP());
         vista.getLblPuerto().setText("Puerto: " + contacto.getPuerto());
 
@@ -89,11 +95,11 @@ public class MessengerController implements ActionListener, ListSelectionListene
         StringBuilder historial = new StringBuilder();
 
         for (Mensaje mensaje : conversacion.getMensajes()) {
-            if (mensaje.getRemitente().getNombreUsuario().equals(user.getNombreUsuario())) {
-                historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.toString()).append("\n");
+            if (mensaje.getEmisor().getNombreUsuario().equals(user.getNombreUsuario())) {
+                historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.getTiempoFormateado()).append("\n");
             } else {
                 historial.append(contacto.getNombreUsuario()).append(": ")
-                        .append(mensaje.getContenido()).append("\n").append(mensaje.toString()).append("\n");
+                        .append(mensaje.getContenido()).append("\n").append(mensaje.getTiempoFormateado()).append("\n");
             }
         }
 
@@ -154,7 +160,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
             nuevoChat.display();
         }
 
-        if (e.getSource() == this.vista.getBtnLogin()){
+        if (e.getSource() == this.vista.getBtnLogin()) {
             Configuracion configuracion = new Configuracion();
             ConfigurationController configurationController = new ConfigurationController(configuracion, this);
             configuracion.display();

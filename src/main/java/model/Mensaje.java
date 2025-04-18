@@ -3,15 +3,18 @@ package model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Mensaje implements Serializable {
     private String contenido;
     private LocalDateTime tiempo;
-    private User remitente;
+    private User emisor;
+    private User receptor;
 
-    public Mensaje(String contenido, User emisor) {
+    public Mensaje(String contenido, User emisor, User receptor) {
         this.contenido = contenido;
-        this.remitente = emisor;
+        this.emisor = emisor;
+        this.receptor = receptor;
         this.tiempo = LocalDateTime.now();
     }
 
@@ -23,22 +26,40 @@ public class Mensaje implements Serializable {
         this.contenido = contenido;
     }
 
-    public User getRemitente() {
-        return remitente;
+    public User getEmisor() {
+        return emisor;
     }
 
-    public void setRemitente(User remitente) {
-        this.remitente = remitente;
+    public void setEmisor(User emisor) {
+        this.emisor = emisor;
+    }
+
+    public User getReceptor() {
+        return receptor;
+    }
+
+    public void setReceptor(User receptor) {
+        this.receptor = receptor;
     }
 
     public LocalDateTime getTiempo() {
         return tiempo;
     }
 
-    @Override
-    public String toString() {
+    public String getTiempoFormateado(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return "[" + tiempo.format(formatter) + "]";
-//        + remitente.getIP() + ": " + contenido;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Mensaje mensaje = (Mensaje) o;
+        return Objects.equals(emisor, mensaje.emisor) && Objects.equals(receptor, mensaje.receptor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(emisor, receptor);
     }
 }

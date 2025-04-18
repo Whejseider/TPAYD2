@@ -4,7 +4,6 @@ import model.Contacto;
 import model.User;
 import view.NuevoContacto;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.regex.Pattern;
@@ -25,25 +24,22 @@ public class NuevoContactoController implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getBtnCancelar()) {
-            System.out.println("Cancelar");
+            System.out.println("NuevoContacto - Cancelar");
             this.vista.dispose();
         }
 
         if (e.getSource() == this.vista.getBtnAceptar()) {
-            System.out.println("Aceptar");
+            System.out.println("NuevoContacto - Aceptar");
 
-            // Limpiar mensajes de error anteriores
             this.vista.limpiarErrores();
 
-            // Guardar datos del formulario
-            String userName = this.vista.getTxtUsuario().getText().trim();
+            String alias = this.vista.getTxtUsuario().getText().trim();
             String puertoStr = this.vista.getTxtPuerto().getText().trim();
             String ip = this.vista.getTxtIP().getText().trim();
 
-            /*TODO: Si esta vacio debe mostrar el no mbre que el mismo contacto eligio,
-             */
-            if (userName.isEmpty()) {
-                userName = "Usuario Desconocido";
+            //TODO:Primera vez carga el nombre de usuario como desconocido, luego del primer mensaje, le cambia el nombre
+            if (alias.isEmpty()) {
+                alias = "Usuario Desconocido";
             }
 
             boolean puertoValido = true;
@@ -66,6 +62,9 @@ public class NuevoContactoController implements ActionListener {
                 vista.mostrarErrorIP("La dirección IP no puede estar vacía");
                 ipValida = false;
             } else {
+                if (ip.equalsIgnoreCase("localhost")){
+                    ip = "127.0.0.1"; //TODO
+                }
                 String regex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
                 Pattern pattern = Pattern.compile(regex);
                 if (!pattern.matcher(ip).matches()) {
@@ -76,8 +75,11 @@ public class NuevoContactoController implements ActionListener {
 
             if (puertoValido && ipValida) {
                 int puerto = Integer.parseInt(puertoStr);
-                contacto = new Contacto(userName, ip, puerto);
-                System.out.println(contacto.toString());
+                contacto = new Contacto();
+                contacto.setAlias(alias);
+                contacto.setIP(ip);
+                contacto.setPuerto(puerto);
+                System.out.println(contacto);
 
                 this.user.getAgenda().agregarContacto(contacto);
 

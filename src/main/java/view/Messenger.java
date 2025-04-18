@@ -1,7 +1,6 @@
 package view;
 
 import model.Contacto;
-import model.Conversacion;
 import utils.ChatListRenderer;
 
 import javax.swing.*;
@@ -38,10 +37,10 @@ public class Messenger extends JFrame {
     private JScrollPane scrollPane;
     private JButton btnLogin;
 
-    public Messenger(String titulo) throws HeadlessException {
-        super(titulo);
+    public Messenger() throws HeadlessException {
+        super("Messenger");
         this.setContentPane(this.pane);
-        this.setSize(750, 600);
+        this.setSize(1200, 700);
         this.setLocationRelativeTo(null);
         this.requestFocus();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,6 +49,8 @@ public class Messenger extends JFrame {
         this.listModel = new DefaultListModel<>();
         this.listChat.setModel(this.listModel);
         this.listChat.setCellRenderer(new ChatListRenderer());
+
+        this.txtAreaConversacion.setBackground(Color.white);
     }
 
     public void agregarContacto(Contacto c) {

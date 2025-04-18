@@ -4,9 +4,6 @@ import model.Contacto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 public class NuevoChat extends JDialog {
     private JPanel pane;
