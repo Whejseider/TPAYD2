@@ -25,7 +25,7 @@ public class Servidor {
 
                 Integer puerto = this.messengerController.getUser().getPuerto();
                 ServerSocket s = new ServerSocket(puerto);
-                this.messengerController.getVista().getTxtAreaConversacion().append("Esperando conexiones en puerto: " + puerto + "\n");
+                this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append("Esperando conexiones en puerto: " + puerto + "\n");
 
                 while (true) {
                     Socket soc = s.accept();
@@ -49,8 +49,8 @@ public class Servidor {
                         contacto.setIP(emisor.getIP());
                         contacto.setPuerto(emisor.getPuerto());
                         receptor.getAgenda().agregarContacto(contacto);
-                        this.messengerController.getVista().agregarContacto(contacto);
-                        this.messengerController.getVista().repaint();
+                        this.messengerController.getVista().getMessengerPanel().agregarContacto(contacto);
+                        this.messengerController.getVista().getMessengerPanel().repaint();
                     }
 
                     Conversacion conversacion = receptor.getConversacionCon(contacto);
@@ -60,7 +60,7 @@ public class Servidor {
                         this.messengerController.mostrarChat(contacto);
                     } else {
                         contacto.getNotificacion().setTieneMensajesNuevos(true);
-                        this.messengerController.getVista().getListChat().repaint();
+                        this.messengerController.getVista().getMessengerPanel().getListChat().repaint();
                     }
 
                     in.close();
@@ -69,7 +69,7 @@ public class Servidor {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                this.messengerController.getVista().getTxtAreaConversacion().append("Error al establecer la conexión" + "\n");
+                this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append("Error al establecer la conexión" + "\n");
             }
         }).start();
     }

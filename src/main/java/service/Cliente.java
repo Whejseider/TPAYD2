@@ -51,7 +51,7 @@ public class Cliente {
             out.close();
             socket.close();
         } catch (Exception e) {
-            this.messengerController.getVista().getTxtAreaConversacion().append(
+            this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append(
                     "Error al enviar el enviar el mensaje. El destinatario " + "[" + contacto.toString() + "]" + " no se encuentra en línea.");
         }
     }

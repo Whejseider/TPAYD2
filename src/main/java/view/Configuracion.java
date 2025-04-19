@@ -1,85 +1,116 @@
 package view;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import controller.ConfigurationController;
+import interfaces.IVista;
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class Configuracion extends JDialog {
+public class Configuracion extends JPanel implements IVista<ConfigurationController> {
+    private JLabel lblErrorUsuario;
+    private JLabel lblErrorPuerto;
     private JPanel pane;
     private JTextField txtUsuario;
     private JTextField txtPuerto;
+    private JLabel lblTitulo;
+    private JLabel lblDescripcion;
     private JLabel lblUsuario;
     private JLabel lblPuerto;
     private JLabel lblPuertoError;
     private JButton btnCancelar;
     private JButton btnAceptar;
-    private JPanel paneContenido;
     private JPanel paneBotones;
+    private ConfigurationController controlador;
 
     public Configuracion() throws HeadlessException {
-        super();
-        this.setTitle("Configuración");
-        this.setSize(400,350);
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
-        this.setModalityType(ModalityType.MODELESS);
+        setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
-        // Panel principal
-        pane = new JPanel();
-        pane.setLayout(new BorderLayout());
-        pane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        // Panel de contenido
-        paneContenido = new JPanel();
-        paneContenido.setLayout(new GridLayout(6,1,10,10));
-
-        // Nombre de usuario
-        lblUsuario = new JLabel("Nombre de usuario:");
-        lblUsuario.setFont(new Font("Arial", Font.PLAIN, 14));
         txtUsuario = new JTextField();
-        txtUsuario.setMargin(new Insets(5,5,5,5));
+        txtUsuario.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese su nombre de usuario");
 
-        // Puerto
-        lblPuerto = new JLabel("Puerto:");
-        lblPuerto.setFont(new Font("Arial", Font.PLAIN, 14));
         txtPuerto = new JTextField();
-        txtPuerto.setMargin(new Insets(0,5,0,0));
+        txtPuerto.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el número de puerto");
 
-        // Error del puerto
-        lblPuertoError = new JLabel(" ");
-        lblPuertoError.setForeground(Color.RED);
-        lblPuertoError.setFont(new Font("Arial", Font.PLAIN, 12));
-        lblPuertoError.setVisible(false);
 
-        // Panel de botones
-        paneBotones = new JPanel();
-        paneBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        btnAceptar = new JButton("Aceptar"){
+            @Override
+            public boolean isDefaultButton(){
+                return true;
+            }
+        };
+        btnAceptar.putClientProperty(FlatClientProperties.STYLE, "" +
+                "foreground:#FFFFFF;");
 
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(255, 255, 255));
-        btnCancelar.setForeground(Color.GRAY);
-        btnCancelar.setPreferredSize(new Dimension(120, 40));
 
-        btnAceptar = new JButton("Aceptar");
-        btnAceptar.setBackground(new Color(33, 150, 243));
-        btnAceptar.setForeground(Color.WHITE);
-        btnAceptar.setPreferredSize(new Dimension(120, 40));
+        pane = new JPanel(new MigLayout("wrap,fillx,insets 35 45 30 45", "fill,250:280"));
+        pane.putClientProperty(FlatClientProperties.STYLE, "" +
+                "arc:20;" +
+                "[light]background:darken(@background,3%);" +
+                "[dark]background:lighten(@background,3%)");
 
-        // Agregar componentes a los paneles
-        paneContenido.add(lblUsuario);
-        paneContenido.add(txtUsuario);
-        paneContenido.add(lblPuerto);
-        paneContenido.add(txtPuerto);
-        paneContenido.add(lblPuertoError);
+        lblTitulo = new JLabel("Ingresar");
+        lblTitulo.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:bold +10");
 
-        paneBotones.add(btnCancelar);
-        paneBotones.add(btnAceptar);
+        lblDescripcion = new JLabel("Por favor rellene los campos con sus credenciales");
+        lblDescripcion.putClientProperty(FlatClientProperties.STYLE, "" +
+                "[light]background:darken(@background,30%);" +
+                "[dark]background:lighten(@background,30%)");
 
+        lblUsuario = new JLabel("Usuario");
+        lblUsuario.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:bold;");
 
-        pane.add(paneContenido, BorderLayout.CENTER);
-        pane.add(paneBotones, BorderLayout.SOUTH);
+        lblPuerto = new JLabel("Puerto");
+        lblPuerto.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:bold;");
 
-        this.setContentPane(pane);
-        this.setVisible(true);
+        lblErrorUsuario = new JLabel("");
+        lblErrorUsuario.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:plain;" +
+                "foreground:#DC3545;");
+
+        lblErrorPuerto = new JLabel("");
+        lblErrorPuerto.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:plain;"+
+                "foreground:#DC3545;");
+
+        pane.add(lblTitulo);
+        pane.add(lblDescripcion);
+        pane.add(new JSeparator(), "gapy 10 10");
+        pane.add(lblUsuario, "gapy 8");
+        pane.add(txtUsuario);
+        pane.add(lblErrorUsuario);
+        pane.add(lblPuerto, "gapy 8");
+        pane.add(txtPuerto);
+        pane.add(lblErrorPuerto);
+        pane.add(btnCancelar, "gapy 10, split 2, sizegroup btn");
+        pane.add(btnAceptar, "sizegroup btn, wrap");
+
+        add(pane);
+    }
+
+    public ConfigurationController getControlador() {
+        return controlador;
+    }
+
+    public JLabel getLblErrorUsuario() {
+        return lblErrorUsuario;
+    }
+
+    public void setLblErrorUsuario(JLabel lblErrorUsuario) {
+        this.lblErrorUsuario = lblErrorUsuario;
+    }
+
+    public JLabel getLblErrorPuerto() {
+        return lblErrorPuerto;
+    }
+
+    public void setLblErrorPuerto(JLabel lblErrorPuerto) {
+        this.lblErrorPuerto = lblErrorPuerto;
     }
 
     public JTextField getTxtUsuario() {
@@ -122,23 +153,12 @@ public class Configuracion extends JDialog {
         this.lblPuertoError = lblPuertoError;
     }
 
-    public void display(){
-        this.pack();
-        this.setLocationRelativeTo(null);
+    public void display() {
         this.setVisible(true);
     }
 
-    public void mostrarErrorPuerto(String mensaje) {
-        lblPuertoError.setText(mensaje);
-        lblPuertoError.setVisible(true);
-        this.revalidate(); // Forzar actualización del layout
-        this.repaint();    // Forzar repintado
+    @Override
+    public void setControlador(ConfigurationController controlador) {
+        this.controlador = controlador;
     }
-
-    public void limpiarErrores() {
-        lblPuertoError.setVisible(false);
-        this.revalidate();
-        this.repaint();
-    }
-
 }

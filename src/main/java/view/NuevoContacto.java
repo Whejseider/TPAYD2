@@ -1,104 +1,123 @@
 package view;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import controller.ConfigurationController;
+import controller.NuevoContactoController;
+import interfaces.IVista;
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class NuevoContacto extends JDialog {
+public class NuevoContacto extends JDialog implements IVista<NuevoContactoController> {
     private JPanel pane;
     private JTextField txtUsuario;
     private JTextField txtPuerto;
+    private JTextField txtIP;
+    private JLabel lblTitulo;
+    private JLabel lblDescripcion;
     private JLabel lblUsuario;
     private JLabel lblPuerto;
-    private JLabel lblPuertoError;
+    private JLabel lblIP;
     private JButton btnCancelar;
     private JButton btnAceptar;
-    private JPanel paneContenido;
     private JPanel paneBotones;
-    private JLabel lblIP;
-    private JTextField txtIP;
-    private JLabel lblIPError;
+    private JLabel lblErrorIP;
+    private JLabel lblErrorPuerto;
+    private NuevoContactoController controlador;
 
     public NuevoContacto() throws HeadlessException {
         super();
-        this.setTitle("Nuevo Contacto");
-        this.setSize(400, 350);
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.setModalityType(ModalityType.MODELESS);
+        setTitle("Nuevo Contacto");
+        setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
-        // Panel principal
-        pane = new JPanel();
-        pane.setLayout(new BorderLayout());
-        pane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        // Panel de contenido
-        paneContenido = new JPanel();
-        paneContenido.setLayout(new GridLayout(9, 1, 5, 5));
-
-        // Nombre de usuario
-        lblUsuario = new JLabel("Nombre de usuario:");
-        lblUsuario.setFont(new Font("Arial", Font.BOLD, 14));
         txtUsuario = new JTextField();
-        txtUsuario.setMargin(new Insets(5, 5, 5, 5));
+        txtUsuario.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,"Ingrese su nombre de usuario");
 
-        // Puerto
-        lblPuerto = new JLabel("Puerto:");
-        lblPuerto.setFont(new Font("Arial", Font.BOLD, 14));
         txtPuerto = new JTextField();
-        txtPuerto.setMargin(new Insets(5, 5, 5, 5));
+        txtPuerto.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,"Ingrese el número de puerto");
 
-        // Error del puerto
-        lblPuertoError = new JLabel(" ");
-        lblPuertoError.setForeground(Color.RED);
-        lblPuertoError.setFont(new Font("Arial", Font.PLAIN, 12));
-        lblPuertoError.setVisible(false);
-
-        // IP
-        lblIP = new JLabel("Dirección IP:");
-        lblIP.setFont(new Font("Arial", Font.BOLD, 14));
         txtIP = new JTextField();
-        txtIP.setMargin(new Insets(5, 5, 5, 5));
+        txtIP.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,"Ingrese la dirección IP");
 
-        // Error de IP
-        lblIPError = new JLabel(" ");
-        lblIPError.setForeground(Color.RED);
-        lblIPError.setFont(new Font("Arial", Font.PLAIN, 12));
-        lblIPError.setVisible(false);
-
-        // Panel de botones
-        paneBotones = new JPanel();
-        paneBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        btnAceptar = new JButton("Aceptar"){
+            @Override
+            public boolean isDefaultButton(){
+                return true;
+            }
+        };
+        btnAceptar.putClientProperty(FlatClientProperties.STYLE, "" +
+                "foreground:#FFFFFF;");
 
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(Color.WHITE);
-        btnCancelar.setForeground(Color.BLACK);
-        btnCancelar.setPreferredSize(new Dimension(120, 40));
 
-        btnAceptar = new JButton("Aceptar");
-        btnAceptar.setBackground(new Color(33, 150, 243));
-        btnAceptar.setForeground(Color.WHITE);
-        btnAceptar.setPreferredSize(new Dimension(120, 40));
+        pane = new JPanel(new MigLayout("wrap,fillx,insets 35 45 30 45", "fill,250:280"));
+        pane.putClientProperty(FlatClientProperties.STYLE, "" +
+                "arc:20;" +
+                "[light]background:darken(@background,3%);" +
+                "[dark]background:lighten(@background,3%)");
 
-        // Agregar componentes a los paneles
-        paneContenido.add(lblUsuario);
-        paneContenido.add(txtUsuario);
-        paneContenido.add(lblPuerto);
-        paneContenido.add(txtPuerto);
-        paneContenido.add(lblPuertoError);
-        paneContenido.add(lblIP);
-        paneContenido.add(txtIP);
-        paneContenido.add(lblIPError);
+        lblTitulo = new JLabel("Nuevo Contacto");
+        lblTitulo.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:bold +10");
 
-        paneBotones.add(btnCancelar);
-        paneBotones.add(btnAceptar);
+        lblDescripcion = new JLabel("Por favor ingrese los datos del contacto");
+        lblDescripcion.putClientProperty(FlatClientProperties.STYLE, "" +
+                "[light]background:darken(@background,30%);" +
+                "[dark]background:lighten(@background,30%)");
 
-        pane.add(paneContenido, BorderLayout.CENTER);
-        pane.add(paneBotones, BorderLayout.SOUTH);
+        lblUsuario = new JLabel("Usuario");
 
-        this.setContentPane(pane);
+        lblPuerto = new JLabel("Puerto");
+
+        lblIP = new JLabel("IP");
+
+        lblErrorIP = new JLabel("");
+        lblErrorIP.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:plain;" +
+                "foreground:#DC3545;");
+
+        lblErrorPuerto = new JLabel("");
+        lblErrorPuerto.putClientProperty(FlatClientProperties.STYLE, "" +
+                "font:plain;"+
+                "foreground:#DC3545;");
+
+        pane.add(lblTitulo);
+        pane.add(lblDescripcion);
+        pane.add(new JSeparator(), "gapy 10 10");
+        pane.add(lblUsuario, "gapy 8");
+        pane.add(txtUsuario);
+        pane.add(lblPuerto, "gapy 8");
+        pane.add(txtPuerto);
+        pane.add(lblErrorPuerto);
+        pane.add(lblIP, "gapy 8");
+        pane.add(txtIP);
+        pane.add(lblErrorIP);
+        pane.add(btnCancelar, "gapy 10, split 2, sizegroup btn");
+        pane.add(btnAceptar, "sizegroup btn, wrap");
+
+        add(pane);
     }
 
+    public JLabel getLblErrorIP() {
+        return lblErrorIP;
+    }
+
+    public JLabel getLblErrorPuerto() {
+        return lblErrorPuerto;
+    }
+
+    public NuevoContactoController getControlador() {
+        return controlador;
+    }
+
+    public JTextField getTxtIP() {
+        return txtIP;
+    }
+
+    public void setTxtIP(JTextField txtIP) {
+        this.txtIP = txtIP;
+    }
 
     public JTextField getTxtUsuario() {
         return txtUsuario;
@@ -114,14 +133,6 @@ public class NuevoContacto extends JDialog {
 
     public void setTxtPuerto(JTextField txtPuerto) {
         this.txtPuerto = txtPuerto;
-    }
-
-    public JLabel getLblPuertoError() {
-        return lblPuertoError;
-    }
-
-    public void setLblPuertoError(JLabel lblPuertoError) {
-        this.lblPuertoError = lblPuertoError;
     }
 
     public JButton getBtnCancelar() {
@@ -140,29 +151,6 @@ public class NuevoContacto extends JDialog {
         this.btnAceptar = btnAceptar;
     }
 
-    public JLabel getLblIP() {
-        return lblIP;
-    }
-
-    public void setLblIP(JLabel lblIP) {
-        this.lblIP = lblIP;
-    }
-
-    public JTextField getTxtIP() {
-        return txtIP;
-    }
-
-    public void setTxtIP(JTextField txtIP) {
-        this.txtIP = txtIP;
-    }
-
-    public JLabel getLblIPError() {
-        return lblIPError;
-    }
-
-    public void setLblIPError(JLabel lblIPError) {
-        this.lblIPError = lblIPError;
-    }
 
     public void display() {
         this.pack();
@@ -170,24 +158,9 @@ public class NuevoContacto extends JDialog {
         this.setVisible(true);
     }
 
-    public void mostrarErrorPuerto(String mensaje) {
-        lblPuertoError.setText(mensaje);
-        lblPuertoError.setVisible(true);
-        this.revalidate();
-        this.repaint();
-    }
 
-    public void mostrarErrorIP(String mensaje) {
-        lblIPError.setText(mensaje);
-        lblIPError.setVisible(true);
-        this.revalidate();
-        this.repaint();
-    }
-
-    public void limpiarErrores() {
-        lblPuertoError.setVisible(false);
-        lblIPError.setVisible(false);
-        this.revalidate();
-        this.repaint();
+    @Override
+    public void setControlador(NuevoContactoController controlador) {
+        this.controlador = controlador;
     }
 }

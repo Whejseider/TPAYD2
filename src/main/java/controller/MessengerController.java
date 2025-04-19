@@ -6,7 +6,6 @@ import model.Mensaje;
 import model.User;
 import service.Cliente;
 import service.Servidor;
-import view.Configuracion;
 import view.Messenger;
 import view.NuevoChat;
 import view.NuevoContacto;
@@ -24,13 +23,21 @@ public class MessengerController implements ActionListener, ListSelectionListene
     private User user;
     private Contacto contactoActual;
 
+
     public MessengerController(Messenger vista) {
         this.vista = vista;
-        this.vista.getBtnEnviar().addActionListener(this);
-        this.vista.getBtnNuevoChat().addActionListener(this);
-        this.vista.getBtnNuevoContacto().addActionListener(this);
-        this.vista.getListChat().addListSelectionListener(this);
-        this.vista.getBtnLogin().addActionListener(this);
+
+        this.vista.getMessengerPanel().getBtnEnviar().addActionListener(this);
+        this.vista.getMessengerPanel().getBtnNuevoChat().addActionListener(this);
+        this.vista.getMessengerPanel().getBtnNuevoContacto().addActionListener(this);
+        this.vista.getMessengerPanel().getListChat().addListSelectionListener(this);
+    }
+
+    public void setTituloVentana(){
+        this.vista.setTitle(this.vista.getTitle() +
+                " - Usuario: " + this.user.getNombreUsuario() +
+                "  IP: " + this.user.getIP() +
+                "  Puerto: " + this.user.getPuerto());
     }
 
     public Messenger getVista() {
@@ -80,16 +87,16 @@ public class MessengerController implements ActionListener, ListSelectionListene
     public void mostrarChat(Contacto contacto) {
         contactoActual = contacto;
 
-        vista.getPanelContactoInfo().setVisible(true);
+        vista.getMessengerPanel().getPanelContactoInfo().setVisible(true);
 
         if (contacto.getAlias().isEmpty()) {
-            vista.getLblNombreMensaje().setText(contacto.getNombreUsuario());
+            vista.getMessengerPanel().getLblNombreMensaje().setText(contacto.getNombreUsuario());
         } else {
-            vista.getLblNombreMensaje().setText(contacto.getAlias());
+            vista.getMessengerPanel().getLblNombreMensaje().setText(contacto.getAlias());
         }
 
-        vista.getLblIP().setText("IP: " + contacto.getIP());
-        vista.getLblPuerto().setText("Puerto: " + contacto.getPuerto());
+        vista.getMessengerPanel().getLblIP().setText("IP: " + contacto.getIP());
+        vista.getMessengerPanel().getLblPuerto().setText("Puerto: " + contacto.getPuerto());
 
         Conversacion conversacion = user.getConversacionCon(contacto);
         StringBuilder historial = new StringBuilder();
@@ -103,7 +110,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
             }
         }
 
-        vista.getTxtAreaConversacion().setText(historial.toString());
+        vista.getMessengerPanel().getTxtAreaConversacion().setText(historial.toString());
     }
 
     public Contacto getContactoActual() {
@@ -113,12 +120,12 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            Contacto contactoSeleccionado = this.vista.getListChat().getSelectedValue();
+            Contacto contactoSeleccionado = this.vista.getMessengerPanel().getListChat().getSelectedValue();
             if (contactoSeleccionado != null) {
 
                 contactoSeleccionado.getNotificacion().setTieneMensajesNuevos(false);
 
-                this.vista.getListChat().repaint();
+                this.vista.getMessengerPanel().getListChat().repaint();
 
                 setContactoActual(contactoSeleccionado);
                 mostrarChat(contactoSeleccionado);
@@ -128,43 +135,37 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.vista.getBtnEnviar()) {
-            String texto = vista.getTxtMensaje().getText().trim();
-            if (texto.isEmpty() || contactoActual == null) return;
+        if (e.getSource() == this.vista.getMessengerPanel().getBtnEnviar()) {
+            String mensaje = vista.getMessengerPanel().getTxtMensaje().getText().trim();
+            if (mensaje.isEmpty() || contactoActual == null) return;
 
             this.configurarCliente();
 
-            String contenido = this.vista.getTxtMensaje().getText().trim();
-
-            DefaultListModel<Contacto> listModel = vista.getListModel();
+            DefaultListModel<Contacto> listModel = this.vista.getMessengerPanel().getListModel();
             if (!listModel.contains(contactoActual)) {
                 listModel.addElement(contactoActual);
-                vista.getListChat().setSelectedValue(contactoActual, true);
+                vista.getMessengerPanel().getListChat().setSelectedValue(contactoActual, true);
             }
 
-            vista.getTxtMensaje().setText("");
+            vista.getMessengerPanel().getTxtMensaje().setText("");
             mostrarChat(contactoActual);
 
-            cliente.enviarMensaje(contenido, contactoActual);
+            cliente.enviarMensaje(mensaje, contactoActual);
         }
 
-        if (e.getSource() == this.vista.getBtnNuevoContacto()) {
+        if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoContacto()) {
             NuevoContacto nuevoContacto = new NuevoContacto();
             NuevoContactoController nuevoContactoController = new NuevoContactoController(nuevoContacto, this.user);
+            nuevoContacto.setControlador(nuevoContactoController);
             nuevoContacto.display();
         }
 
-        if (e.getSource() == this.vista.getBtnNuevoChat()) {
+        if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoChat()) {
             NuevoChat nuevoChat = new NuevoChat();
             NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user, this);
             nuevoChat.display();
         }
 
-        if (e.getSource() == this.vista.getBtnLogin()) {
-            Configuracion configuracion = new Configuracion();
-            ConfigurationController configurationController = new ConfigurationController(configuracion, this);
-            configuracion.display();
-        }
     }
 
 }

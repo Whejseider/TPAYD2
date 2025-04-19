@@ -1,5 +1,6 @@
 package controller;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import model.Contacto;
 import model.User;
 import view.NuevoContacto;
@@ -31,8 +32,6 @@ public class NuevoContactoController implements ActionListener {
         if (e.getSource() == this.vista.getBtnAceptar()) {
             System.out.println("NuevoContacto - Aceptar");
 
-            this.vista.limpiarErrores();
-
             String alias = this.vista.getTxtUsuario().getText().trim();
             String puertoStr = this.vista.getTxtPuerto().getText().trim();
             String ip = this.vista.getTxtIP().getText().trim();
@@ -49,17 +48,27 @@ public class NuevoContactoController implements ActionListener {
             try {
                 int puerto = Integer.parseInt(puertoStr);
                 if (puerto < 1000 || puerto > 65535) {
-                    vista.mostrarErrorPuerto("El puerto debe estar entre 1000 y 65535");
+                    vista.getTxtPuerto().putClientProperty(
+                            FlatClientProperties.OUTLINE, "error");
+                    vista.getLblErrorPuerto().setText("*El puerto debe estar entre 1000 y 65535");
                     puertoValido = false;
+                } else {
+                    vista.getTxtPuerto().putClientProperty(
+                            FlatClientProperties.OUTLINE, null);
+                    vista.getLblErrorPuerto().setText("");
                 }
             } catch (NumberFormatException err) {
-                vista.mostrarErrorPuerto("El puerto debe ser un número y no estar vacío");
+                vista.getTxtPuerto().putClientProperty(
+                        FlatClientProperties.OUTLINE, "error");
+                vista.getLblErrorPuerto().setText("*El puerto debe ser un número y no estar vacío");
                 puertoValido = false;
             }
 
             // Validar la IP
             if (ip.isEmpty()) {
-                vista.mostrarErrorIP("La dirección IP no puede estar vacía");
+                vista.getTxtIP().putClientProperty(
+                        FlatClientProperties.OUTLINE,"error");
+                vista.getLblErrorIP().setText("La dirección IP no puede estar vacía");
                 ipValida = false;
             } else {
                 if (ip.equalsIgnoreCase("localhost")){
@@ -68,8 +77,14 @@ public class NuevoContactoController implements ActionListener {
                 String regex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
                 Pattern pattern = Pattern.compile(regex);
                 if (!pattern.matcher(ip).matches()) {
-                    vista.mostrarErrorIP("La dirección IP no es válida");
+                    vista.getTxtIP().putClientProperty(
+                            FlatClientProperties.OUTLINE,"error");
+                    vista.getLblErrorIP().setText("La dirección IP no es válida");
                     ipValida = false;
+                } else {
+                    vista.getTxtIP().putClientProperty(
+                            FlatClientProperties.OUTLINE,null);
+                    vista.getLblErrorIP().setText("");
                 }
             }
 

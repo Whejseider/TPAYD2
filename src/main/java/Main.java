@@ -1,6 +1,12 @@
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import controller.MessengerController;
+import controller.ConfigurationController;
+import view.Configuracion;
 import view.Messenger;
 
 import javax.swing.*;
@@ -10,7 +16,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel( new FlatMacLightLaf() );
+            FlatLaf.registerCustomDefaultsSource("fv.themes");
+            UIManager.setLookAndFeel( new FlatIntelliJLaf() );
         } catch( Exception ex ) {
             System.err.println( "Error al inicializar LAF" );
         }
@@ -25,7 +32,13 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             try {
                 Messenger messenger = new Messenger();
-                MessengerController messengerController = new MessengerController(messenger);
+
+                Configuracion configuracion = new Configuracion();
+                ConfigurationController configurationController = new ConfigurationController(configuracion);
+                configurationController.setMessenger(messenger);
+                configuracion.setControlador(configurationController);
+
+                messenger.setContentPane(configuracion);
             } catch (Exception e) {
                 System.err.println("Error al inicializar la vista");
             }
