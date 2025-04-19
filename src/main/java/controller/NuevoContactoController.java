@@ -14,8 +14,8 @@ public class NuevoContactoController implements ActionListener {
     private User user;
     private Contacto contacto;
 
-    public NuevoContactoController(NuevoContacto nuevoContacto, User user) {
-        this.vista = nuevoContacto;
+    public NuevoContactoController(NuevoContacto vista, User user) {
+        this.vista = vista;
         this.user = user;
 
         this.vista.getBtnAceptar().addActionListener(this);

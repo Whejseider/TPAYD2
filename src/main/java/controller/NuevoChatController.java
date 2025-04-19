@@ -15,7 +15,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
     private Contacto contacto;
     private MessengerController messengerController;
 
-    public NuevoChatController(NuevoChat vista, User user, MessengerController messengerController) {
+    public NuevoChatController(NuevoChat vista, User user) {
         this.vista = vista;
         this.user = user;
         this.messengerController = messengerController;
@@ -24,6 +24,14 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         for (Contacto c: this.user.getAgenda().getContactos()){
             this.vista.agregarContacto(c);
         }
+    }
+
+    public MessengerController getMessengerController() {
+        return messengerController;
+    }
+
+    public void setMessengerController(MessengerController messengerController) {
+        this.messengerController = messengerController;
     }
 
     @Override

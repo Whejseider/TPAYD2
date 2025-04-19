@@ -34,7 +34,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.vista.getMessengerPanel().getBtnDarkMode().addActionListener(this);
     }
 
-    public void setTituloVentana(){
+    public void setTituloVentana() {
         this.vista.setTitle(this.vista.getTitle() +
                 " - Usuario: " + this.user.getNombreUsuario() +
                 "  IP: " + this.user.getIP() +
@@ -163,11 +163,13 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
         if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoChat()) {
             NuevoChat nuevoChat = new NuevoChat();
-            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user, this);
+            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user);
+            nuevoChatController.setMessengerController(this);
+            nuevoChat.setControlador(nuevoChatController);
             nuevoChat.display();
         }
 
-        if (e.getSource() == this.vista.getMessengerPanel().getBtnDarkMode()){
+        if (e.getSource() == this.vista.getMessengerPanel().getBtnDarkMode()) {
             darkMode = !darkMode;
             this.vista.getMessengerPanel().cambiarTema(darkMode);
         }

@@ -1,17 +1,20 @@
 package view;
 
+import controller.NuevoChatController;
+import interfaces.IVista;
 import model.Contacto;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class NuevoChat extends JDialog {
+public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
     private JPanel pane;
     private JList<Contacto> list1;
     private JTextField txtBuscar;
     private JPanel paneBuscar;
     private JLabel lblBuscar;
     private DefaultListModel<Contacto> listModel;
+    private NuevoChatController controlador;
 
     public NuevoChat() throws HeadlessException {
         super();
@@ -117,5 +120,10 @@ public class NuevoChat extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return pane;
+    }
+
+    @Override
+    public void setControlador(NuevoChatController controlador) {
+        this.controlador = controlador;
     }
 }
