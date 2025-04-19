@@ -27,6 +27,7 @@ public class Messenger extends JFrame implements IVista<MessengerController> {
         this.controlador = controlador;
     }
 
+
     public MessengerPanel getMessengerPanel() {
         return messengerPanel;
     }

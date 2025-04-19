@@ -1,5 +1,10 @@
 package view;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLaf;
+import controller.MessengerController;
 import model.Contacto;
 import utils.ChatListRenderer;
 
@@ -34,6 +39,8 @@ public class MessengerPanel extends JPanel {
     private JList<Contacto> listChat;
     private DefaultListModel<Contacto> listModel;
     private JScrollPane scrollPane;
+    private JButton btnDarkMode;
+    private MessengerController controlador;
 
     public MessengerPanel() {
         init();
@@ -126,6 +133,14 @@ public class MessengerPanel extends JPanel {
         panelOpciones.setPreferredSize(new Dimension(110, 44));
         pane.add(panelOpciones, BorderLayout.WEST);
 
+        btnDarkMode = new JButton("Tema Oscuro"){
+            @Override
+            public boolean isDefaultButton() {
+                return true;
+            }
+        };
+        panelOpciones.add(btnDarkMode);
+
         btnNuevoContacto = new JButton("Nuevo Contacto");
         panelOpciones.add(btnNuevoContacto);
 
@@ -139,6 +154,40 @@ public class MessengerPanel extends JPanel {
 
     public void agregarContacto(Contacto c) {
         listModel.addElement(c);
+    }
+
+    public void cambiarTema(boolean dark){
+        if (FlatLaf.isLafDark() != dark){
+            if (!dark){
+                SwingUtilities.invokeLater(()->{
+                    try {
+                        FlatIntelliJLaf.setup();
+                        FlatLaf.updateUI();
+                        btnDarkMode.setText("Tema Oscuro");
+                    } catch( Exception ex ) {
+                        System.err.println( "Error al inicializar LAF" );
+                    }
+                });
+            } else {
+                SwingUtilities.invokeLater(()->{
+                    try {
+                        FlatDarculaLaf.setup();
+                        FlatLaf.updateUI();
+                        btnDarkMode.setText("Tema Claro");
+                    } catch( Exception ex ) {
+                        System.err.println( "Error al inicializar LAF" );
+                    }
+                });
+            }
+        }
+    }
+
+    public JButton getBtnDarkMode() {
+        return btnDarkMode;
+    }
+
+    public void setBtnDarkMode(JButton btnDarkMode) {
+        this.btnDarkMode = btnDarkMode;
     }
 
     public void setListChat(JList<Contacto> listChat) {

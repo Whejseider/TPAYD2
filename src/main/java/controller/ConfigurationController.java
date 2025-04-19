@@ -87,6 +87,7 @@ public class ConfigurationController implements ActionListener {
                 messengerController.setUser(user);
                 messengerController.setTituloVentana();
                 messengerController.configurarServidor();
+
                 messenger.setControlador(messengerController);
 
                 messenger.setContentPane(messenger.getMessengerPanel());
