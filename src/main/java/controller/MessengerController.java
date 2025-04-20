@@ -155,14 +155,14 @@ public class MessengerController implements ActionListener, ListSelectionListene
         }
 
         if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoContacto()) {
-            NuevoContacto nuevoContacto = new NuevoContacto();
+            NuevoContacto nuevoContacto = new NuevoContacto(this.vista);
             NuevoContactoController nuevoContactoController = new NuevoContactoController(nuevoContacto, this.user);
             nuevoContacto.setControlador(nuevoContactoController);
             nuevoContacto.display();
         }
 
         if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoChat()) {
-            NuevoChat nuevoChat = new NuevoChat();
+            NuevoChat nuevoChat = new NuevoChat(this.vista);
             NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat, this.user);
             nuevoChatController.setMessengerController(this);
             nuevoChat.setControlador(nuevoChatController);

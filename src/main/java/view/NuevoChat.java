@@ -15,9 +15,11 @@ public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
     private JLabel lblBuscar;
     private DefaultListModel<Contacto> listModel;
     private NuevoChatController controlador;
+    private Frame main;
 
-    public NuevoChat() throws HeadlessException {
-        super();
+    public NuevoChat(Frame main) throws HeadlessException {
+        super(main);
+        this.main = main;
         this.setContentPane(this.pane);
         this.setTitle("Nuevo Chat");
         this.setLocationRelativeTo(null);
@@ -54,7 +56,8 @@ public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
 
     public void display() {
         this.pack();
-        this.setLocationRelativeTo(null);
+        this.setAlwaysOnTop(true);
+        this.setLocationRelativeTo(main);
         this.setVisible(true);
     }
 

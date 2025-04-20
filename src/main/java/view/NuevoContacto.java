@@ -25,9 +25,11 @@ public class NuevoContacto extends JDialog implements IVista<NuevoContactoContro
     private JLabel lblErrorIP;
     private JLabel lblErrorPuerto;
     private NuevoContactoController controlador;
+    private Frame main;
 
-    public NuevoContacto() throws HeadlessException {
-        super();
+    public NuevoContacto(Frame main) throws HeadlessException {
+        super(main);
+        this.main = main;
         setTitle("Nuevo Contacto");
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
@@ -154,7 +156,8 @@ public class NuevoContacto extends JDialog implements IVista<NuevoContactoContro
 
     public void display() {
         this.pack();
-        this.setLocationRelativeTo(null);
+        this.setAlwaysOnTop(true);
+        this.setLocationRelativeTo(main);
         this.setVisible(true);
     }
 
