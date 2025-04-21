@@ -69,6 +69,14 @@
             <version>11.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>raven.toast</groupId>
+            <artifactId>swing-toast-notifications</artifactId>
+            <version>1.0.4</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/library/swing-toast-notifications-1.0.4.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
 </project>

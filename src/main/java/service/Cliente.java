@@ -5,6 +5,7 @@ import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
 import model.User;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import java.io.ObjectInputStream;
@@ -22,19 +23,14 @@ public class Cliente {
         new Thread(() -> {
             try (Socket socket = new Socket(mensaje.getReceptor().getIP(), mensaje.getReceptor().getPuerto())) {
 
-
-                // Primero crear el OutputStream
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.flush(); // Importante flush antes de crear el InputStream
+                out.flush();
 
-                // Después crear el InputStream
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-                // Ahora enviar el mensaje
                 out.writeObject(mensaje);
                 out.flush();
 
-                // Y recibir la respuesta
                 User input = (User) in.readObject();
                 Contacto receptor = mensaje.getReceptor();
 
@@ -62,15 +58,16 @@ public class Cliente {
 
                 in.close();
                 out.close();
-                socket.close();
+//                socket.close();
             } catch (Exception e) {
-                SwingUtilities.invokeLater(() -> {
-                    this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append(
-                            "Error al enviar el enviar el mensaje. El destinatario " +
-                                    "[" + mensaje.getReceptor().toString() + "]"
-                                    + " no se encuentra en línea.");
-                });
-
+                Notifications
+                        .getInstance()
+                        .show(
+                                Notifications.Type.ERROR,
+                                Notifications.Location.TOP_RIGHT,
+                                "Error al enviar el enviar el mensaje.\n" +
+                                        "El destinatario [" + mensaje.getReceptor().getAlias() + "]"
+                                        + " no se encuentra en línea.");
             }
         }).start();
 

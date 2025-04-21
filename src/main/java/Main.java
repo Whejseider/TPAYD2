@@ -6,6 +6,8 @@ import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import controller.ConfigurationController;
+import model.Notificacion;
+import raven.toast.Notifications;
 import view.Configuracion;
 import view.Messenger;
 
@@ -32,6 +34,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             try {
                 Messenger messenger = new Messenger();
+                Notifications.getInstance().setJFrame(messenger);
 
                 Configuracion configuracion = new Configuracion();
                 ConfigurationController configurationController = new ConfigurationController(configuracion);

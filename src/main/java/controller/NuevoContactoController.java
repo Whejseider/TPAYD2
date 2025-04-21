@@ -3,6 +3,7 @@ package controller;
 import com.formdev.flatlaf.FlatClientProperties;
 import model.Contacto;
 import model.User;
+import raven.toast.Notifications;
 import view.NuevoContacto;
 
 import java.awt.event.ActionEvent;
@@ -68,7 +69,7 @@ public class NuevoContactoController implements ActionListener {
             if (ip.isEmpty()) {
                 vista.getTxtIP().putClientProperty(
                         FlatClientProperties.OUTLINE,"error");
-                vista.getLblErrorIP().setText("La dirección IP no puede estar vacía");
+                vista.getLblErrorIP().setText("*La dirección IP no puede estar vacía");
                 ipValida = false;
             } else {
                 if (ip.equalsIgnoreCase("localhost")){
@@ -79,7 +80,7 @@ public class NuevoContactoController implements ActionListener {
                 if (!pattern.matcher(ip).matches()) {
                     vista.getTxtIP().putClientProperty(
                             FlatClientProperties.OUTLINE,"error");
-                    vista.getLblErrorIP().setText("La dirección IP no es válida");
+                    vista.getLblErrorIP().setText("*La dirección IP no es válida");
                     ipValida = false;
                 } else {
                     vista.getTxtIP().putClientProperty(
@@ -98,6 +99,12 @@ public class NuevoContactoController implements ActionListener {
                 this.user.getAgenda().agregarContacto(contacto);
 
                 this.vista.dispose();
+                Notifications
+                        .getInstance()
+                        .show(
+                                Notifications.Type.SUCCESS,
+                                Notifications.Location.TOP_RIGHT,
+                                "Contacto agregado correctamente");
             }
         }
     }

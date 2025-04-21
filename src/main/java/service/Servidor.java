@@ -5,6 +5,7 @@ import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
 import model.User;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -27,8 +28,12 @@ public class Servidor {
 
                 Integer puerto = this.messengerController.getUser().getPuerto();
                 ServerSocket s = new ServerSocket(puerto);
-                SwingUtilities.invokeLater(() -> this.messengerController.getVista().getMessengerPanel()
-                        .getTxtAreaConversacion().append("Esperando conexiones en puerto: " + puerto + "\n"));
+                Notifications
+                        .getInstance()
+                        .show(
+                                Notifications.Type.SUCCESS,
+                                Notifications.Location.TOP_RIGHT,
+                                "Servidor iniciado");
 
                 while (true) {
                     try  {
@@ -39,14 +44,22 @@ public class Servidor {
                         }).start();
                     } catch (IOException e) {
                         e.printStackTrace();
-                        SwingUtilities.invokeLater(() -> {
-                            this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append("Error al aceptar la conexión: " + e.getMessage() + "\n");
-                        });
+                        Notifications
+                                .getInstance()
+                                .show(
+                                        Notifications.Type.ERROR,
+                                        Notifications.Location.TOP_RIGHT,
+                                        "Error al aceptar la conexión: \n" + e.getMessage());
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append("Error al establecer la conexión" + "\n");
+                Notifications
+                        .getInstance()
+                        .show(
+                                Notifications.Type.ERROR,
+                                Notifications.Location.TOP_RIGHT,
+                                "Error al establecer la conexión");
             }
         }).start();
     }
@@ -100,31 +113,28 @@ public class Servidor {
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> {
-                this.messengerController
-                        .getVista()
-                        .getMessengerPanel()
-                        .getTxtAreaConversacion()
-                        .append("Error: Se recibió un tipo de objeto desconocido.\n");
-            });
+            Notifications
+                    .getInstance()
+                    .show(
+                            Notifications.Type.ERROR,
+                            Notifications.Location.TOP_RIGHT,
+                            "Error: Se recibió un tipo de objeto desconocido");
         } catch (IOException e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> {
-                this.messengerController
-                        .getVista()
-                        .getMessengerPanel()
-                        .getTxtAreaConversacion()
-                        .append("Error de I/O con el cliente: " + e.getMessage() + "\n");
-            });
+            Notifications
+                    .getInstance()
+                    .show(
+                            Notifications.Type.ERROR,
+                            Notifications.Location.TOP_RIGHT,
+                            "Error de I/O con el cliente: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> {
-                this.messengerController
-                        .getVista()
-                        .getMessengerPanel()
-                        .getTxtAreaConversacion()
-                        .append("Error inesperado al procesar conexión: " + e.getMessage() + "\n");
-            });
+            Notifications
+                    .getInstance()
+                    .show(
+                            Notifications.Type.ERROR,
+                            Notifications.Location.TOP_RIGHT,
+                            "Error inesperado al procesar conexión: " + e.getMessage());
         }
     }
 

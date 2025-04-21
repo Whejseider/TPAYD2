@@ -2,6 +2,7 @@ package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import model.User;
+import raven.toast.Notifications;
 import view.Configuracion;
 import view.Messenger;
 import view.MessengerPanel;
@@ -76,13 +77,6 @@ public class ConfigurationController implements ActionListener {
                 user.setPuerto(puerto);
                 System.out.println(user);
 
-                JOptionPane.showMessageDialog(
-                        this.vista,
-                        "Sesión iniciada correctamente.",
-                        "Información",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
                 MessengerController messengerController = new MessengerController(messenger);
                 messengerController.setUser(user);
                 messengerController.setTituloVentana();
@@ -93,6 +87,7 @@ public class ConfigurationController implements ActionListener {
                 messenger.setContentPane(messenger.getMessengerPanel());
                 messenger.revalidate();
                 messenger.repaint();
+
             }
         }
     }
