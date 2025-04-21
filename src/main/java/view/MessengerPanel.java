@@ -1,6 +1,5 @@
 package view;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -41,6 +40,7 @@ public class MessengerPanel extends JPanel {
     private JScrollPane scrollPane;
     private JButton btnDarkMode;
     private MessengerController controlador;
+    private JButton btnLogOut;
 
     public MessengerPanel() {
         init();
@@ -144,6 +144,9 @@ public class MessengerPanel extends JPanel {
         btnNuevoContacto = new JButton("Nuevo Contacto");
         panelOpciones.add(btnNuevoContacto);
 
+        btnLogOut = new JButton("Cerrar Sesión");
+        panelOpciones.add(btnLogOut);
+
         setLayout(new BorderLayout());
         add(pane, BorderLayout.CENTER);
 
@@ -180,6 +183,30 @@ public class MessengerPanel extends JPanel {
                 });
             }
         }
+    }
+
+    public void mostrarContactoInfo(Contacto contactoSeleccionado) {
+        getPanelContactoInfo().setVisible(true);
+
+        if (contactoSeleccionado.getAlias().isEmpty()) {
+            getLblNombreMensaje().setText(contactoSeleccionado.getNombreUsuario());
+        } else {
+            getLblNombreMensaje().setText(contactoSeleccionado.getAlias());
+        }
+
+        getLblIP().setText("IP: " + contactoSeleccionado.getIP());
+        getLblPuerto().setText("Puerto: " + contactoSeleccionado.getPuerto());
+
+        getPanelContactoInfo().revalidate();
+        getPanelContactoInfo().repaint();
+    }
+
+    public JButton getBtnLogOut() {
+        return btnLogOut;
+    }
+
+    public void setBtnLogOut(JButton btnLogOut) {
+        this.btnLogOut = btnLogOut;
     }
 
     public JButton getBtnDarkMode() {

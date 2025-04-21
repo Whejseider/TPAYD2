@@ -2,21 +2,18 @@ package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import model.User;
-import raven.toast.Notifications;
-import view.Configuracion;
+import view.Login;
 import view.Messenger;
-import view.MessengerPanel;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ConfigurationController implements ActionListener {
-    private Configuracion vista;
+public class LoginController implements ActionListener {
+    private Login vista;
     private User user;
     private Messenger messenger;
 
-    public ConfigurationController(Configuracion vista) {
+    public LoginController(Login vista) {
         this.vista = vista;
         this.vista.getBtnAceptar().addActionListener(this);
         this.vista.getBtnCancelar().addActionListener(this);
@@ -79,24 +76,16 @@ public class ConfigurationController implements ActionListener {
 
                 MessengerController messengerController = new MessengerController(messenger);
                 messengerController.setUser(user);
-                messengerController.setTituloVentana();
-                messengerController.configurarServidor();
-
-                messenger.setControlador(messengerController);
-
-                messenger.setContentPane(messenger.getMessengerPanel());
-                messenger.revalidate();
-                messenger.repaint();
-
+                messengerController.login();
             }
         }
     }
 
-    public Configuracion getVista() {
+    public Login getVista() {
         return vista;
     }
 
-    public void setVista(Configuracion vista) {
+    public void setVista(Login vista) {
         this.vista = vista;
     }
 

@@ -2,6 +2,7 @@ package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import model.Contacto;
+import model.Notificacion;
 import model.User;
 import raven.toast.Notifications;
 import view.NuevoContacto;
@@ -68,23 +69,23 @@ public class NuevoContactoController implements ActionListener {
             // Validar la IP
             if (ip.isEmpty()) {
                 vista.getTxtIP().putClientProperty(
-                        FlatClientProperties.OUTLINE,"error");
+                        FlatClientProperties.OUTLINE, "error");
                 vista.getLblErrorIP().setText("*La dirección IP no puede estar vacía");
                 ipValida = false;
             } else {
-                if (ip.equalsIgnoreCase("localhost")){
+                if (ip.equalsIgnoreCase("localhost")) {
                     ip = "127.0.0.1"; //TODO
                 }
                 String regex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
                 Pattern pattern = Pattern.compile(regex);
                 if (!pattern.matcher(ip).matches()) {
                     vista.getTxtIP().putClientProperty(
-                            FlatClientProperties.OUTLINE,"error");
+                            FlatClientProperties.OUTLINE, "error");
                     vista.getLblErrorIP().setText("*La dirección IP no es válida");
                     ipValida = false;
                 } else {
                     vista.getTxtIP().putClientProperty(
-                            FlatClientProperties.OUTLINE,null);
+                            FlatClientProperties.OUTLINE, null);
                     vista.getLblErrorIP().setText("");
                 }
             }
@@ -96,15 +97,24 @@ public class NuevoContactoController implements ActionListener {
                 contacto.setIP(ip);
                 contacto.setPuerto(puerto);
 
-                this.user.getAgenda().agregarContacto(contacto);
-
+                if (this.user.getAgenda().getContactos().contains(contacto)) {
+                    Notifications
+                            .getInstance()
+                            .show(
+                                    Notifications.Type.ERROR,
+                                    Notifications.Location.TOP_RIGHT,
+                                    "Ya hay otro contacto registrado igual"
+                            );
+                } else {
+                    this.user.getAgenda().agregarContacto(contacto);
+                    Notifications
+                            .getInstance()
+                            .show(
+                                    Notifications.Type.SUCCESS,
+                                    Notifications.Location.TOP_RIGHT,
+                                    "Contacto agregado correctamente");
+                }
                 this.vista.dispose();
-                Notifications
-                        .getInstance()
-                        .show(
-                                Notifications.Type.SUCCESS,
-                                Notifications.Location.TOP_RIGHT,
-                                "Contacto agregado correctamente");
             }
         }
     }

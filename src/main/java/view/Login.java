@@ -1,14 +1,14 @@
 package view;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import controller.ConfigurationController;
+import controller.LoginController;
 import interfaces.IVista;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class Configuracion extends JPanel implements IVista<ConfigurationController> {
+public class Login extends JPanel implements IVista<LoginController> {
     private JLabel lblErrorUsuario;
     private JLabel lblErrorPuerto;
     private JPanel pane;
@@ -22,9 +22,9 @@ public class Configuracion extends JPanel implements IVista<ConfigurationControl
     private JButton btnCancelar;
     private JButton btnAceptar;
     private JPanel paneBotones;
-    private ConfigurationController controlador;
+    private LoginController controlador;
 
-    public Configuracion() throws HeadlessException {
+    public Login() throws HeadlessException {
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
         txtUsuario = new JTextField();
@@ -93,7 +93,7 @@ public class Configuracion extends JPanel implements IVista<ConfigurationControl
         add(pane);
     }
 
-    public ConfigurationController getControlador() {
+    public LoginController getControlador() {
         return controlador;
     }
 
@@ -158,7 +158,7 @@ public class Configuracion extends JPanel implements IVista<ConfigurationControl
     }
 
     @Override
-    public void setControlador(ConfigurationController controlador) {
+    public void setControlador(LoginController controlador) {
         this.controlador = controlador;
     }
 }

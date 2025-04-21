@@ -1,11 +1,13 @@
 package controller;
 
+import com.formdev.flatlaf.FlatLaf;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
 import model.User;
 import service.Cliente;
 import service.Servidor;
+import view.Login;
 import view.Messenger;
 import view.NuevoChat;
 import view.NuevoContacto;
@@ -15,8 +17,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
 public class MessengerController implements ActionListener, ListSelectionListener {
     private Messenger vista;
@@ -34,6 +34,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.vista.getMessengerPanel().getBtnNuevoContacto().addActionListener(this);
         this.vista.getMessengerPanel().getListChat().addListSelectionListener(this);
         this.vista.getMessengerPanel().getBtnDarkMode().addActionListener(this);
+        this.vista.getMessengerPanel().getBtnLogOut().addActionListener(this);
 
         this.configurarCliente();
     }
@@ -127,7 +128,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
                 vista.getMessengerPanel().getListChat().revalidate();
                 this.vista.getMessengerPanel().getListChat().repaint();
 
-                vista.mostrarContactoInfo(contactoSeleccionado);
+                vista.getMessengerPanel().mostrarContactoInfo(contactoSeleccionado);
 
                 setContactoActual(contactoSeleccionado);
                 mostrarChat(contactoSeleccionado);
@@ -175,6 +176,10 @@ public class MessengerController implements ActionListener, ListSelectionListene
             this.vista.getMessengerPanel().cambiarTema(darkMode);
         }
 
+        if (e.getSource() == this.vista.getMessengerPanel().getBtnLogOut()) {
+
+        }
+
     }
 
     public void enviarMensaje(Mensaje mensaje) {
@@ -188,6 +193,20 @@ public class MessengerController implements ActionListener, ListSelectionListene
         vista
                 .getMessengerPanel()
                 .getTxtAreaConversacion()
-                .append(mensaje.getEmisor().getNombreUsuario() + ": " + mensaje.getContenido() + "\n" + mensaje.getTiempoFormateado() + "\n");
+                .append(mensaje.getReceptor().getAlias() + ": " + mensaje.getContenido() + "\n" + mensaje.getTiempoFormateado() + "\n");
+    }
+
+    public void login() {
+        setTituloVentana();
+        configurarServidor();
+        vista.setControlador(this);
+        vista.setContentPane(vista.getMessengerPanel());
+        FlatLaf.updateUI();
+    }
+
+    //TODO
+    public void logout(){
+//        this.user = null;
+
     }
 }

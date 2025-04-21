@@ -1,20 +1,19 @@
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import controller.ConfigurationController;
-import model.Notificacion;
+import controller.LoginController;
 import raven.toast.Notifications;
-import view.Configuracion;
+import view.Login;
 import view.Messenger;
 
 import javax.swing.*;
 import java.awt.*;
 
+
 public class Main {
+    private static Main main;
+    private Messenger mainForm;
+    private Login loginForm;
 
     public static void main(String[] args) {
         try {
@@ -36,15 +35,17 @@ public class Main {
                 Messenger messenger = new Messenger();
                 Notifications.getInstance().setJFrame(messenger);
 
-                Configuracion configuracion = new Configuracion();
-                ConfigurationController configurationController = new ConfigurationController(configuracion);
-                configurationController.setMessenger(messenger);
-                configuracion.setControlador(configurationController);
+                Login login = new Login();
+                LoginController loginController = new LoginController(login);
+                loginController.setMessenger(messenger);
+                login.setControlador(loginController);
 
-                messenger.setContentPane(configuracion);
+                messenger.setContentPane(login);
+
             } catch (Exception e) {
                 System.err.println("Error al inicializar la vista");
             }
         });
     }
+
 }

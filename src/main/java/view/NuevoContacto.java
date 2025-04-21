@@ -1,7 +1,6 @@
 package view;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import controller.ConfigurationController;
 import controller.NuevoContactoController;
 import interfaces.IVista;
 import net.miginfocom.swing.MigLayout;
