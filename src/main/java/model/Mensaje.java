@@ -9,9 +9,9 @@ public class Mensaje implements Serializable {
     private String contenido;
     private LocalDateTime tiempo;
     private User emisor;
-    private User receptor;
+    private Contacto receptor;
 
-    public Mensaje(String contenido, User emisor, User receptor) {
+    public Mensaje(String contenido, User emisor, Contacto receptor) {
         this.contenido = contenido;
         this.emisor = emisor;
         this.receptor = receptor;
@@ -34,11 +34,11 @@ public class Mensaje implements Serializable {
         this.emisor = emisor;
     }
 
-    public User getReceptor() {
+    public Contacto getReceptor() {
         return receptor;
     }
 
-    public void setReceptor(User receptor) {
+    public void setReceptor(Contacto receptor) {
         this.receptor = receptor;
     }
 

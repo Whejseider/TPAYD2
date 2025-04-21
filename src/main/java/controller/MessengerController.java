@@ -15,6 +15,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 public class MessengerController implements ActionListener, ListSelectionListener {
     private Messenger vista;
@@ -32,6 +34,8 @@ public class MessengerController implements ActionListener, ListSelectionListene
         this.vista.getMessengerPanel().getBtnNuevoContacto().addActionListener(this);
         this.vista.getMessengerPanel().getListChat().addListSelectionListener(this);
         this.vista.getMessengerPanel().getBtnDarkMode().addActionListener(this);
+
+        this.configurarCliente();
     }
 
     public void setTituloVentana() {
@@ -86,32 +90,26 @@ public class MessengerController implements ActionListener, ListSelectionListene
     }
 
     public void mostrarChat(Contacto contacto) {
-        contactoActual = contacto;
+        SwingUtilities.invokeLater(() -> {
+            contactoActual = contacto;
 
-        vista.getMessengerPanel().getPanelContactoInfo().setVisible(true);
+            Conversacion conversacion = user.getConversacionCon(contacto);
+            StringBuilder historial = new StringBuilder();
 
-        if (contacto.getAlias().isEmpty()) {
-            vista.getMessengerPanel().getLblNombreMensaje().setText(contacto.getNombreUsuario());
-        } else {
-            vista.getMessengerPanel().getLblNombreMensaje().setText(contacto.getAlias());
-        }
-
-        vista.getMessengerPanel().getLblIP().setText("IP: " + contacto.getIP());
-        vista.getMessengerPanel().getLblPuerto().setText("Puerto: " + contacto.getPuerto());
-
-        Conversacion conversacion = user.getConversacionCon(contacto);
-        StringBuilder historial = new StringBuilder();
-
-        for (Mensaje mensaje : conversacion.getMensajes()) {
-            if (mensaje.getEmisor().getNombreUsuario().equals(user.getNombreUsuario())) {
-                historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.getTiempoFormateado()).append("\n");
-            } else {
-                historial.append(contacto.getNombreUsuario()).append(": ")
-                        .append(mensaje.getContenido()).append("\n").append(mensaje.getTiempoFormateado()).append("\n");
+            for (Mensaje mensaje : conversacion.getMensajes()) {
+                if (mensaje.getEmisor().getNombreUsuario().equals(user.getNombreUsuario())) {
+                    historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.getTiempoFormateado()).append("\n");
+                } else {
+                    historial.append(contacto.getNombreUsuario()).append(": ")
+                            .append(mensaje.getContenido()).append("\n").append(mensaje.getTiempoFormateado()).append("\n");
+                }
             }
-        }
 
-        vista.getMessengerPanel().getTxtAreaConversacion().setText(historial.toString());
+            vista.getMessengerPanel().getTxtAreaConversacion().setText(historial.toString());
+            vista.getMessengerPanel().getTxtAreaConversacion().revalidate();
+            vista.getMessengerPanel().getTxtAreaConversacion().repaint();
+        });
+
     }
 
     public Contacto getContactoActual() {
@@ -126,7 +124,10 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
                 contactoSeleccionado.getNotificacion().setTieneMensajesNuevos(false);
 
+                vista.getMessengerPanel().getListChat().revalidate();
                 this.vista.getMessengerPanel().getListChat().repaint();
+
+                vista.mostrarContactoInfo(contactoSeleccionado);
 
                 setContactoActual(contactoSeleccionado);
                 mostrarChat(contactoSeleccionado);
@@ -137,10 +138,12 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getMessengerPanel().getBtnEnviar()) {
-            String mensaje = vista.getMessengerPanel().getTxtMensaje().getText().trim();
-            if (mensaje.isEmpty() || contactoActual == null) return;
+            String contenido = vista.getMessengerPanel().getTxtMensaje().getText().trim();
+            if (contenido.isEmpty() || contactoActual == null) return;
 
-            this.configurarCliente();
+            Mensaje mensaje = new Mensaje(contenido, this.user, contactoActual);
+
+            cliente.enviarMensaje(mensaje);
 
             DefaultListModel<Contacto> listModel = this.vista.getMessengerPanel().getListModel();
             if (!listModel.contains(contactoActual)) {
@@ -149,9 +152,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
             }
 
             vista.getMessengerPanel().getTxtMensaje().setText("");
-            mostrarChat(contactoActual);
 
-            cliente.enviarMensaje(mensaje, contactoActual);
         }
 
         if (e.getSource() == this.vista.getMessengerPanel().getBtnNuevoContacto()) {
@@ -176,4 +177,17 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     }
 
+    public void enviarMensaje(Mensaje mensaje) {
+        vista
+                .getMessengerPanel()
+                .getTxtAreaConversacion()
+                .append("\t\t\tYo: " + mensaje.getContenido() + "\n" + "\t\t\t" + mensaje.getTiempoFormateado() + "\n");
+    }
+
+    public void recibirMensaje(Mensaje mensaje) {
+        vista
+                .getMessengerPanel()
+                .getTxtAreaConversacion()
+                .append(mensaje.getEmisor().getNombreUsuario() + ": " + mensaje.getContenido() + "\n" + mensaje.getTiempoFormateado() + "\n");
+    }
 }

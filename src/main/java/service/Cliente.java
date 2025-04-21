@@ -6,6 +6,7 @@ import model.Conversacion;
 import model.Mensaje;
 import model.User;
 
+import javax.swing.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -17,43 +18,62 @@ public class Cliente {
         this.messengerController = messengerController;
     }
 
-    public void enviarMensaje(String contenido, Contacto contacto) {
-        try {
-            Socket socket = new Socket(contacto.getIP(), contacto.getPuerto());
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+    public void enviarMensaje(Mensaje mensaje) {
+        new Thread(() -> {
+            try (Socket socket = new Socket(mensaje.getReceptor().getIP(), mensaje.getReceptor().getPuerto())) {
 
-            Mensaje mensaje = new Mensaje(contenido, this.messengerController.getUser(), contacto);
 
-            out.writeObject(mensaje);
-            out.flush();
+                // Primero crear el OutputStream
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out.flush(); // Importante flush antes de crear el InputStream
 
-            User receptor = (User) in.readObject();
+                // Después crear el InputStream
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-            if (contacto.getAlias().equalsIgnoreCase("Usuario Desconocido")){
+                // Ahora enviar el mensaje
+                out.writeObject(mensaje);
+                out.flush();
 
-                Contacto contactoModificado = new Contacto();
-                contactoModificado.setAlias(receptor.getNombreUsuario());
-                contactoModificado.setIP(receptor.getIP());
-                contactoModificado.setPuerto(receptor.getPuerto());
+                // Y recibir la respuesta
+                User input = (User) in.readObject();
+                Contacto receptor = mensaje.getReceptor();
 
-                this.messengerController.getUser().getAgenda().modificarContactoPorIP(contacto, contactoModificado);
-                contacto.setAlias(contactoModificado.getAlias());
+                if (receptor.getAlias().equalsIgnoreCase("Usuario Desconocido")) {
+
+                    Contacto contactoModificado = new Contacto();
+                    contactoModificado.setUser(input);
+                    contactoModificado.setNombreUsuario(input.getNombreUsuario());
+                    contactoModificado.setAlias(input.getNombreUsuario());
+                    contactoModificado.setIP(input.getIP());
+                    contactoModificado.setPuerto(input.getPuerto());
+
+                    this.messengerController.getUser().getAgenda().modificarContactoPorIP(receptor, contactoModificado);
+                    receptor.setAlias(contactoModificado.getAlias());
+                }
+
+                receptor.setUser(input);
+
+                Conversacion conversacion = this.messengerController.getUser().getConversacionCon(receptor);
+                conversacion.agregarMensaje(mensaje);
+
+                if (receptor.equals(this.messengerController.getContactoActual())) {
+                    this.messengerController.enviarMensaje(mensaje);
+                }
+
+                in.close();
+                out.close();
+                socket.close();
+            } catch (Exception e) {
+                SwingUtilities.invokeLater(() -> {
+                    this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append(
+                            "Error al enviar el enviar el mensaje. El destinatario " +
+                                    "[" + mensaje.getReceptor().toString() + "]"
+                                    + " no se encuentra en línea.");
+                });
+
             }
+        }).start();
 
-            Conversacion conversacion = this.messengerController.getUser().getConversacionCon(contacto);
-            conversacion.agregarMensaje(mensaje);
-
-            if (contacto.equals(this.messengerController.getContactoActual())) {
-                this.messengerController.mostrarChat(contacto);
-            }
-
-            out.close();
-            socket.close();
-        } catch (Exception e) {
-            this.messengerController.getVista().getMessengerPanel().getTxtAreaConversacion().append(
-                    "Error al enviar el enviar el mensaje. El destinatario " + "[" + contacto.toString() + "]" + " no se encuentra en línea.");
-        }
     }
 
 

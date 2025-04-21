@@ -31,4 +31,20 @@ public class Messenger extends JFrame implements IVista<MessengerController> {
     public MessengerPanel getMessengerPanel() {
         return messengerPanel;
     }
+
+    public void mostrarContactoInfo(Contacto contactoSeleccionado) {
+        getMessengerPanel().getPanelContactoInfo().setVisible(true);
+
+        if (contactoSeleccionado.getAlias().isEmpty()) {
+            getMessengerPanel().getLblNombreMensaje().setText(contactoSeleccionado.getNombreUsuario());
+        } else {
+            getMessengerPanel().getLblNombreMensaje().setText(contactoSeleccionado.getAlias());
+        }
+
+        getMessengerPanel().getLblIP().setText("IP: " + contactoSeleccionado.getIP());
+        getMessengerPanel().getLblPuerto().setText("Puerto: " + contactoSeleccionado.getPuerto());
+
+        getMessengerPanel().getPanelContactoInfo().revalidate();
+        getMessengerPanel().getPanelContactoInfo().repaint();
+    }
 }

@@ -94,7 +94,6 @@ public class NuevoContactoController implements ActionListener {
                 contacto.setAlias(alias);
                 contacto.setIP(ip);
                 contacto.setPuerto(puerto);
-                System.out.println(contacto);
 
                 this.user.getAgenda().agregarContacto(contacto);
 

@@ -21,12 +21,13 @@ public class Agenda implements Serializable {
 
     public Contacto getContactoPorUsuario(User user) {
         for (Contacto c : contactos) {
-            if (c.equals(user)) {
+            if (c.getIP().equals(user.getIP()) && c.getPuerto().equals(user.getPuerto())) {
                 return c;
             }
         }
         return null;
     }
+
 
     public boolean modificarContactoPorIP(Contacto contactoOriginal, Contacto contactoActualizado) {
         for (int i = 0; i < contactos.size(); i++) {
