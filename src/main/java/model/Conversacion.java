@@ -7,10 +7,19 @@ import java.util.List;
 public class Conversacion implements Serializable {
     private Contacto contacto;
     private List<Mensaje> mensajes;
+    private Notificacion notificacion = new Notificacion();
 
     public Conversacion(Contacto contacto) {
         this.contacto = contacto;
         this.mensajes = new ArrayList<>();
+    }
+
+    public Notificacion getNotificacion() {
+        return notificacion;
+    }
+
+    public void setNotificacion(Notificacion notificacion) {
+        this.notificacion = notificacion;
     }
 
     public Contacto getContacto() {

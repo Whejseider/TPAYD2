@@ -120,18 +120,18 @@ public class MessengerController implements ActionListener, ListSelectionListene
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            Contacto contactoSeleccionado = this.vista.getMessengerPanel().getListChat().getSelectedValue();
-            if (contactoSeleccionado != null) {
+            Conversacion conversacion = this.vista.getMessengerPanel().getListChat().getSelectedValue();
+            if (conversacion != null) {
 
-                contactoSeleccionado.getNotificacion().setTieneMensajesNuevos(false);
+                conversacion.getNotificacion().setTieneMensajesNuevos(false);
 
                 vista.getMessengerPanel().getListChat().revalidate();
                 this.vista.getMessengerPanel().getListChat().repaint();
 
-                vista.getMessengerPanel().mostrarContactoInfo(contactoSeleccionado);
+                vista.getMessengerPanel().mostrarContactoInfo(conversacion.getContacto());
 
-                setContactoActual(contactoSeleccionado);
-                mostrarChat(contactoSeleccionado);
+                setContactoActual(conversacion.getContacto());
+                mostrarChat(conversacion.getContacto());
             }
         }
     }
@@ -146,10 +146,12 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
             cliente.enviarMensaje(mensaje);
 
-            DefaultListModel<Contacto> listModel = this.vista.getMessengerPanel().getListModel();
-            if (!listModel.contains(contactoActual)) {
-                listModel.addElement(contactoActual);
-                vista.getMessengerPanel().getListChat().setSelectedValue(contactoActual, true);
+            Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
+
+            DefaultListModel<Conversacion> listModel = this.vista.getMessengerPanel().getListModel();
+            if (!listModel.contains(conversacion)) {
+                listModel.addElement(conversacion);
+                vista.getMessengerPanel().getListChat().setSelectedValue(conversacion, true);
             }
 
             vista.getMessengerPanel().getTxtMensaje().setText("");

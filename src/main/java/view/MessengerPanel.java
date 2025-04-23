@@ -6,6 +6,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import controller.MessengerController;
 import model.Contacto;
+import model.Conversacion;
 import net.miginfocom.swing.MigLayout;
 import utils.ChatListRenderer;
 
@@ -37,8 +38,8 @@ public class MessengerPanel extends JPanel {
     private JTextField txtMensaje;
     private JButton btnEnviar;
     private JTextArea txtAreaConversacion;
-    private JList<Contacto> listChat;
-    private DefaultListModel<Contacto> listModel;
+    private JList<Conversacion> listChat;
+    private DefaultListModel<Conversacion> listModel;
     private JScrollPane scrollPane;
     private JButton btnDarkMode;
     private MessengerController controlador;
@@ -137,14 +138,14 @@ public class MessengerPanel extends JPanel {
                 "[dark]background:darken(@background,10%)");
         pane.add(panelOpciones, BorderLayout.WEST);
 
-        btnDarkMode = new JButton("Tema Oscuro"){
+        btnDarkMode = new JButton("Tema Oscuro") {
             @Override
             public boolean isDefaultButton() {
                 return true;
             }
         };
         panelOpciones.add(btnDarkMode, "gapy 10 10, sizegroup btn");
-        panelOpciones.add(new JSeparator(),"gapy 10 10");
+        panelOpciones.add(new JSeparator(), "gapy 10 10");
         btnNuevoContacto = new JButton("Nuevo Contacto");
         panelOpciones.add(btnNuevoContacto, "gapy 10 10, sizegroup btn");
 
@@ -159,30 +160,32 @@ public class MessengerPanel extends JPanel {
         listChat.setCellRenderer(new ChatListRenderer());
     }
 
-    public void agregarContacto(Contacto c) {
-        listModel.addElement(c);
+    public void agregarConversacion(Conversacion c) {
+        if (!listModel.contains(c)) {
+            listModel.addElement(c);
+        }
     }
 
-    public void cambiarTema(boolean dark){
-        if (FlatLaf.isLafDark() != dark){
-            if (!dark){
-                SwingUtilities.invokeLater(()->{
+    public void cambiarTema(boolean dark) {
+        if (FlatLaf.isLafDark() != dark) {
+            if (!dark) {
+                SwingUtilities.invokeLater(() -> {
                     try {
                         FlatIntelliJLaf.setup();
                         FlatLaf.updateUI();
                         btnDarkMode.setText("Tema Oscuro");
-                    } catch( Exception ex ) {
-                        System.err.println( "Error al inicializar LAF" );
+                    } catch (Exception ex) {
+                        System.err.println("Error al inicializar LAF");
                     }
                 });
             } else {
-                SwingUtilities.invokeLater(()->{
+                SwingUtilities.invokeLater(() -> {
                     try {
                         FlatDarculaLaf.setup();
                         FlatLaf.updateUI();
                         btnDarkMode.setText("Tema Claro");
-                    } catch( Exception ex ) {
-                        System.err.println( "Error al inicializar LAF" );
+                    } catch (Exception ex) {
+                        System.err.println("Error al inicializar LAF");
                     }
                 });
             }
@@ -221,15 +224,15 @@ public class MessengerPanel extends JPanel {
         this.btnDarkMode = btnDarkMode;
     }
 
-    public void setListChat(JList<Contacto> listChat) {
+    public void setListChat(JList<Conversacion> listChat) {
         this.listChat = listChat;
     }
 
-    public DefaultListModel<Contacto> getListModel() {
+    public DefaultListModel<Conversacion> getListModel() {
         return listModel;
     }
 
-    public void setListModel(DefaultListModel<Contacto> listModel) {
+    public void setListModel(DefaultListModel<Conversacion> listModel) {
         this.listModel = listModel;
     }
 
@@ -281,7 +284,7 @@ public class MessengerPanel extends JPanel {
         return txtAreaConversacion;
     }
 
-    public JList<Contacto> getListChat() {
+    public JList<Conversacion> getListChat() {
         return listChat;
     }
 

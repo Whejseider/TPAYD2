@@ -7,7 +7,6 @@ import model.Mensaje;
 import model.User;
 import raven.toast.Notifications;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -36,7 +35,7 @@ public class Servidor {
                                 "Servidor iniciado");
 
                 while (true) {
-                    try  {
+                    try {
                         Socket soc = s.accept();
                         new Thread(() -> {
                             handleClientConnection(soc);
@@ -91,18 +90,18 @@ public class Servidor {
                 contacto.setIP(emisor.getIP());
                 contacto.setPuerto(emisor.getPuerto());
                 receptor.getAgenda().agregarContacto(contacto);
-                this.messengerController.getVista().getMessengerPanel().agregarContacto(contacto);
                 this.messengerController.getVista().getMessengerPanel().revalidate();
                 this.messengerController.getVista().getMessengerPanel().repaint();
             }
 
             Conversacion conversacion = receptor.getConversacionCon(contacto);
+            this.messengerController.getVista().getMessengerPanel().agregarConversacion(conversacion);
             conversacion.agregarMensaje(mensaje);
 
             if (contacto.equals(this.messengerController.getContactoActual())) {
                 this.messengerController.recibirMensaje(mensaje);
             } else {
-                contacto.getNotificacion().setTieneMensajesNuevos(true);
+                conversacion.getNotificacion().setTieneMensajesNuevos(true);
                 this.messengerController.getVista().getMessengerPanel().getListChat().revalidate();
                 this.messengerController.getVista().getMessengerPanel().getListChat().repaint();
             }

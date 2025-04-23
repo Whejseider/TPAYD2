@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Contacto implements Serializable {
-    private Notificacion notificacion = new Notificacion();
     private String alias;
     private User user;
     private String IP;
@@ -27,15 +26,6 @@ public class Contacto implements Serializable {
         }
 
         return mostrar + "\n  IP: " + getIP() + "  Puerto: " + getPuerto();
-    }
-
-
-    public Notificacion getNotificacion() {
-        return notificacion;
-    }
-
-    public void setNotificacion(Notificacion notificacion) {
-        this.notificacion = notificacion;
     }
 
     public String getAlias() {
