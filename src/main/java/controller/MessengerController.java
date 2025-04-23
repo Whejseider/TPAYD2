@@ -183,17 +183,24 @@ public class MessengerController implements ActionListener, ListSelectionListene
     }
 
     public void enviarMensaje(Mensaje mensaje) {
-        vista
-                .getMessengerPanel()
-                .getTxtAreaConversacion()
-                .append("\t\t\tYo: " + mensaje.getContenido() + "\n" + "\t\t\t" + mensaje.getTiempoFormateado() + "\n");
+        SwingUtilities.invokeLater(() -> {
+            vista
+                    .getMessengerPanel()
+                    .getTxtAreaConversacion()
+                    .append("\t\t\tYo: " + mensaje.getContenido() + "\n" + "\t\t\t" + mensaje.getTiempoFormateado() + "\n");
+        });
+
     }
 
     public void recibirMensaje(Mensaje mensaje) {
-        vista
-                .getMessengerPanel()
-                .getTxtAreaConversacion()
-                .append(mensaje.getReceptor().getAlias() + ": " + mensaje.getContenido() + "\n" + mensaje.getTiempoFormateado() + "\n");
+        String alias = mensaje.getReceptor().getUser().getAgenda().getContactoPorUsuario(mensaje.getEmisor()).getAlias();
+        SwingUtilities.invokeLater(() -> {
+            vista
+                    .getMessengerPanel()
+                    .getTxtAreaConversacion()
+                    .append(alias + ": " + mensaje.getContenido() + "\n" + mensaje.getTiempoFormateado() + "\n");
+        });
+
     }
 
     public void login() {
@@ -205,7 +212,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
     }
 
     //TODO
-    public void logout(){
+    public void logout() {
 //        this.user = null;
 
     }
