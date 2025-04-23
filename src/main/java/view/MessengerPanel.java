@@ -1,10 +1,12 @@
 package view;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import controller.MessengerController;
 import model.Contacto;
+import net.miginfocom.swing.MigLayout;
 import utils.ChatListRenderer;
 
 import javax.swing.*;
@@ -129,8 +131,10 @@ public class MessengerPanel extends JPanel {
         txtMensaje = new JTextField();
         panelEnviarMensaje.add(txtMensaje, BorderLayout.CENTER);
 
-        panelOpciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        panelOpciones.setPreferredSize(new Dimension(110, 44));
+        panelOpciones = new JPanel(new MigLayout("wrap,fillx,insets 15 25 10 25", "fill,60:100"));
+        panelOpciones.putClientProperty(FlatClientProperties.STYLE, "" +
+                "[light]background:darken(@background,10%);" +
+                "[dark]background:darken(@background,10%)");
         pane.add(panelOpciones, BorderLayout.WEST);
 
         btnDarkMode = new JButton("Tema Oscuro"){
@@ -139,13 +143,13 @@ public class MessengerPanel extends JPanel {
                 return true;
             }
         };
-        panelOpciones.add(btnDarkMode);
-
+        panelOpciones.add(btnDarkMode, "gapy 10 10, sizegroup btn");
+        panelOpciones.add(new JSeparator(),"gapy 10 10");
         btnNuevoContacto = new JButton("Nuevo Contacto");
-        panelOpciones.add(btnNuevoContacto);
+        panelOpciones.add(btnNuevoContacto, "gapy 10 10, sizegroup btn");
 
         btnLogOut = new JButton("Cerrar Sesión");
-        panelOpciones.add(btnLogOut);
+        panelOpciones.add(btnLogOut, "gapy 10 10, sizegroup btn");
 
         setLayout(new BorderLayout());
         add(pane, BorderLayout.CENTER);

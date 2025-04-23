@@ -16,8 +16,8 @@
 
     <repositories>
         <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/Whejseider/TPAYD2</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -77,8 +77,8 @@
         </dependency>
 
         <dependency>
-            <groupId>raven.toast</groupId>
-            <artifactId>swing-toast-notifications</artifactId>
+            <groupId>com.github.Whejseider</groupId>
+            <artifactId>swingNotifications</artifactId>
             <version>1.0.4</version>
         </dependency>
 
