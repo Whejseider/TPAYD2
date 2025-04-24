@@ -14,11 +14,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Servidor {
+    private static Servidor instance;
     private MessengerController messengerController;
 
-    public Servidor(MessengerController messengerController) {
+    private Servidor(MessengerController messengerController) {
         this.messengerController = messengerController;
         this.iniciarServidor();
+    }
+
+    public static Servidor getInstance(MessengerController messengerController) {
+        if (instance == null) {
+            instance = new Servidor(messengerController);
+        }
+        return instance;
     }
 
     public void iniciarServidor() {
@@ -90,8 +98,6 @@ public class Servidor {
                 contacto.setIP(emisor.getIP());
                 contacto.setPuerto(emisor.getPuerto());
                 receptor.getAgenda().agregarContacto(contacto);
-                this.messengerController.getVista().getMessengerPanel().revalidate();
-                this.messengerController.getVista().getMessengerPanel().repaint();
             }
 
             Conversacion conversacion = receptor.getConversacionCon(contacto);
@@ -102,8 +108,8 @@ public class Servidor {
                 this.messengerController.recibirMensaje(mensaje);
             } else {
                 conversacion.getNotificacion().setTieneMensajesNuevos(true);
-                this.messengerController.getVista().getMessengerPanel().getListChat().revalidate();
                 this.messengerController.getVista().getMessengerPanel().getListChat().repaint();
+                this.messengerController.getVista().getMessengerPanel().getListChat().revalidate();
             }
 
 //            in.close();

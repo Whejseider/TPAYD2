@@ -20,7 +20,6 @@ import java.awt.event.ActionListener;
 
 public class MessengerController implements ActionListener, ListSelectionListener {
     private Messenger vista;
-    private Servidor servidor;
     private Cliente cliente;
     private User user;
     private Contacto contactoActual;
@@ -50,24 +49,12 @@ public class MessengerController implements ActionListener, ListSelectionListene
         return vista;
     }
 
-    public void configurarServidor() {
-        this.servidor = new Servidor(this);
-    }
-
     public void configurarCliente() {
         this.cliente = new Cliente(this);
     }
 
     public void setVista(Messenger vista) {
         this.vista = vista;
-    }
-
-    public Servidor getServidor() {
-        return servidor;
-    }
-
-    public void setServidor(Servidor servidor) {
-        this.servidor = servidor;
     }
 
     public Cliente getCliente() {
@@ -207,7 +194,7 @@ public class MessengerController implements ActionListener, ListSelectionListene
 
     public void login() {
         setTituloVentana();
-        configurarServidor();
+        Servidor servidor = Servidor.getInstance(this);
         vista.setControlador(this);
         vista.setContentPane(vista.getMessengerPanel());
         FlatLaf.updateUI();
