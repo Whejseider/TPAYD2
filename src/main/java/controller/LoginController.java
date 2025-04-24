@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import model.User;
 import view.Login;
 import view.Messenger;
+import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,9 +75,10 @@ public class LoginController implements ActionListener {
                 user.setPuerto(puerto);
                 System.out.println(user);
 
-                MessengerController messengerController = new MessengerController(messenger);
-                messengerController.setUser(user);
-                messengerController.login();
+//                MessengerController messengerController = new MessengerController(messenger);
+//                messengerController.setUser(user);
+//                messengerController.login();
+                FormManager.login();
             }
         }
     }

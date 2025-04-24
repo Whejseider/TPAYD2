@@ -4,11 +4,12 @@ import com.formdev.flatlaf.FlatClientProperties;
 import controller.LoginController;
 import interfaces.IVista;
 import net.miginfocom.swing.MigLayout;
+import view.system.Form;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class Login extends JPanel implements IVista<LoginController> {
+public class Login extends Form implements IVista<LoginController> {
     private JLabel lblErrorUsuario;
     private JLabel lblErrorPuerto;
     private JPanel pane;

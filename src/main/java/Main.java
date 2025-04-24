@@ -3,6 +3,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import controller.LoginController;
 import raven.toast.Notifications;
+import utils.DemoPreferences;
 import view.Login;
 import view.Messenger;
 
@@ -16,6 +17,7 @@ public class Main {
     private Login loginForm;
 
     public static void main(String[] args) {
+        DemoPreferences.init();
         try {
             FlatLaf.registerCustomDefaultsSource("fv.themes");
             UIManager.setLookAndFeel( new FlatIntelliJLaf() );
@@ -30,17 +32,18 @@ public class Main {
             System.err.println("Error al instalar la fuente FlatRobotoFont");
         }
 
+        DemoPreferences.setupLaf();
         SwingUtilities.invokeLater(() -> {
             try {
                 Messenger messenger = new Messenger();
-                Notifications.getInstance().setJFrame(messenger);
+//                Notifications.getInstance().setJFrame(messenger);
 
-                Login login = new Login();
-                LoginController loginController = new LoginController(login);
-                loginController.setMessenger(messenger);
-                login.setControlador(loginController);
+//                Login login = new Login();
+//                LoginController loginController = new LoginController(login);
+//                loginController.setMessenger(messenger);
+//                login.setControlador(loginController);
 
-                messenger.setContentPane(login);
+//                messenger.setContentPane(login);
 
             } catch (Exception e) {
                 System.err.println("Error al inicializar la vista");

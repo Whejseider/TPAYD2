@@ -9,11 +9,12 @@ import model.Contacto;
 import model.Conversacion;
 import net.miginfocom.swing.MigLayout;
 import utils.ChatListRenderer;
+import view.system.Form;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class MessengerPanel extends JPanel {
+public class MessengerPanel extends Form {
     private JPanel pane;
     private JPanel panelOpciones;
     private JPanel panelPrincipal;
