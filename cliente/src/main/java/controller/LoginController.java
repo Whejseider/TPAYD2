@@ -1,11 +1,14 @@
 package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import connection.Sesion;
 import interfaces.AppStateListener;
 import model.*;
 import connection.Cliente;
+import raven.modal.Toast;
 import view.forms.Login;
 import view.Messenger;
+import view.simple.SimpleMessageModal;
 import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
@@ -79,9 +82,7 @@ public class LoginController implements ActionListener, AppStateListener {
                 user.setPuerto(puerto);
                 System.out.println(user);
 
-                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, user);
-
-                mainController.onResponse(c);
+                Cliente.getInstance().iniciarSesion(user);
             }
         }
 
@@ -129,12 +130,14 @@ public class LoginController implements ActionListener, AppStateListener {
     @Override
     public void onLoginSuccess(User user) {
         cleanup();
+        Sesion.getInstance().setUsuarioActual(user);
+        Toast.show(vista, Toast.Type.DEFAULT, "Bienvenido " + user.getNombreUsuario());
         FormManager.login();
     }
 
     @Override
-    public void onLoginFailure(Exception e) {
-        ErrorManager.getInstance().showError(e);
+    public void onLoginFailure(String s) {
+        ErrorManager.getInstance().showError(s);
     }
 
     @Override

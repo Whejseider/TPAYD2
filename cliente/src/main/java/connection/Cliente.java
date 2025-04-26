@@ -77,8 +77,15 @@ public class Cliente {
             objectOutputStream.flush();
         } catch (IOException e) {
             cerrarTodo(socket, objectInputStream, objectOutputStream);
-
         }
+    }
+
+    public void cerrarSesion(User user){
+        try {
+            Comando c = new Comando(TipoSolicitud.CERRAR_SESION, user);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {}
     }
 
 

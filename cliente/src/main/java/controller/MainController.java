@@ -51,16 +51,6 @@ public class MainController implements ClientListener {
         });
     }
 
-    private void notifyLoginAttempt(User user) {
-        SwingUtilities.invokeLater(() -> {
-            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
-            for (AppStateListener listener : copiaListeners) {
-                listener.onRegistrationFailure();
-            }
-        });
-    }
-
-
     private void notifyLoginSuccess(User user) {
         SwingUtilities.invokeLater(() -> {
             List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
@@ -70,10 +60,10 @@ public class MainController implements ClientListener {
         });
     }
 
-    private void notifyLoginFailure(Exception e) {
+    private void notifyLoginFailure(String s) {
         SwingUtilities.invokeLater(() -> {
             for (AppStateListener listener : listeners) {
-                listener.onLoginFailure(e);
+                listener.onLoginFailure(s);
             }
         });
     }
@@ -141,17 +131,19 @@ public class MainController implements ClientListener {
                     notifyConnectionAttempt(comando.getTipoRespuesta());
 
                 case INICIAR_SESION:
-                    try {
-                        if (comando.getContenido() instanceof User) {
-                            Sesion.getInstance().setUsuarioActual((User) comando.getContenido());
-                            user = Sesion.getInstance().getUsuarioActual();
-                            System.out.println("DEBUG: Login exitoso para: " + user.getNombreUsuario());
-                            notifyLoginAttempt(this.user);
-                        }
-                    } catch (Exception ex) {
-                        notifyLoginFailure(ex);
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
+                        notifyLoginSuccess((User) comando.getContenido());
+                    } else {
+                        notifyLoginFailure((String) comando.getContenido());
                     }
+                    break;
 
+                case REGISTRARSE:
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
+                        notifyRegistrationSuccess();
+                    } else {
+                        notifyRegistrationFailure();
+                    }
                     break;
 
                 case CERRAR_SESION:
@@ -189,14 +181,6 @@ public class MainController implements ClientListener {
                         }
                     } else {
                         System.err.println("ERROR: Contenido inesperado para LISTA_USUARIOS: " + comando.getContenido());
-                    }
-                    break;
-
-                case REGISTRARSE:
-                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
-                        notifyRegistrationSuccess();
-                    } else {
-                        notifyRegistrationFailure();
                     }
                     break;
 

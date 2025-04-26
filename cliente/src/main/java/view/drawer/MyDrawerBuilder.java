@@ -2,6 +2,8 @@ package view.drawer;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import connection.Cliente;
+import connection.Sesion;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
 import raven.modal.drawer.item.Item;
@@ -128,7 +130,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                     return;
                 } else if (i == 4) {
                     action.consume();
-                    FormManager.logout();
+                    Cliente.getInstance().cerrarSesion(Sesion.getInstance().getUsuarioActual());
                     return;
                 }
                 if (itemClass == null || !Form.class.isAssignableFrom(itemClass)) {

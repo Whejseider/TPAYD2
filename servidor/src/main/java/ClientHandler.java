@@ -33,18 +33,25 @@ public class ClientHandler implements Runnable {
 
     private void iniciarSesion() throws IOException {
         user = (User) comando.getContenido();
-        if (clientesConectados.stream().noneMatch(
-                c -> c.user.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
-            clientesConectados.add(this);
-            System.out.println("Servidor: Usuario conectado: " + user.getNombreUsuario());
-            Comando c = new Comando(TipoSolicitud.INICIAR_SESION, true);
+        if (directorio.stream().noneMatch(u -> u.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
+            System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
+            Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "El usuario es inexistente");
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } else {
-            System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
-            Comando c = new Comando(TipoSolicitud.INICIAR_SESION, false);
-            objectOutputStream.writeObject(c);
-            objectOutputStream.flush();
+            if (clientesConectados.stream().noneMatch(
+                    c -> c.user.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
+                clientesConectados.add(this);
+                System.out.println("Servidor: Usuario conectado: " + user.getNombreUsuario());
+                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, user);
+                objectOutputStream.writeObject(c);
+                objectOutputStream.flush();
+            } else {
+                System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
+                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Ya hay un usuario conectado con ese nombre");
+                objectOutputStream.writeObject(c);
+                objectOutputStream.flush();
+            }
         }
     }
 

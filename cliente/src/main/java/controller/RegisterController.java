@@ -46,7 +46,7 @@ public class RegisterController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onLoginFailure(Exception e) {
+    public void onLoginFailure(String s) {
 
     }
 
@@ -73,8 +73,7 @@ public class RegisterController implements ActionListener, AppStateListener {
 
     @Override
     public void onRegistrationFailure() {
-        Toast.show(vista, Toast.Type.ERROR, "Error al registrar el usuario, parece que ya existe uno con ese nombre de usuario.");
-
+        ErrorManager.getInstance().showError("Error al registrar el usuario, parece que ya existe uno con ese nombre de usuario.");
     }
 
     @Override

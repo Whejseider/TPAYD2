@@ -12,7 +12,7 @@ public interface AppStateListener {
 
     void onLoginSuccess(User user);
 
-    void onLoginFailure(Exception e);
+    void onLoginFailure(String s);
 
     void onLogoutSuccess();
 

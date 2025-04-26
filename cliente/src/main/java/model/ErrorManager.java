@@ -14,9 +14,8 @@ public class ErrorManager {
         return instance;
     }
 
-    public void showError(Exception e) {
-        Toast.show(FormManager.getFrame(), Toast.Type.ERROR, e.getMessage());
-        e.printStackTrace();
+    public void showError(String s) {
+        Toast.show(FormManager.getFrame(), Toast.Type.ERROR, s);
     }
 }
 
