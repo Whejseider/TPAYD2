@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/TPAYD2_jar</output-path>
     <root id="archive" name="TPAYD2.jar">
       <element id="module-output" name="TPAYD2" />
-      <element id="dir-copy" path="$PROJECT_DIR$/src" />
+      <element id="dir-copy" path="$PROJECT_DIR$/cliente/src" />
     </root>
   </artifact>
 </component>
