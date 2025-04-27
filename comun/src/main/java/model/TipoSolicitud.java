@@ -2,8 +2,8 @@ package model;
 
 public enum TipoSolicitud {
     OBTENER_DIRECTORIO,
-    LISTA_USUARIOS,
     ENVIAR_MENSAJE,
+    RECIBIR_MENSAJE,
     REGISTRARSE,
     INICIAR_SESION,
     CONECTARSE_SERVIDOR,

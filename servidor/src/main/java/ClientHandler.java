@@ -124,11 +124,7 @@ public class ClientHandler implements Runnable {
                 userActual.getAgenda().agregarContacto(contacto);
                 actualizarUsuario(userActual);
                 contacto.getUser().getAgenda().agregarContacto(userContacto);
-                /**
-                 * probablemente tenga que updatear el cliente porque
-                 * solo actualizo aca
-                 */
-                actualizarUsuario(contacto.getUser());
+
                 Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, userActual);
                 enviarComando(c);
                 System.out.println("Servidor: Contacto agregado: " + contacto.getNombreUsuario());
@@ -139,7 +135,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void actualizarUsuario(User userActualizado) throws IOException {
+    public void actualizarUsuario(User userActualizado) {
         if (estaEnDirectorio(userActualizado.getNombreUsuario())) {
             directorio.updateUser(userActualizado);
 
@@ -152,13 +148,12 @@ public class ClientHandler implements Runnable {
                 }
             }
 
-//            this.user = userActualizado;
             System.out.println("Servidor: Usuario actualizado: " + userActualizado.getNombreUsuario());
         }
     }
 
     public void enviarComando(Comando comando) throws IOException {
-        objectOutputStream.reset(); // NANI?! atado con alambre
+        objectOutputStream.reset();
         objectOutputStream.writeObject(comando);
         objectOutputStream.flush();
     }
@@ -180,10 +175,6 @@ public class ClientHandler implements Runnable {
                         case ENVIAR_MENSAJE -> {
                             Mensaje msg = (Mensaje) comando.getContenido();
                             enviarMensaje(msg);
-                        }
-
-                        case LISTA_USUARIOS -> {
-
                         }
 
                         case OBTENER_DIRECTORIO -> {
