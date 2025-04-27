@@ -37,7 +37,12 @@ public class Agenda implements Serializable {
         return false;
     }
 
-
+    /**
+     * EN desUSO
+     * @param contactoOriginal
+     * @param contactoActualizado
+     * @return
+     */
     public boolean modificarContactoPorIP(Contacto contactoOriginal, Contacto contactoActualizado) {
         for (int i = 0; i < contactos.size(); i++) {
             Contacto c = contactos.get(i);

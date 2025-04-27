@@ -69,16 +69,13 @@ public class User implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User user)) return false;
-        return Objects.equals(nombreUsuario, user.nombreUsuario) &&
-                Objects.equals(IP, user.IP) &&
-                Objects.equals(puerto, user.puerto);
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(nombreUsuario, user.nombreUsuario);
     }
-
 
     @Override
     public int hashCode() {
-        return Objects.hash(nombreUsuario, IP, puerto);
+        return Objects.hashCode(nombreUsuario);
     }
 }
