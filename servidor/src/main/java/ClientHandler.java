@@ -18,7 +18,8 @@ public class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clientesConectados = new ArrayList<>();
     public static Directorio directorio = new Directorio();
-    private Map<String, List<Mensaje>> mensajesPendientes = new HashMap<>();
+    private static Map<String, List<Mensaje>> mensajesPendientes = new HashMap<>();
+
     private Socket socket;
     private ObjectInputStream objectInputStream; //Entrada
     private ObjectOutputStream objectOutputStream; //Salida
@@ -123,17 +124,11 @@ public class ClientHandler implements Runnable {
              * esto es para agregar el usuario actual al contacto del contacto que quiero agregar
              * para sincronizarlo
              */
-            Contacto userContacto = new Contacto();
-            userContacto.setUser(userActual);
-            userContacto.setNombreUsuario(userActual.getNombreUsuario());
-            userContacto.setAlias(userActual.getNombreUsuario());
-            userContacto.setIP(socket.getInetAddress().getHostAddress());
-            userContacto.setPuerto(socket.getPort());
+            Contacto userContacto = crearContacto(userActual);
 
             if (!userActual.getAgenda().existeContacto(contacto.getUser())) {
                 userActual.getAgenda().agregarContacto(contacto);
                 actualizarUsuario(userActual);
-                contacto.getUser().getAgenda().agregarContacto(userContacto);
 
                 Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, userActual);
                 enviarComando(c);
@@ -143,6 +138,16 @@ public class ClientHandler implements Runnable {
                 enviarComando(c);
             }
         }
+    }
+
+    private Contacto crearContacto(User user) {
+        Contacto userContacto = new Contacto();
+        userContacto.setUser(user);
+        userContacto.setNombreUsuario(user.getNombreUsuario());
+        userContacto.setAlias(user.getNombreUsuario());
+        userContacto.setIP(socket.getInetAddress().getHostAddress());
+        userContacto.setPuerto(socket.getPort());
+        return userContacto;
     }
 
     public void actualizarUsuario(User userActualizado) {
@@ -165,15 +170,25 @@ public class ClientHandler implements Runnable {
     public void enviarMensaje() throws IOException {
         Mensaje mensaje = (Mensaje) comando.getContenido();
         Contacto receptor = mensaje.getReceptor();
+        User emisor = mensaje.getEmisor();
         String nombreContacto = receptor.getNombreUsuario();
 
         if (estaEnDirectorio(nombreContacto)) {
+            emisor.getConversacionCon(receptor).agregarMensaje(mensaje);
+            actualizarUsuario(emisor);
+            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensaje);
+            enviarComando(c);
 
             if (estaConectado(nombreContacto)) {
                 ClientHandler receptorConectado = getClienteConectado(nombreContacto);
                 receptorConectado.recibirMensaje(mensaje);
             } else {
                 mensajesPendientes.computeIfAbsent(nombreContacto, k -> new ArrayList<>()).add(mensaje);
+
+                System.out.println(
+                        "Servidor: Mensaje pendiente - Emisor: "
+                                + mensaje.getEmisor().getNombreUsuario() +
+                                " - Receptor: " + nombreContacto);
             }
         } else {
             Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario" + nombreContacto + " no existe");
@@ -191,12 +206,13 @@ public class ClientHandler implements Runnable {
         User receptor = mensaje.getReceptor().getUser();
         String nombreEmisor = emisor.getNombreUsuario();
 
-        if (!receptor.getAgenda().existeContacto(emisor)) {
-            receptor.getAgenda().agregarContacto(emisor);
-            actualizarUsuario(receptor);
+        if (!userActual.getAgenda().existeContacto(emisor)) {
+            userActual.getAgenda().agregarContacto(emisor);
         }
 
-        mensaje.getReceptor().setUser(userActual);
+        userActual.getConversacionCon(emisor).agregarMensaje(mensaje);
+        Contacto contacto = crearContacto(userActual);
+        mensaje.setReceptor(contacto);
         Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
         enviarComando(c);
     }

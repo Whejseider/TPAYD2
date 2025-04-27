@@ -1,13 +1,19 @@
 package controller;
 
+import connection.Cliente;
 import view.Messenger;
 
-public class ControllerManager  {
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+public class ControllerManager {
 
     private static ControllerManager instance;
     private Messenger vista;
 
     private ControllerManager() {
+
     }
 
     public static ControllerManager getInstance() {
@@ -17,6 +23,7 @@ public class ControllerManager  {
         return instance;
     }
 
+
     public Messenger getVista() {
         return vista;
     }
@@ -24,4 +31,9 @@ public class ControllerManager  {
     public void setVista(Messenger vista) {
         this.vista = vista;
     }
+
+    public void cerrarTodo(){
+        Cliente.getInstance().cerrarTodo();
+    }
+
 }

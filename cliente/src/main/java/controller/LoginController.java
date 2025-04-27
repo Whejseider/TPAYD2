@@ -16,7 +16,6 @@ import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 public class LoginController implements ActionListener, AppStateListener {
     private Login vista;
@@ -121,10 +120,11 @@ public class LoginController implements ActionListener, AppStateListener {
 
     @Override
     public void onLoginSuccess(User user) {
-        cleanup();
+        removeListener();
         Sesion.getInstance().setUsuarioActual(user);
         Toast.show(vista, Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
+        FormManager.removeLogin();
     }
 
     @Override
@@ -142,12 +142,12 @@ public class LoginController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onNewMessageReceived(Mensaje mensaje) {
+    public void onMessageReceivedSuccess(Mensaje mensaje) {
 
     }
 
     @Override
-    public void onUserListUpdated(List<User> userList) {
+    public void onMessageReceivedFailure(String s) {
 
     }
 
@@ -171,10 +171,28 @@ public class LoginController implements ActionListener, AppStateListener {
 
     }
 
-    public void cleanup() {
+    @Override
+    public void onSendMessageSuccess(Mensaje contenido) {
+
+    }
+
+    @Override
+    public void onSendMessageFailure(String s) {
+
+    }
+
+    public void removeListener() {
         if (this.mainController != null) {
             this.mainController.removeAppStateListener(this);
             System.out.println("LoginController desregistrado como listener.");
         }
+    }
+
+    public void addListener(){
+        if(this.mainController == null){
+            this.mainController = MainController.getInstance();
+        }
+        this.mainController.addAppStateListener(this);
+        System.out.println("LoginController registrado como listener.");
     }
 }

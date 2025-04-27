@@ -10,10 +10,10 @@ public class User implements Serializable {
     private String IP = "127.0.0.1"; //TODO
     private Integer puerto;
     private Agenda agenda;
-    private Map<Contacto, Conversacion> conversaciones;
+    private Map<Contacto, Conversacion> conversacion;
 
     public User() {
-        this.conversaciones = new HashMap<>();
+        this.conversacion = new HashMap<>();
         this.agenda = new Agenda();
     }
 
@@ -49,12 +49,22 @@ public class User implements Serializable {
         this.agenda = agenda;
     }
 
-    public Map<Contacto, Conversacion> getConversaciones() {
-        return conversaciones;
+    public Map<Contacto, Conversacion> getConversacion() {
+        return conversacion;
     }
 
     public Conversacion getConversacionCon(Contacto contacto) {
-        return this.conversaciones.computeIfAbsent(contacto, k -> new Conversacion(contacto));
+        return this.conversacion.computeIfAbsent(contacto, k -> new Conversacion(contacto));
+    }
+
+    public Conversacion getConversacionCon(User user) {
+        Contacto c = new Contacto(); //Atado con alambre
+        c.setUser(user);
+        c.setIP(user.getIP());
+        c.setPuerto(user.getPuerto());
+        c.setNombreUsuario(user.getNombreUsuario());
+        c.setAlias(user.getNombreUsuario());
+        return this.conversacion.computeIfAbsent(c, k -> new Conversacion(c));
     }
 
 

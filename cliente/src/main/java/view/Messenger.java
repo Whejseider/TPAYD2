@@ -33,6 +33,14 @@ public class Messenger extends JFrame implements IVista<ControllerManager> {
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
         setVisible(true);
+
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                controlador.cerrarTodo();
+            }
+        });
     }
 
     @Override
@@ -44,9 +52,9 @@ public class Messenger extends JFrame implements IVista<ControllerManager> {
         return messengerPanel;
     }
 
-
-
     public ControllerManager getControlador() {
         return controlador;
     }
+
+
 }

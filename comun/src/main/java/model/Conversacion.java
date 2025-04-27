@@ -3,6 +3,7 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Conversacion implements Serializable {
     private Contacto contacto;
@@ -36,5 +37,19 @@ public class Conversacion implements Serializable {
 
     public void agregarMensaje(Mensaje mensaje) {
         this.mensajes.add(mensaje);
+    }
+
+
+    //TODO VERIFICAR
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Conversacion that = (Conversacion) o;
+        return Objects.equals(contacto, that.contacto);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(contacto);
     }
 }

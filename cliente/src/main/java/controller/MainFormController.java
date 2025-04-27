@@ -1,5 +1,6 @@
 package controller;
 
+import connection.Cliente;
 import connection.Sesion;
 import interfaces.AppStateListener;
 import model.Directorio;
@@ -9,8 +10,6 @@ import model.User;
 import view.manager.ErrorManager;
 import view.system.FormManager;
 import view.system.MainForm;
-
-import java.util.List;
 
 public class MainFormController implements AppStateListener {
     private MainForm vista;
@@ -40,6 +39,7 @@ public class MainFormController implements AppStateListener {
     @Override
     public void onLogoutSuccess() {
         Sesion.getInstance().setUsuarioActual(null);
+        Cliente.getInstance().cerrarConexion();
         FormManager.showLogin();
     }
 
@@ -51,12 +51,12 @@ public class MainFormController implements AppStateListener {
     }
 
     @Override
-    public void onNewMessageReceived(Mensaje mensaje) {
+    public void onMessageReceivedSuccess(Mensaje mensaje) {
 
     }
 
     @Override
-    public void onUserListUpdated(List<User> userList) {
+    public void onMessageReceivedFailure(String s) {
 
     }
 
@@ -82,6 +82,16 @@ public class MainFormController implements AppStateListener {
 
     @Override
     public void onAddContactFailure(String s) {
+
+    }
+
+    @Override
+    public void onSendMessageSuccess(Mensaje contenido) {
+
+    }
+
+    @Override
+    public void onSendMessageFailure(String s) {
 
     }
 }

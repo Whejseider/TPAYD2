@@ -45,7 +45,7 @@ public class Cliente {
 //            objectOutputStream.writeObject(c);
 //            objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -57,7 +57,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -67,7 +67,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
 
         }
     }
@@ -78,7 +78,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -88,7 +88,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -98,7 +98,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -108,7 +108,7 @@ public class Cliente {
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
         } catch (IOException e) {
-            cerrarTodo(socket, objectInputStream, objectOutputStream);
+            cerrarTodo();
         }
     }
 
@@ -125,13 +125,30 @@ public class Cliente {
                     respuesta = (Comando) objectInputStream.readObject();
                     clientListener.onResponse(respuesta);
                 } catch (Exception e) {
-                    cerrarTodo(socket, objectInputStream, objectOutputStream);
+                    cerrarTodo();
                 }
             }
         }).start();
     }
 
-    private void cerrarTodo(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public void cerrarConexion() {
+        try {
+
+            if (objectInputStream != null) {
+                objectInputStream.close();
+            }
+
+            if (objectOutputStream != null) {
+                objectOutputStream.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    public void cerrarTodo() {
         try {
 
             if (objectInputStream != null) {

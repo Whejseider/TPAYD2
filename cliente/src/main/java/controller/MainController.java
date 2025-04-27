@@ -84,24 +84,6 @@ public class MainController implements ClientListener {
         });
     }
 
-    private void notifyNewMessageReceived(Mensaje mensaje) {
-        SwingUtilities.invokeLater(() -> {
-            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
-            for (AppStateListener listener : copiaListeners) {
-                listener.onNewMessageReceived(mensaje);
-            }
-        });
-    }
-
-    private void notifyUserListUpdated(List<User> userList) {
-        SwingUtilities.invokeLater(() -> {
-            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
-            for (AppStateListener listener : copiaListeners) {
-                listener.onUserListUpdated(userList);
-            }
-        });
-    }
-
     private void notifyRegistrationSuccess() {
         SwingUtilities.invokeLater(() -> {
             List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
@@ -147,6 +129,42 @@ public class MainController implements ClientListener {
         });
     }
 
+    private void notifySendMessageSuccess(Mensaje contenido) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onSendMessageSuccess(contenido);
+            }
+        });
+    }
+
+    private void notifySendMessageFailure(String s) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onSendMessageFailure(s);
+            }
+        });
+    }
+
+    private void notifyMessageReceivedSuccess(Mensaje mensaje) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onMessageReceivedSuccess(mensaje);
+            }
+        });
+    }
+
+    private void notifyMessageReceivedFailure(String s) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onMessageReceivedFailure(s);
+            }
+        });
+    }
+
     /**
      * ClientListener
      *
@@ -186,14 +204,19 @@ public class MainController implements ClientListener {
                     break;
 
                 case ENVIAR_MENSAJE:
-                    if (comando.getContenido() instanceof Mensaje) {
-                        Mensaje msg = (Mensaje) comando.getContenido();
-                        System.out.println("DEBUG: Mensaje recibido: " + msg.getContenido());
-                        notifyNewMessageReceived(msg);
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Mensaje) {
+                        notifySendMessageSuccess((Mensaje) comando.getContenido());
                     } else {
-                        System.err.println("ERROR: Contenido inesperado para ENVIAR_MENSAJE: " + comando.getContenido());
+                        notifySendMessageFailure((String) comando.getContenido());
                     }
                     break;
+
+                case RECIBIR_MENSAJE:
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Mensaje) {
+                        notifyMessageReceivedSuccess((Mensaje) comando.getContenido());
+                    } else {
+                        notifyMessageReceivedFailure((String) comando.getContenido());
+                    }
 
                 case AGREGAR_CONTACTO:
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof User) {
@@ -203,9 +226,9 @@ public class MainController implements ClientListener {
                     }
 
                 case OBTENER_DIRECTORIO:
-                if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Directorio) {
-                    notifyDirectoryInfoReceived((Directorio) comando.getContenido());
-                }
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Directorio) {
+                        notifyDirectoryInfoReceived((Directorio) comando.getContenido());
+                    }
                     break;
 
                 default:

@@ -5,10 +5,7 @@ import model.Mensaje;
 import model.TipoRespuesta;
 import model.User;
 
-import java.util.List;
-
 /**
- * Tengo que usar todo español o todo ingles, preferentemente español
  * Desde aca gestionamos las respuestas del servidor
  * Probablemente habria que mover los listener de conexiones a uno aparte
  */
@@ -28,10 +25,10 @@ public interface AppStateListener {
     void onLogoutFailure(String s);
 
     //Nuevo mensajeRecibido
-    void onNewMessageReceived(Mensaje mensaje);
+    void onMessageReceivedSuccess(Mensaje mensaje);
 
     //No se todavia
-    void onUserListUpdated(List<User> userList);
+    void onMessageReceivedFailure(String s);
 
     //SIGNUP
     //TODO AGREGAR STRING
@@ -46,4 +43,8 @@ public interface AppStateListener {
     void onAddContactSuccess(User user);
 
     void onAddContactFailure(String s);
+
+    void onSendMessageSuccess(Mensaje contenido);
+
+    void onSendMessageFailure(String s);
 }

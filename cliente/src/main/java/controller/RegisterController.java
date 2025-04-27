@@ -14,7 +14,6 @@ import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class RegisterController implements ActionListener, AppStateListener {
@@ -65,12 +64,12 @@ public class RegisterController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onNewMessageReceived(Mensaje mensaje) {
+    public void onMessageReceivedSuccess(Mensaje mensaje) {
 
     }
 
     @Override
-    public void onUserListUpdated(List<User> userList) {
+    public void onMessageReceivedFailure(String s) {
 
     }
 
@@ -97,6 +96,16 @@ public class RegisterController implements ActionListener, AppStateListener {
 
     @Override
     public void onAddContactFailure(String s) {
+
+    }
+
+    @Override
+    public void onSendMessageSuccess(Mensaje contenido) {
+
+    }
+
+    @Override
+    public void onSendMessageFailure(String s) {
 
     }
 

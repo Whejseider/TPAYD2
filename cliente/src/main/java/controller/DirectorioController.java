@@ -11,7 +11,6 @@ import view.forms.other.Card;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 public class DirectorioController implements AppStateListener, ActionListener {
 
@@ -115,12 +114,12 @@ public class DirectorioController implements AppStateListener, ActionListener {
     }
 
     @Override
-    public void onNewMessageReceived(Mensaje mensaje) {
+    public void onMessageReceivedSuccess(Mensaje mensaje) {
 
     }
 
     @Override
-    public void onUserListUpdated(List<User> userList) {
+    public void onMessageReceivedFailure(String s) {
 
     }
 
@@ -151,6 +150,16 @@ public class DirectorioController implements AppStateListener, ActionListener {
     @Override
     public void onAddContactFailure(String s) {
         Toast.show(vista, Toast.Type.ERROR, s);
+    }
+
+    @Override
+    public void onSendMessageSuccess(Mensaje contenido) {
+
+    }
+
+    @Override
+    public void onSendMessageFailure(String s) {
+
     }
 
 }

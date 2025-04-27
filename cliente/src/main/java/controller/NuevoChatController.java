@@ -12,17 +12,14 @@ import java.awt.event.ActionListener;
 
 public class NuevoChatController implements ActionListener, ListSelectionListener {
     private NuevoChat vista;
-    private User user = Sesion.getInstance().getUsuarioActual();
     private Contacto contacto;
     private MessengerPanelController messengerPanelController;
 
     public NuevoChatController(NuevoChat vista) {
         this.vista = vista;
-        this.user = user;
-        this.messengerPanelController = messengerPanelController;
         this.vista.getList1().addListSelectionListener(this);
 
-        for (Contacto c: this.user.getAgenda().getContactos()){
+        for (Contacto c: Sesion.getInstance().getUsuarioActual().getAgenda().getContactos()){
             this.vista.agregarContacto(c);
         }
     }

@@ -167,6 +167,10 @@ public class FormManager {
         return login;
     }
 
+    public static void removeLogin(){
+        login = null;
+    }
+
     public static void showAbout() {
         ModalDialog.showModal(frame, new SimpleModalBorder(new About(), "Acerca de"),
                 ModalDialog.createOption().setAnimationEnabled(false)

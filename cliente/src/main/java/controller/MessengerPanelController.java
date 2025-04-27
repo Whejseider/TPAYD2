@@ -2,10 +2,9 @@ package controller;
 
 import connection.Cliente;
 import connection.Sesion;
-import model.Contacto;
-import model.Conversacion;
-import model.Mensaje;
-import model.User;
+import interfaces.AppStateListener;
+import model.*;
+import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
 
@@ -15,11 +14,12 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MessengerPanelController implements ActionListener, ListSelectionListener {
+public class MessengerPanelController implements ActionListener, ListSelectionListener, AppStateListener {
     private MessengerPanel vista;
-    private Cliente cliente;
+    private Cliente cliente = Cliente.getInstance();
     private User user = Sesion.getInstance().getUsuarioActual();
     private Contacto contactoActual;
+    private MainController mainController = MainController.getInstance();
 
     public MessengerPanelController(MessengerPanel vista) {
         this.vista = vista;
@@ -27,6 +27,8 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         this.vista.getBtnEnviar().addActionListener(this);
         this.vista.getBtnNuevoChat().addActionListener(this);
         this.vista.getListChat().addListSelectionListener(this);
+
+        this.mainController.addAppStateListener(this);
     }
 
 
@@ -60,27 +62,18 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
     }
 
     public void procesaMensajeEntrante(Mensaje mensaje){
-        User receptor = this.getUser();
-        mensaje.getReceptor().setUser(receptor);
+
+        User receptor = mensaje.getReceptor().getUser();
+        Sesion.getInstance().setUsuarioActual(receptor); // Actualizo el usuario?
+        this.user = Sesion.getInstance().getUsuarioActual(); // Y la variable local
 
         User emisor = mensaje.getEmisor();
-        receptor.setNombreUsuario(this.getUser().getNombreUsuario()); //PORQUE?
 
         Contacto contacto = receptor.getAgenda().getContactoPorUsuario(emisor);
 
-        if (contacto == null) {
-            contacto = new Contacto();
-            contacto.setUser(emisor);
-            contacto.setNombreUsuario(emisor.getNombreUsuario());
-            contacto.setAlias(emisor.getNombreUsuario());
-            contacto.setIP(emisor.getIP());
-            contacto.setPuerto(emisor.getPuerto());
-            receptor.getAgenda().agregarContacto(contacto);
-        }
-
+        //Agrega la conversacion a la vista
         Conversacion conversacion = receptor.getConversacionCon(contacto);
         this.getVista().agregarConversacion(conversacion);
-        conversacion.agregarMensaje(mensaje);
 
         if (contacto.equals(this.getContactoActual())) {
             this.recibirMensaje(mensaje);
@@ -145,7 +138,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
             Mensaje mensaje = new Mensaje(contenido, this.user, contactoActual);
 
-//            cliente.enviarMensaje(mensaje);
+            cliente.enviarMensaje(mensaje);
 
             Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
 
@@ -171,6 +164,9 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
     public void enviarMensaje(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
+            //TODO puede que haya otra forma mejor
+            Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
+            this.user = Sesion.getInstance().getUsuarioActual();
             vista
                     .getTxtAreaConversacion()
                     .append("\t\t\tYo: " + mensaje.getContenido() + "\n" + "\t\t\t" + mensaje.getTiempoFormateado() + "\n");
@@ -188,4 +184,73 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
     }
 
+    @Override
+    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
+
+    }
+
+    @Override
+    public void onLoginSuccess(User user) {
+
+    }
+
+    @Override
+    public void onLoginFailure(String s) {
+
+    }
+
+    @Override
+    public void onLogoutSuccess() {
+
+    }
+
+    @Override
+    public void onLogoutFailure(String s) {
+
+    }
+
+    @Override
+    public void onMessageReceivedSuccess(Mensaje mensaje) {
+        procesaMensajeEntrante(mensaje);
+    }
+
+    @Override
+    public void onMessageReceivedFailure(String s) {
+        Toast.show(vista, Toast.Type.ERROR, s);
+    }
+
+    @Override
+    public void onRegistrationSuccess() {
+
+    }
+
+    @Override
+    public void onRegistrationFailure(String s) {
+
+    }
+
+    @Override
+    public void onDirectoryInfoReceived(Directorio directorio) {
+
+    }
+
+    @Override
+    public void onAddContactSuccess(User user) {
+
+    }
+
+    @Override
+    public void onAddContactFailure(String s) {
+
+    }
+
+    @Override
+    public void onSendMessageSuccess(Mensaje mensaje) {
+        enviarMensaje(mensaje);
+    }
+
+    @Override
+    public void onSendMessageFailure(String s) {
+        Toast.show(vista, Toast.Type.ERROR, s);
+    }
 }
