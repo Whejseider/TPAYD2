@@ -15,3 +15,6 @@ Un par de erroress al cambiar de vistas al inicio en la app
 Asi como el cerrar Cesion
 
 Actualizar al usuario contacto, que alguien lo agrego (YO AGREGO UN CONTACTO, EL SERVER TIENE QUE ACTUALIZAR A ESE CONTACTO O ALGO ASI, O CAPAZ AL MANDARLE UN MSJ NO SE)
+
+Y cosas no tan urgentes como terminar de adaptar y crear controllers, modular más, abstraer lo que es la conexión de las acciones del usuario
+ejemplo : en el servidor ClientHandler manejo todo, debería de separarlo en capas 
