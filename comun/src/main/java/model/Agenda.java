@@ -19,6 +19,16 @@ public class Agenda implements Serializable {
         this.contactos.add(contacto);
     }
 
+    public void agregarContacto(User user){
+        Contacto c = new Contacto();
+        c.setUser(user);
+        c.setNombreUsuario(user.getNombreUsuario());
+        c.setIP(user.getIP());
+        c.setPuerto(user.getPuerto());
+        c.setAlias(user.getNombreUsuario());
+        this.contactos.add(c);
+    }
+
     public Contacto getContactoPorUsuario(User user) {
         for (Contacto c : contactos) {
             if (c.getNombreUsuario().equals(user.getNombreUsuario())) {
