@@ -156,7 +156,7 @@ public class FormSetting extends Form {
         JPanel panel = new JPanel(new MigLayout());
         panel.setBorder(new TitledBorder("Opción Modal Predeterminada"));
         JCheckBox chAnimation = new JCheckBox("Animación activada");
-        JCheckBox chCloseOnPressedEscape = new JCheckBox("Close on pressed escape");
+        JCheckBox chCloseOnPressedEscape = new JCheckBox("Cerrar al presionar la tecla Escape");
         chAnimation.setSelected(ModalDialog.getDefaultOption().isAnimationEnabled());
         chCloseOnPressedEscape.setSelected(ModalDialog.getDefaultOption().isCloseOnPressedEscape());
 

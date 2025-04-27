@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import controller.NuevoContactoController;
 import interfaces.IVista;
 import net.miginfocom.swing.MigLayout;
-import utils.SystemForm;
 
 import javax.swing.*;
 import java.awt.*;

@@ -6,7 +6,8 @@ import raven.modal.option.Option;
 import utils.SystemForm;
 import view.component.EmptyModalBorder;
 import view.component.FormSearchPanel;
-import view.forms.*;
+import view.forms.FormSetting;
+import view.forms.MessengerPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;

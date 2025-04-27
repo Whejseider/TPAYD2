@@ -1,6 +1,9 @@
 package interfaces;
 
-import model.*;
+import model.Directorio;
+import model.Mensaje;
+import model.TipoRespuesta;
+import model.User;
 
 import java.util.List;
 

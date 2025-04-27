@@ -55,9 +55,9 @@ public class About extends JPanel {
 
     private String getDescriptionText() {
         String text = "Este es un proyecto para la materia Análisis y Diseño de Sistemas II, " +
-                "hecho con las librerías FlatLaf Look and Feel y MigLayout library.<br>" +
+                "hecho con las librerías FlatLaf Look and Feel y MigLayout library.<br><br>" +
                 "Se basa en una conexión por socket cliente-servidor, con el servidor centralizado.<br><br>" +
-                "Para el código de fuente, visitar <a href=\"https://github.com/DJ-Raven/swing-modal-dialog/\">GitHub TPAYD2.</a><br>" +
+                "Para el código de fuente, visitar <a href=\"https://github.com/DJ-Raven/swing-modal-dialog/\">GitHub TPAYD2.</a><br><br>" +
                 "Agustín Cerdá - Manuel Gracia - Franco Vallone<br>";
 
         return text;

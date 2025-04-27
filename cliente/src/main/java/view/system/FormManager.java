@@ -13,11 +13,11 @@ import raven.modal.Drawer;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import utils.UndoRedo;
+import view.component.About;
 import view.drawer.MenuDrawer;
 import view.forms.FormError;
 import view.forms.FormRegister;
 import view.forms.Login;
-import view.component.About;
 import view.forms.MessengerPanel;
 
 import javax.swing.*;

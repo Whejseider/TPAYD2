@@ -4,9 +4,6 @@ import javax.swing.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 
-/**
- * @author Raven
- */
 public class MemoryBar extends JProgressBar {
 
     private Timer timer;

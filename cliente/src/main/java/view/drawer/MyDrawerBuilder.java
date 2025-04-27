@@ -18,7 +18,9 @@ import raven.modal.drawer.simple.footer.LightDarkButtonFooter;
 import raven.modal.drawer.simple.footer.SimpleFooterData;
 import raven.modal.drawer.simple.header.SimpleHeaderData;
 import raven.modal.option.Option;
-import view.forms.*;
+import view.forms.FormDirectorio;
+import view.forms.FormSetting;
+import view.forms.MessengerPanel;
 import view.system.AllForms;
 import view.system.Form;
 import view.system.FormManager;
@@ -44,7 +46,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
 
     @Override
     public SimpleHeaderData getSimpleHeaderData() {
-        AvatarIcon icon = new AvatarIcon(new FlatSVGIcon("demo/drawer/image/avatar_male.svg", 100, 100), 50, 50, 3.5f);
+        AvatarIcon icon = new AvatarIcon(new FlatSVGIcon("fv/drawer/image/avatar_male.svg", 100, 100), 50, 50, 3.5f);
         icon.setType(AvatarIcon.Type.MASK_SQUIRCLE);
         icon.setBorder(2, 2);
 
@@ -146,7 +148,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
         });
 
         simpleMenuOption.setMenus(items)
-                .setBaseIconPath("demo/drawer/icon")
+                .setBaseIconPath("fv/drawer/icon")
                 .setIconScale(0.45f);
 
         return simpleMenuOption;

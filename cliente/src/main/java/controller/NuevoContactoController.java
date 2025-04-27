@@ -1,9 +1,9 @@
 package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import connection.Sesion;
 import model.Contacto;
 import model.User;
-import connection.Sesion;
 import view.forms.NuevoContacto;
 
 import java.awt.event.ActionEvent;

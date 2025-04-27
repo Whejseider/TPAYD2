@@ -5,9 +5,6 @@ import com.formdev.flatlaf.util.UIScale;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * @author Raven
- */
 public class ResponsiveLayout implements LayoutManager {
 
     public JustifyContent getJustifyContent() {

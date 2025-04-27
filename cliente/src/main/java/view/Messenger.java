@@ -3,8 +3,8 @@ package view;
 import com.formdev.flatlaf.FlatClientProperties;
 import controller.ControllerManager;
 import interfaces.IVista;
-import view.forms.MessengerPanel;
 import view.drawer.MyDrawerBuilder;
+import view.forms.MessengerPanel;
 import view.system.FormManager;
 
 import javax.swing.*;

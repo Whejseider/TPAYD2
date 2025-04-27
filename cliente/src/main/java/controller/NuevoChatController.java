@@ -1,8 +1,8 @@
 package controller;
 
+import connection.Sesion;
 import model.Contacto;
 import model.User;
-import connection.Sesion;
 import view.NuevoChat;
 
 import javax.swing.event.ListSelectionEvent;

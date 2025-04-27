@@ -11,7 +11,7 @@ import view.system.Form;
 import javax.swing.*;
 import java.awt.*;
 
-@SystemForm(name = "MessengerPanel", description = "chat interface", tags = {"chat"})
+@SystemForm(name = "Chats", description = "Muestra los chats activos y el crear un nuevo chat", tags = {"chat"})
 public class MessengerPanel extends Form implements IVista<MessengerPanelController> {
     private JPanel pane;
     private JPanel panelOpciones;

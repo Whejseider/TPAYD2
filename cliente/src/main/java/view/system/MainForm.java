@@ -30,10 +30,10 @@ public class MainForm extends JPanel {
     private JPanel createHeader() {
         JPanel panel = new JPanel(new MigLayout("insets 3", "[]push[]push", "[fill]"));
         JToolBar toolBar = new JToolBar();
-        JButton buttonDrawer = new JButton(new FlatSVGIcon("demo/icons/menu.svg", 0.5f));
-        buttonUndo = new JButton(new FlatSVGIcon("demo/icons/undo.svg", 0.5f));
-        buttonRedo = new JButton(new FlatSVGIcon("demo/icons/redo.svg", 0.5f));
-        buttonRefresh = new JButton(new FlatSVGIcon("demo/icons/refresh.svg", 0.5f));
+        JButton buttonDrawer = new JButton(new FlatSVGIcon("fv/icons/menu.svg", 0.5f));
+        buttonUndo = new JButton(new FlatSVGIcon("fv/icons/undo.svg", 0.5f));
+        buttonRedo = new JButton(new FlatSVGIcon("fv/icons/redo.svg", 0.5f));
+        buttonRefresh = new JButton(new FlatSVGIcon("fv/icons/refresh.svg", 0.5f));
 
         // style
         buttonDrawer.putClientProperty(FlatClientProperties.STYLE, "" +
@@ -88,7 +88,7 @@ public class MainForm extends JPanel {
         JLabel lbJava = new JLabel(String.format(st, java));
         lbJava.putClientProperty(FlatClientProperties.STYLE, "" +
                 "foreground:$Label.disabledForeground;");
-        lbJava.setIcon(new SVGIconUIColor("demo/icons/java.svg", 1f, "Label.disabledForeground"));
+        lbJava.setIcon(new SVGIconUIColor("fv/icons/java.svg", 1f, "Label.disabledForeground"));
         panel.add(lbJava);
 
         panel.add(new JSeparator(JSeparator.VERTICAL));

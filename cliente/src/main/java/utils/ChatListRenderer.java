@@ -1,6 +1,5 @@
 package utils;
 
-import model.Contacto;
 import model.Conversacion;
 
 import javax.swing.*;

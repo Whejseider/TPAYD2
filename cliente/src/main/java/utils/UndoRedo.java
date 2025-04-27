@@ -3,10 +3,6 @@ package utils;
 import java.util.Iterator;
 import java.util.Stack;
 
-/**
- * @param <E>
- * @author Raven
- */
 public class UndoRedo<E> implements Iterable<E> {
 
     private final Stack<E> stack1;

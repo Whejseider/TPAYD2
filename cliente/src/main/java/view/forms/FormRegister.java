@@ -1,7 +1,6 @@
 package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import controller.LoginController;
 import controller.RegisterController;
 import interfaces.IVista;
 import net.miginfocom.swing.MigLayout;

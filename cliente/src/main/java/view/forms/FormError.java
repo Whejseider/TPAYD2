@@ -6,12 +6,10 @@ import connection.ConnectionManager;
 import model.TipoRespuesta;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.Toast;
-import connection.Cliente;
 import view.system.Form;
 import view.system.FormManager;
 
 import javax.swing.*;
-import java.io.IOException;
 
 public class FormError extends Form {
 
@@ -25,7 +23,7 @@ public class FormError extends Form {
         JLabel labelDescription = new JLabel("Perdón, algo salio mal.");
         labelMessage.putClientProperty(FlatClientProperties.STYLE, "" +
                 "font:bold +10");
-        FlatSVGIcon icon = new FlatSVGIcon("demo/icons/server_error.svg", 2f);
+        FlatSVGIcon icon = new FlatSVGIcon("fv/icons/server_error.svg", 2f);
         add(new JLabel(icon));
         panel = new JPanel(new MigLayout("wrap", "", "[]3[]10[]"));
         panel.add(labelMessage);

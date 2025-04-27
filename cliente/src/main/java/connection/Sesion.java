@@ -2,6 +2,9 @@ package connection;
 
 import model.User;
 
+/**
+ * De aca controlo la sesión del usuario para que las demás clases puedan acceder siempre
+ */
 public class Sesion {
     private User usuarioActual;
     private static Sesion instance;

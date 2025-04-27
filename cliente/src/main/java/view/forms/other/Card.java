@@ -2,13 +2,11 @@ package view.forms.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import model.User;
 import net.miginfocom.swing.MigLayout;
 import raven.extras.AvatarIcon;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
-import java.util.function.Consumer;
 
 public class Card extends JPanel {
     private JLabel title;
@@ -45,7 +43,7 @@ public class Card extends JPanel {
         JPanel header = new JPanel(new MigLayout("fill,insets 0", "[fill]", "[top]"));
         header.putClientProperty(FlatClientProperties.STYLE, "" +
                 "background:null");
-        JLabel label = new JLabel(new AvatarIcon(new FlatSVGIcon("demo/drawer/image/avatar_male.svg", 100, 100), 50, 50, 3.5f));
+        JLabel label = new JLabel(new AvatarIcon(new FlatSVGIcon("fv/drawer/image/avatar_male.svg", 100, 100), 50, 50, 3.5f));
         header.add(label);
         return header;
     }

@@ -1,6 +1,8 @@
 import model.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -161,10 +163,11 @@ public class ClientHandler implements Runnable {
         objectOutputStream.flush();
     }
 
-
+    /**
+     * Ir agregando los casos que falta, e ir sacando los que no van (del enum tambien)
+     */
     @Override
     public void run() {
-        // Lógica del hilo para recibir y reenviar mensajes
         Object objetoRecibido;
 
         while (socket.isConnected()) {

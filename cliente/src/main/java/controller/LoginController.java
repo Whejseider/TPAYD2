@@ -1,13 +1,17 @@
 package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import connection.Cliente;
 import connection.Sesion;
 import interfaces.AppStateListener;
-import model.*;
-import connection.Cliente;
+import model.Directorio;
+import model.Mensaje;
+import model.TipoRespuesta;
+import model.User;
 import raven.modal.Toast;
-import view.forms.Login;
 import view.Messenger;
+import view.forms.Login;
+import view.manager.ErrorManager;
 import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
@@ -85,9 +89,7 @@ public class LoginController implements ActionListener, AppStateListener {
         }
 
         if (e.getSource() == vista.getBtnSignUp()) {
-//            mainController.showFormRegister();
             FormManager.showRegister();
-
         }
     }
 

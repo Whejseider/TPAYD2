@@ -15,7 +15,7 @@ public class PasswordRevealIcon implements AnimatedIcon {
     private final Color color;
 
     public PasswordRevealIcon() {
-        this(new FlatSVGIcon("demo/icons/eye.svg", 0.75f),
+        this(new FlatSVGIcon("fv/icons/eye.svg", 0.75f),
                 UIManager.getColor("PasswordField.revealIconColor"), 3);
     }
 

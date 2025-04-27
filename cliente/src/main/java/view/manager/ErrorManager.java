@@ -1,4 +1,4 @@
-package model;
+package view.manager;
 
 import raven.modal.Toast;
 import view.system.FormManager;

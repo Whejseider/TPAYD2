@@ -1,11 +1,10 @@
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.util.FontUtils;
 import controller.ControllerManager;
 import utils.Preferences;
-import view.forms.Login;
 import view.Messenger;
+import view.forms.Login;
 
 import javax.swing.*;
 import java.awt.*;
