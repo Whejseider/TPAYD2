@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Emprolijar, quizas mover tema de conexiones a otro modulo, y manejo de usuario a otro y asi<br>
@@ -15,6 +18,7 @@ public class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clientesConectados = new ArrayList<>();
     public static Directorio directorio = new Directorio();
+    private Map<String, List<Mensaje>> mensajesPendientes = new HashMap<>();
     private Socket socket;
     private ObjectInputStream objectInputStream; //Entrada
     private ObjectOutputStream objectOutputStream; //Salida
@@ -48,6 +52,11 @@ public class ClientHandler implements Runnable {
                 u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
     }
 
+    private static ClientHandler getClienteConectado(String nombreUsuario) {
+        return clientesConectados.stream().filter(
+                c -> c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
+    }
+
     private void iniciarSesion() throws IOException {
         User user = (User) comando.getContenido();
         if (!estaEnDirectorio(user.getNombreUsuario())) {
@@ -61,6 +70,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("Servidor: Usuario conectado: " + user.getNombreUsuario());
                 Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, userActual);
                 enviarComando(c);
+                enviarMensajesPendientes();
             } else {
                 System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
                 Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Ya hay un usuario conectado con ese nombre");
@@ -128,7 +138,7 @@ public class ClientHandler implements Runnable {
                 Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, userActual);
                 enviarComando(c);
                 System.out.println("Servidor: Contacto agregado: " + contacto.getNombreUsuario());
-            } else{
+            } else {
                 Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Ya existe ese contacto en la agenda");
                 enviarComando(c);
             }
@@ -149,6 +159,63 @@ public class ClientHandler implements Runnable {
             }
 
             System.out.println("Servidor: Usuario actualizado: " + userActualizado.getNombreUsuario());
+        }
+    }
+
+    public void enviarMensaje() throws IOException {
+        Mensaje mensaje = (Mensaje) comando.getContenido();
+        Contacto receptor = mensaje.getReceptor();
+        String nombreContacto = receptor.getNombreUsuario();
+
+        if (estaEnDirectorio(nombreContacto)) {
+
+            if (estaConectado(nombreContacto)) {
+                ClientHandler receptorConectado = getClienteConectado(nombreContacto);
+                receptorConectado.recibirMensaje(mensaje);
+            } else {
+                mensajesPendientes.computeIfAbsent(nombreContacto, k -> new ArrayList<>()).add(mensaje);
+            }
+        } else {
+            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario" + nombreContacto + " no existe");
+            enviarComando(c);
+        }
+    }
+
+    /**
+     * Al recibir un mensaje, verifico
+     * @param mensaje
+     * @throws IOException
+     */
+    public void recibirMensaje(Mensaje mensaje) throws IOException {
+        User emisor = mensaje.getEmisor();
+        User receptor = mensaje.getReceptor().getUser();
+        String nombreEmisor = emisor.getNombreUsuario();
+
+        if (!receptor.getAgenda().existeContacto(emisor)) {
+            receptor.getAgenda().agregarContacto(emisor);
+            actualizarUsuario(receptor);
+        }
+
+        mensaje.getReceptor().setUser(userActual);
+        Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
+        enviarComando(c);
+    }
+
+    /**
+     * Método invocado al iniciar sesión para recibir los mensajes pendientes si tuviera alguno
+     * @throws IOException
+     */
+    public void enviarMensajesPendientes() throws IOException {
+        String nombreUsuario = userActual.getNombreUsuario();
+        // Si existe la clave en el MAP, la sacamos del map y el contenido se almacena en mensajes!!
+        List<Mensaje> mensajes = mensajesPendientes.remove(nombreUsuario);
+
+        if (mensajes != null && !mensajes.isEmpty()) {
+            for (Mensaje mensaje : mensajes) {
+                recibirMensaje(mensaje);
+            }
+        } else {
+            System.out.println("Servidor: No hay mensajes pendientes para el usuario: " + nombreUsuario);
         }
     }
 
@@ -173,8 +240,11 @@ public class ClientHandler implements Runnable {
                     switch (comando.getTipoSolicitud()) {
 
                         case ENVIAR_MENSAJE -> {
-                            Mensaje msg = (Mensaje) comando.getContenido();
-                            enviarMensaje(msg);
+                            enviarMensaje();
+                        }
+
+                        case RECIBIR_MENSAJE -> {
+
                         }
 
                         case OBTENER_DIRECTORIO -> {
@@ -202,27 +272,6 @@ public class ClientHandler implements Runnable {
             } catch (IOException | ClassNotFoundException e) {
                 cerrarTodo(socket, objectInputStream, objectOutputStream);
                 break;
-            }
-        }
-    }
-
-
-    public void enviarMensaje(Mensaje mensaje) {
-        for (ClientHandler clienteConectado : clientesConectados) {
-            try {
-                /**
-                 * Hacer que verifique si existe el usuario registrado
-                 * despues verifico si esta en linea y se lo mando, y si no
-                 * guardo el mensaje en un array
-                 * crear metodos, despues veo
-                 */
-                User receptor = mensaje.getReceptor().getUser();
-                if (clienteConectado.userActual.getNombreUsuario().equalsIgnoreCase(receptor.getNombreUsuario())) {
-                    clienteConectado.objectOutputStream.writeObject(mensaje);
-                    clienteConectado.objectOutputStream.flush();
-                }
-            } catch (Exception e) {
-                cerrarTodo(socket, objectInputStream, objectOutputStream);
             }
         }
     }
