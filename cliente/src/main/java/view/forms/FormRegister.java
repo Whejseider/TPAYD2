@@ -75,7 +75,7 @@ public class FormRegister extends Form implements IVista<RegisterController> {
         lblUsuario.putClientProperty(FlatClientProperties.STYLE, "" +
                 "font:bold;");
 
-        lblIP = new JLabel("Usuario");
+        lblIP = new JLabel("IP");
         lblIP.putClientProperty(FlatClientProperties.STYLE, "" +
                 "font:bold;");
 

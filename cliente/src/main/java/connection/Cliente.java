@@ -9,6 +9,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+/**
+ * Debo separar responsabilidades de acceso y luego de uso del usuario, pero
+ * no me queda mucho tiempo
+ *
+ */
 public class Cliente {
 
     public static final int PUERTO = 1234; //default
@@ -45,7 +50,7 @@ public class Cliente {
     }
 
 
-    //TODO: Hacerlo pasandole COMANDO oconvertirlo aca, ver que onda capaz mas facil hacerlo aca
+
     public void enviarMensaje(Mensaje mensaje) {
         try {
             Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, mensaje);
@@ -108,20 +113,8 @@ public class Cliente {
     }
 
     /**
-     * Starts a thread to continuously listen for responses from the server.
-     *
-     * This method reads objects from the input stream connected to the server,
-     * casting them to the expected type, and passes them to the client listener
-     * for handling. If an exception occurs during this process, such as when the
-     * connection is lost, the relevant resources (socket, input and output streams)
-     * are closed to release resources and avoid potential leaks.
-     *
-     * Behavior:
-     * - Continuously listens for incoming serialized objects from the server.
-     * - Parses the received data into a {@code Comando} object and notifies the
-     *   {@code ClientListener} via the {@code onResponse} method.
-     * - Automatically terminates on encountering a disconnection or error,
-     *   ensuring proper resource cleanup by calling {@code cerrarTodo}.
+     * Escucha conexiones del servidor
+     * luego las gestiona con el patrón listener
      */
     public void escuchar() {
         new Thread(() -> {

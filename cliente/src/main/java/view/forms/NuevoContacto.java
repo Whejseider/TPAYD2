@@ -9,7 +9,6 @@ import utils.SystemForm;
 import javax.swing.*;
 import java.awt.*;
 
-@SystemForm(name = "FormAddContact", description = "Añade otros contactos", tags = {"chat", "contacto", "agregar", "añadir"})
 public class NuevoContacto extends JDialog implements IVista<NuevoContactoController> {
     private JPanel pane;
     private JTextField txtUsuario;
