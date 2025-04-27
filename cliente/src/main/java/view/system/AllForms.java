@@ -1,6 +1,8 @@
 package view.system;
 
+import controller.DirectorioController;
 import controller.MessengerPanelController;
+import view.forms.FormDirectorio;
 import view.forms.MessengerPanel;
 
 import javax.swing.*;
@@ -31,8 +33,13 @@ public class AllForms {
         }
         try {
             Form form = cls.getDeclaredConstructor().newInstance();
+            /*
+            Hmm....
+             */
             if (form instanceof MessengerPanel) {
-                new MessengerPanelController((MessengerPanel) form);
+                MessengerPanelController messengerPanelController = new MessengerPanelController((MessengerPanel) form);
+            } else if (form instanceof FormDirectorio){
+                DirectorioController directorioController = new DirectorioController((FormDirectorio) form);
             }
             getInstance().formsMap.put(cls, form);
             formInit(form);

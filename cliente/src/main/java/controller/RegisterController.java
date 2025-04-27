@@ -56,6 +56,11 @@ public class RegisterController implements ActionListener, AppStateListener {
     }
 
     @Override
+    public void onLogoutFailure(String s) {
+
+    }
+
+    @Override
     public void onNewMessageReceived(Mensaje mensaje) {
 
     }
@@ -68,16 +73,26 @@ public class RegisterController implements ActionListener, AppStateListener {
     @Override
     public void onRegistrationSuccess() {
         Toast.show(vista, Toast.Type.SUCCESS, "Usuario registrado correctamente.");
-        FormManager.logout();
+        FormManager.showLogin();
     }
 
     @Override
-    public void onRegistrationFailure() {
-        ErrorManager.getInstance().showError("Error al registrar el usuario, parece que ya existe uno con ese nombre de usuario.");
+    public void onRegistrationFailure(String s) {
+        ErrorManager.getInstance().showError(s);
     }
 
     @Override
-    public void onDirectoryInfoReceived(Object directoryData) {
+    public void onDirectoryInfoReceived(Directorio directorio) {
+
+    }
+
+    @Override
+    public void onAddContactSuccess(User user) {
+
+    }
+
+    @Override
+    public void onAddContactFailure(String s) {
 
     }
 
@@ -161,7 +176,7 @@ public class RegisterController implements ActionListener, AppStateListener {
         }
 
         if (e.getSource() == vista.getBtnLogin()) {
-            FormManager.logout();
+            FormManager.showLogin();
         }
     }
 }

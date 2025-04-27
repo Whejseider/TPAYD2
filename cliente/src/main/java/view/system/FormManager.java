@@ -6,6 +6,7 @@ import connection.Cliente;
 import connection.ConnectionManager;
 import connection.Sesion;
 import controller.LoginController;
+import controller.MainFormController;
 import controller.RegisterController;
 import model.TipoRespuesta;
 import raven.modal.Drawer;
@@ -28,7 +29,6 @@ public class FormManager {
     private static MainForm mainForm;
     private static Login login;
     private static FormRegister register;
-    private static MessengerPanel messengerPanel;
 
     public static void install(JFrame f) {
         frame = f;
@@ -39,20 +39,21 @@ public class FormManager {
     public static void init() {
         boolean logged = Sesion.getInstance().getUsuarioActual() != null;
         if (logged) {
-            login();
+            showHome();
         } else {
             TipoRespuesta tipoRespuesta = ConnectionManager.getInstance().checkConnection();
             if (tipoRespuesta == TipoRespuesta.OK) {
-                logout();
+                showLogin();
                 Cliente.getInstance().escuchar();
             } else {
-                ConnectionManager.getInstance().showError(() -> logout(), true);
+                ConnectionManager.getInstance().showError(() -> showLogin(), true);
             }
         }
     }
 
     private static void install() {
         FormSearch.getInstance().installKeyMap(getMainForm());
+        MainFormController mainFormController = new MainFormController();
     }
 
     public static void showForm(Form form) {
@@ -97,7 +98,7 @@ public class FormManager {
     }
 
     //TODO CAMbiar nombres porque me equivoque este y logout, estan al revés
-    public static void login() {
+    public static void showHome() {
         MenuDrawer.getInstance().setVisible(true);
         MenuDrawer.getInstance().setDrawerHeader(Sesion.getInstance().getUsuarioActual());
         frame.getContentPane().removeAll();
@@ -107,7 +108,7 @@ public class FormManager {
         frame.revalidate();
     }
 
-    public static void logout() {
+    public static void showLogin() {
         MenuDrawer.getInstance().setVisible(false);
         frame.getContentPane().removeAll();
         Form login = getLogin();
@@ -118,7 +119,7 @@ public class FormManager {
         frame.revalidate();
     }
 
-    public static void register() {
+    public static void showRegister() {
         MenuDrawer.getInstance().setVisible(false);
         frame.getContentPane().removeAll();
         Form register = getRegister();

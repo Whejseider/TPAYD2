@@ -4,15 +4,20 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * Emprolijar, quizas mover tema de conexiones a otro modulo, y manejo de usuario a otro y asi<br>
+ * tambien crear funciones si un usuario esta en linea, o en el directorio, etc<br>
+ * para no andar copiando y pegando
+ */
 public class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clientesConectados = new ArrayList<>();
-    public static ArrayList<User> directorio = new ArrayList<>();
+    public static Directorio directorio = new Directorio();
     private Socket socket;
     private ObjectInputStream objectInputStream; //Entrada
     private ObjectOutputStream objectOutputStream; //Salida
     private Comando comando;
-    private User user;
+    private User userActual;
 
     public ClientHandler(Socket socket) {
         try {
@@ -31,45 +36,131 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    private static boolean estaConectado(String nombreUsuario) {
+        return clientesConectados.stream().anyMatch(
+                c -> c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
+    }
+
+    private static boolean estaEnDirectorio(String nombreUsuario) {
+        return directorio.getDirectorio().stream().anyMatch(
+                u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
+    }
+
     private void iniciarSesion() throws IOException {
-        user = (User) comando.getContenido();
-        if (directorio.stream().noneMatch(u -> u.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
+        User user = (User) comando.getContenido();
+        if (!estaEnDirectorio(user.getNombreUsuario())) {
             System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
             Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "El usuario es inexistente");
-            objectOutputStream.writeObject(c);
-            objectOutputStream.flush();
+            enviarComando(c);
         } else {
-            if (clientesConectados.stream().noneMatch(
-                    c -> c.user.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
+            if (!estaConectado(user.getNombreUsuario())) {
                 clientesConectados.add(this);
+                this.userActual = directorio.getUsuarioPorNombre(user.getNombreUsuario());
                 System.out.println("Servidor: Usuario conectado: " + user.getNombreUsuario());
-                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, user);
-                objectOutputStream.writeObject(c);
-                objectOutputStream.flush();
+                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, userActual);
+                enviarComando(c);
             } else {
                 System.out.println("Servidor: Error al iniciar sesión: " + user.getNombreUsuario());
                 Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Ya hay un usuario conectado con ese nombre");
-                objectOutputStream.writeObject(c);
-                objectOutputStream.flush();
+                enviarComando(c);
             }
         }
     }
 
     private void registrarse() throws IOException {
-        user = (User) comando.getContenido();
-        if (directorio.stream().noneMatch(u -> u.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario()))) {
+        User user = (User) comando.getContenido();
+        if (!estaEnDirectorio(user.getNombreUsuario())) {
             directorio.add(user);
             System.out.println("Servidor: Usuario registrado: " + user.getNombreUsuario());
             Comando c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.OK);
-            objectOutputStream.writeObject(c);
-            objectOutputStream.flush();
+            enviarComando(c);
         } else {
             System.out.println("Servidor: El usuario ya existe.");
-            Comando c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.ERROR);
-            objectOutputStream.writeObject(c);
-            objectOutputStream.flush();
+            Comando c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.ERROR, "Ya existe un usuario con el mismo nombre");
+            enviarComando(c);
         }
     }
+
+    private void cerrarSesion() throws IOException {
+        if (!estaConectado(userActual.getNombreUsuario())) {
+            System.out.println("Servidor: Error el usuario no está conectado: " + userActual.getNombreUsuario());
+            Comando c = new Comando(TipoSolicitud.CERRAR_SESION, TipoRespuesta.ERROR, "Hubo un error al cerrar la sesión");
+            enviarComando(c);
+        } else {
+            System.out.println("Servidor: Cerrar sesión de usuario: " + userActual.getNombreUsuario());
+            this.removeClienteConectado();
+            Comando c = new Comando(TipoSolicitud.CERRAR_SESION, TipoRespuesta.OK, null);
+            enviarComando(c);
+        }
+    }
+
+    private void enviarDirectorio() throws IOException {
+        Comando c = new Comando(TipoSolicitud.OBTENER_DIRECTORIO, TipoRespuesta.OK, directorio);
+        enviarComando(c);
+        System.out.println("Servidor: directorio enviado");
+    }
+
+    private void agregarContacto() throws IOException {
+        Contacto contacto = (Contacto) comando.getContenido();
+        if (!estaEnDirectorio(contacto.getNombreUsuario())) {
+            Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR);
+            enviarComando(c);
+            System.out.println("Servidor: ERROR al agregar contacto: " + contacto.getNombreUsuario());
+        } else {
+            /**
+             * esto es para agregar el usuario actual al contacto del contacto que quiero agregar
+             * para sincronizarlo
+             */
+            Contacto userContacto = new Contacto();
+            userContacto.setUser(userActual);
+            userContacto.setNombreUsuario(userActual.getNombreUsuario());
+            userContacto.setAlias(userActual.getNombreUsuario());
+            userContacto.setIP(socket.getInetAddress().getHostAddress());
+            userContacto.setPuerto(socket.getPort());
+
+            if (!userActual.getAgenda().existeContacto(contacto.getUser())) {
+                userActual.getAgenda().agregarContacto(contacto);
+                actualizarUsuario(userActual);
+                contacto.getUser().getAgenda().agregarContacto(userContacto);
+                /**
+                 * probablemente tenga que updatear el cliente porque
+                 * solo actualizo aca
+                 */
+                actualizarUsuario(contacto.getUser());
+                Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, userActual);
+                enviarComando(c);
+                System.out.println("Servidor: Contacto agregado: " + contacto.getNombreUsuario());
+            } else{
+                Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Ya existe ese contacto en la agenda");
+                enviarComando(c);
+            }
+        }
+    }
+
+    public void actualizarUsuario(User userActualizado) throws IOException {
+        if (estaEnDirectorio(userActualizado.getNombreUsuario())) {
+            directorio.updateUser(userActualizado);
+
+            if (estaConectado(userActualizado.getNombreUsuario())) {
+                for (ClientHandler clienteConectado : clientesConectados) {
+                    if (clienteConectado.userActual.getNombreUsuario().equalsIgnoreCase(userActualizado.getNombreUsuario())) {
+                        clienteConectado.userActual = userActualizado;
+                        break;
+                    }
+                }
+            }
+
+//            this.user = userActualizado;
+            System.out.println("Servidor: Usuario actualizado: " + userActualizado.getNombreUsuario());
+        }
+    }
+
+    public void enviarComando(Comando comando) throws IOException {
+        objectOutputStream.reset(); // NANI?! atado con alambre
+        objectOutputStream.writeObject(comando);
+        objectOutputStream.flush();
+    }
+
 
     @Override
     public void run() {
@@ -82,25 +173,36 @@ public class ClientHandler implements Runnable {
                 if (objetoRecibido instanceof Comando) {
                     comando = (Comando) objetoRecibido;
                     switch (comando.getTipoSolicitud()) {
+
                         case ENVIAR_MENSAJE -> {
                             Mensaje msg = (Mensaje) comando.getContenido();
                             enviarMensaje(msg);
                         }
+
                         case LISTA_USUARIOS -> {
-//                            enviarListaUsuarios();
+
                         }
+
                         case OBTENER_DIRECTORIO -> {
+                            enviarDirectorio();
                         }
-                        case REGISTRARSE -> { // no va
+
+                        case REGISTRARSE -> {
 
                             registrarse();
                         }
-                        case INICIAR_SESION -> { // nno va
+
+                        case INICIAR_SESION -> {
                             iniciarSesion();
                         }
-//                        case AGREGAR_CONTACTO {
-//
-//                        }
+
+                        case CERRAR_SESION -> {
+                            cerrarSesion();
+                        }
+
+                        case AGREGAR_CONTACTO -> {
+                            agregarContacto();
+                        }
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
@@ -109,6 +211,7 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
 
     public void enviarMensaje(Mensaje mensaje) {
         for (ClientHandler clienteConectado : clientesConectados) {
@@ -120,7 +223,7 @@ public class ClientHandler implements Runnable {
                  * crear metodos, despues veo
                  */
                 User receptor = mensaje.getReceptor().getUser();
-                if (clienteConectado.user.getNombreUsuario().equalsIgnoreCase(receptor.getNombreUsuario())) {
+                if (clienteConectado.userActual.getNombreUsuario().equalsIgnoreCase(receptor.getNombreUsuario())) {
                     clienteConectado.objectOutputStream.writeObject(mensaje);
                     clienteConectado.objectOutputStream.flush();
                 }
@@ -132,7 +235,9 @@ public class ClientHandler implements Runnable {
 
     public void removeClienteConectado() {
         clientesConectados.remove(this);
-        System.out.println("SERVIDOR: El usuario " + this.user.getNombreUsuario() + " se desconectó");
+        System.out.println("SERVIDOR: El usuario " + this.userActual.getNombreUsuario() + " se desconectó");
+        //TODO deberia de guarda lo ultimo del usuario en el directorio creo, mucho texto
+        userActual = null;
     }
 
     private void cerrarTodo(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {

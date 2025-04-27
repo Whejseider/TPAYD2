@@ -21,11 +21,20 @@ public class Agenda implements Serializable {
 
     public Contacto getContactoPorUsuario(User user) {
         for (Contacto c : contactos) {
-            if (c.getIP().equals(user.getIP()) && c.getPuerto().equals(user.getPuerto())) {
+            if (c.getNombreUsuario().equals(user.getNombreUsuario())) {
                 return c;
             }
         }
         return null;
+    }
+
+    public boolean existeContacto(User user) {
+        for (Contacto c : contactos) {
+            if (c.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

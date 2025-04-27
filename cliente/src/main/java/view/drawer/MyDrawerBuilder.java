@@ -90,7 +90,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
         MenuItem items[] = new MenuItem[]{
                 new Item.Label("MENSAJERÍA"),
                 new Item("Chat", "chat.svg", MessengerPanel.class),
-                new Item("Directorio", FormResponsiveLayout.class),
+                new Item("Directorio", "eye.svg", FormDirectorio.class),
                 new Item.Label("OTROS"),
                 new Item("Configuración", "setting.svg", FormSetting.class),
                 new Item("Acerca de", "about.svg"),
@@ -124,13 +124,16 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                 System.out.println("Drawer menu seleccionado " + Arrays.toString(index));
                 Class<?> itemClass = action.getItem().getItemClass();
                 int i = index[0];
-                if (i == 3) {
+                if (i == 1) {
+                    Cliente.getInstance().obtenerDirectorio();
+                } else if (i == 3) {
                     action.consume();
                     FormManager.showAbout();
                     return;
                 } else if (i == 4) {
                     action.consume();
                     Cliente.getInstance().cerrarSesion(Sesion.getInstance().getUsuarioActual());
+//                    FormManager.showLogin(); //TODO Si no lo pongo aca no muestra el login, ver despues porque, (ACTION)
                     return;
                 }
                 if (itemClass == null || !Form.class.isAssignableFrom(itemClass)) {

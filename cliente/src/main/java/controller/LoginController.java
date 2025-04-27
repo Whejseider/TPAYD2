@@ -8,7 +8,6 @@ import connection.Cliente;
 import raven.modal.Toast;
 import view.forms.Login;
 import view.Messenger;
-import view.simple.SimpleMessageModal;
 import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
@@ -17,7 +16,6 @@ import java.util.List;
 
 public class LoginController implements ActionListener, AppStateListener {
     private Login vista;
-    private User user;
     private Cliente cliente;
     private Messenger messenger;
     private MainController mainController;
@@ -77,7 +75,7 @@ public class LoginController implements ActionListener, AppStateListener {
 
             if (puertoValido && nombreValido) {
                 int puerto = Integer.parseInt(puertoStr);
-                user = new User();
+                User user = new User();
                 user.setNombreUsuario(userName);
                 user.setPuerto(puerto);
                 System.out.println(user);
@@ -88,7 +86,7 @@ public class LoginController implements ActionListener, AppStateListener {
 
         if (e.getSource() == vista.getBtnSignUp()) {
 //            mainController.showFormRegister();
-            FormManager.register();
+            FormManager.showRegister();
 
         }
     }
@@ -99,14 +97,6 @@ public class LoginController implements ActionListener, AppStateListener {
 
     public void setVista(Login vista) {
         this.vista = vista;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Messenger getMessenger() {
@@ -123,7 +113,7 @@ public class LoginController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onRegistrationFailure(){
+    public void onRegistrationFailure(String s){
 
     }
 
@@ -131,8 +121,8 @@ public class LoginController implements ActionListener, AppStateListener {
     public void onLoginSuccess(User user) {
         cleanup();
         Sesion.getInstance().setUsuarioActual(user);
-        Toast.show(vista, Toast.Type.DEFAULT, "Bienvenido " + user.getNombreUsuario());
-        FormManager.login();
+        Toast.show(vista, Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
+        FormManager.showHome();
     }
 
     @Override
@@ -142,6 +132,11 @@ public class LoginController implements ActionListener, AppStateListener {
 
     @Override
     public void onLogoutSuccess() {
+    }
+
+    @Override
+    public void onLogoutFailure(String s) {
+
     }
 
     @Override
@@ -160,7 +155,17 @@ public class LoginController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onDirectoryInfoReceived(Object directoryData) {
+    public void onDirectoryInfoReceived(Directorio directorio) {
+
+    }
+
+    @Override
+    public void onAddContactSuccess(User user) {
+
+    }
+
+    @Override
+    public void onAddContactFailure(String s) {
 
     }
 

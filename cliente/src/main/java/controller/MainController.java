@@ -2,11 +2,7 @@ package controller;
 
 import interfaces.AppStateListener;
 import interfaces.ClientListener;
-import model.Comando;
-import model.Mensaje;
-import model.TipoRespuesta;
-import model.User;
-import connection.Sesion;
+import model.*;
 import view.system.FormManager;
 import view.system.MainForm;
 
@@ -45,7 +41,8 @@ public class MainController implements ClientListener {
 
     private void notifyConnectionAttempt(TipoRespuesta tipoRespuesta) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onConnectionAttempt(tipoRespuesta);
             }
         });
@@ -62,7 +59,8 @@ public class MainController implements ClientListener {
 
     private void notifyLoginFailure(String s) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onLoginFailure(s);
             }
         });
@@ -70,7 +68,17 @@ public class MainController implements ClientListener {
 
     private void notifyLogoutSuccess() {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onLogoutSuccess();
+            }
+        });
+    }
+
+    private void notifyLogoutFailure(String s) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onLogoutSuccess();
             }
         });
@@ -78,7 +86,8 @@ public class MainController implements ClientListener {
 
     private void notifyNewMessageReceived(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onNewMessageReceived(mensaje);
             }
         });
@@ -86,7 +95,8 @@ public class MainController implements ClientListener {
 
     private void notifyUserListUpdated(List<User> userList) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onUserListUpdated(userList);
             }
         });
@@ -94,24 +104,45 @@ public class MainController implements ClientListener {
 
     private void notifyRegistrationSuccess() {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
                 listener.onRegistrationSuccess();
             }
         });
     }
 
-    private void notifyRegistrationFailure(){
+    private void notifyRegistrationFailure(String s) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
-                listener.onRegistrationFailure();
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onRegistrationFailure(s);
             }
         });
     }
 
-    private void notifyDirectoryInfoReceived(Object directoryData) {
+    private void notifyDirectoryInfoReceived(Directorio directorio) {
         SwingUtilities.invokeLater(() -> {
-            for (AppStateListener listener : listeners) {
-                listener.onDirectoryInfoReceived(directoryData);
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onDirectoryInfoReceived(directorio);
+            }
+        });
+    }
+
+    private void notifyAddContactSuccess(User user) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onAddContactSuccess(user);
+            }
+        });
+    }
+
+    private void notifyAddContactFailure(String s) {
+        SwingUtilities.invokeLater(() -> {
+            List<AppStateListener> copiaListeners = new ArrayList<>(listeners);
+            for (AppStateListener listener : copiaListeners) {
+                listener.onAddContactFailure(s);
             }
         });
     }
@@ -142,14 +173,16 @@ public class MainController implements ClientListener {
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
                         notifyRegistrationSuccess();
                     } else {
-                        notifyRegistrationFailure();
+                        notifyRegistrationFailure((String) comando.getContenido());
                     }
                     break;
 
                 case CERRAR_SESION:
-                    this.user = null;
-                    System.out.println("DEBUG: Logout procesado.");
-                    notifyLogoutSuccess();
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
+                        notifyLogoutSuccess();
+                    } else {
+                        notifyLogoutFailure((String) comando.getContenido());
+                    }
                     break;
 
                 case ENVIAR_MENSAJE:
@@ -162,33 +195,17 @@ public class MainController implements ClientListener {
                     }
                     break;
 
-                case LISTA_USUARIOS:
-                    if (comando.getContenido() instanceof List) {
-                        try {
-                            @SuppressWarnings("unchecked")
-                            List<User> userList = (List<User>) comando.getContenido();
-
-                            if (!userList.isEmpty() && !(userList.get(0) instanceof User)) {
-                                System.err.println("ERROR: La lista recibida no contiene objetos User.");
-
-                            } else {
-                                System.out.println("DEBUG: Lista de usuarios actualizada recibida.");
-                                notifyUserListUpdated(userList);
-                            }
-                        } catch (ClassCastException e) {
-                            System.err.println("ERROR: No se pudo castear el contenido de LISTA_USUARIOS a List<User>.");
-
-                        }
+                case AGREGAR_CONTACTO:
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof User) {
+                        notifyAddContactSuccess((User) comando.getContenido());
                     } else {
-                        System.err.println("ERROR: Contenido inesperado para LISTA_USUARIOS: " + comando.getContenido());
+                        notifyAddContactFailure((String) comando.getContenido());
                     }
-                    break;
 
                 case OBTENER_DIRECTORIO:
-
-                    Object dirData = comando.getContenido();
-                    System.out.println("DEBUG: Información de directorio recibida.");
-                    notifyDirectoryInfoReceived(dirData);
+                if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Directorio) {
+                    notifyDirectoryInfoReceived((Directorio) comando.getContenido());
+                }
                     break;
 
                 default:

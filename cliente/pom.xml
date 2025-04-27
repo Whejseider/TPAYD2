@@ -103,6 +103,7 @@
             <artifactId>jfreechart</artifactId>
             <version>1.5.5</version>
         </dependency>
+
         <dependency>
             <groupId>com.fv</groupId>
             <artifactId>comun</artifactId>

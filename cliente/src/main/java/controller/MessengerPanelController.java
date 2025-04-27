@@ -167,7 +167,6 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
             nuevoChat.display();
         }
 
-
     }
 
     public void enviarMensaje(Mensaje mensaje) {

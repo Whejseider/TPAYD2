@@ -2,10 +2,7 @@ package connection;
 
 import controller.MainController;
 import interfaces.ClientListener;
-import model.Comando;
-import model.Mensaje;
-import model.TipoSolicitud;
-import model.User;
+import model.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -85,9 +82,30 @@ public class Cliente {
             Comando c = new Comando(TipoSolicitud.CERRAR_SESION, user);
             objectOutputStream.writeObject(c);
             objectOutputStream.flush();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            cerrarTodo(socket, objectInputStream, objectOutputStream);
+        }
     }
 
+    public void obtenerDirectorio(){
+        try {
+            Comando c = new Comando(TipoSolicitud.OBTENER_DIRECTORIO);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            cerrarTodo(socket, objectInputStream, objectOutputStream);
+        }
+    }
+
+    public void agregarContacto(Contacto contacto) {
+        try {
+            Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, contacto);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            cerrarTodo(socket, objectInputStream, objectOutputStream);
+        }
+    }
 
     /**
      * Starts a thread to continuously listen for responses from the server.
@@ -164,4 +182,5 @@ public class Cliente {
     public void setComando(Comando comando) {
         this.comando = comando;
     }
+
 }

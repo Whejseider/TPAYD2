@@ -9,12 +9,11 @@ import view.system.Form;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.function.Consumer;
 
 @SystemForm(name = "Directorio", description = "Directorio de contactos", tags = {"directorio"})
-public class FormResponsiveLayout extends Form {
+public class FormDirectorio extends Form {
 
-    public FormResponsiveLayout() {
+    public FormDirectorio() {
         init();
     }
 
@@ -24,22 +23,9 @@ public class FormResponsiveLayout extends Form {
         add(createOptions());
     }
 
-    @Override
-    public void formInit() {
-        // add sample data
-        panelCard.removeAll();
-//        for (ModelEmployee employee : SampleData.getSampleEmployeeData(true)) {
-//            panelCard.add(new Card(employee, createEventCard()));
-//        }
-        panelCard.repaint();
-        panelCard.revalidate();
+    public JPanel getPanelCard() {
+        return panelCard;
     }
-
-//    private Consumer<ModelEmployee> createEventCard() {
-//        return e -> {
-//            JOptionPane.showMessageDialog(this, e.getProfile().getName());
-//        };
-//    }
 
     private JPanel createInfo() {
         JPanel panel = new JPanel(new MigLayout("fillx,wrap", "[fill]"));
