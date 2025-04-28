@@ -3,16 +3,16 @@ package model;
 import java.io.Serializable;
 
 public class Notificacion implements Serializable {
-    private boolean tieneMensajesNuevos = false;
+    private volatile boolean tieneMensajesNuevos;
 
     public Notificacion() {
     }
 
-    public boolean tieneMensajesNuevos() {
-        return tieneMensajesNuevos;
+    public synchronized boolean tieneMensajesNuevos() {
+        return this.tieneMensajesNuevos;
     }
 
-    public void setTieneMensajesNuevos(boolean tieneMensajesNuevos) {
-        this.tieneMensajesNuevos = tieneMensajesNuevos;
+    public synchronized void setTieneMensajesNuevos(boolean value) {
+        this.tieneMensajesNuevos = value;
     }
 }

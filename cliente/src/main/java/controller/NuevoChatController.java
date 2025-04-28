@@ -2,6 +2,7 @@ package controller;
 
 import connection.Sesion;
 import model.Contacto;
+import model.Conversacion;
 import view.NuevoChat;
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         this.vista = vista;
         this.vista.getList1().addListSelectionListener(this);
 
-        for (Contacto c: Sesion.getInstance().getUsuarioActual().getAgenda().getContactos()){
+        for (Contacto c : Sesion.getInstance().getUsuarioActual().getAgenda().getContactos()) {
             this.vista.agregarContacto(c);
         }
     }
@@ -42,13 +43,26 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         if (!e.getValueIsAdjusting()) {
             Contacto seleccionado = this.vista.getList1().getSelectedValue();
             if (seleccionado != null) {
+                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(seleccionado);
                 SwingUtilities.invokeLater(() -> {
                     this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
                     this.messengerPanelController.setContactoActual(seleccionado);
-                    this.messengerPanelController.revalidarTxtConversacion();
-                    this.messengerPanelController.getVista().getTxtAreaConversacion().setText("");
-//                    this.messengerPanelController.mostrarChat(seleccionado);
-//                    this.messengerPanelController.getVista().getListChat().setSelectedValue(seleccionado, true);
+
+                    /**
+                     * Si existe la conversacion entonces la muestro y selecciono, sino borro todo
+                     */
+                    if (conversacion.getMensajes() != null) {
+                        this.messengerPanelController.mostrarChat(seleccionado);
+
+                            this.messengerPanelController.getVista().getListChat().setSelectedValue(seleccionado, true);
+                            this.messengerPanelController.revalidarListChat();
+
+                    } else {
+                        this.messengerPanelController.revalidarTxtConversacion();
+                        this.messengerPanelController.getVista().getTxtAreaConversacion().setText("");
+                    }
+
+
                     this.vista.dispose();
                 });
 

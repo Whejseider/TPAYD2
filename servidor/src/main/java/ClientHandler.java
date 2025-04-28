@@ -312,10 +312,12 @@ public class ClientHandler implements Runnable {
     }
 
     public void removeClienteConectado() {
-        System.out.println("SERVIDOR: El usuario " + this.userActual.getNombreUsuario() + " se desconectó");
-        clientesConectados.remove(this);
-        //TODO deberia de guarda lo ultimo del usuario en el directorio creo, mucho texto
-        userActual = null;
+        if (clientesConectados != null && clientesConectados.contains(this)) {
+            System.out.println("SERVIDOR: El usuario " + this.userActual.getNombreUsuario() + " se desconectó");
+            clientesConectados.remove(this);
+            //TODO deberia de guarda lo ultimo del usuario en el directorio creo, mucho texto
+            userActual = null;
+        }
     }
 
     private void cerrarTodo(Socket socket, ObjectInputStream ois, ObjectOutputStream oos) {

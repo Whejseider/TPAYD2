@@ -56,11 +56,8 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
     public void procesaMensajeEntrante(Mensaje mensaje) {
 
         User receptor = mensaje.getReceptor().getUser();
-
         User emisor = mensaje.getEmisor();
-
         Contacto contacto = receptor.getAgenda().getContactoPorUsuario(emisor);
-
         Conversacion conversacion = receptor.getConversacionCon(emisor);
 
         SwingUtilities.invokeLater(() -> {
@@ -68,15 +65,18 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
             if (!listModel.contains(conversacion)) {
                 listModel.addElement(conversacion);
             }
-        });
 
-        //Si el contacto del mensaje recibido, es el mismo que tengo ahora en pantalla seleccionado, muestro en pantalla el mensaje
-        if (contacto.equals(this.getContactoActual())) {
-            this.recibirMensaje(mensaje);
-        } else {
-            conversacion.getNotificacion().setTieneMensajesNuevos(true);
-            SwingUtilities.invokeLater(this::revalidarListChat);
-        }
+            if (contacto.equals(this.getContactoActual())) {
+                this.recibirMensaje(mensaje);
+            } else {
+                revalidarListChat();
+//                System.out.println("DEBUG - Antes de set: " + conversacion.getNotificacion().tieneMensajesNuevos());
+                conversacion.getNotificacion().setTieneMensajesNuevos(true);
+                listModel.set(listModel.indexOf(conversacion), conversacion);
+//                System.out.println("DEBUG - Después de set: " + conversacion.getNotificacion().tieneMensajesNuevos());
+            }
+
+        });
     }
 
     public void mostrarChat(Contacto contacto) {
@@ -139,17 +139,16 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         if (!e.getValueIsAdjusting()) {
             Conversacion conversacion = this.vista.getListChat().getSelectedValue();
             if (conversacion != null) {
-
-                conversacion.getNotificacion().setTieneMensajesNuevos(false);
-
-
                 SwingUtilities.invokeLater(() -> {
+                    setContactoActual(conversacion.getContacto());
+                    mostrarChat(conversacion.getContacto());
+
+
                     revalidarListChat();
+                    conversacion.getNotificacion().setTieneMensajesNuevos(false);
+
                     vista.mostrarContactoInfo(conversacion.getContacto());
                 });
-
-                setContactoActual(conversacion.getContacto());
-                mostrarChat(conversacion.getContacto());
             }
         }
     }
