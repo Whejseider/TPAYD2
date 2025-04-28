@@ -104,7 +104,6 @@ public class ClientHandler implements Runnable {
             System.out.println("Servidor: Cerrar sesión de usuario: " + userActual.getNombreUsuario());
             Comando c = new Comando(TipoSolicitud.CERRAR_SESION, TipoRespuesta.OK, null);
             enviarComando(c);
-            removeClienteConectado();
             cerrarTodo(socket, objectInputStream, objectOutputStream);
         }
     }
@@ -168,27 +167,27 @@ public class ClientHandler implements Runnable {
         Mensaje mensaje = (Mensaje) comando.getContenido();
         Contacto receptor = mensaje.getReceptor();
         User emisor = mensaje.getEmisor();
-        String nombreContacto = receptor.getNombreUsuario();
+        String nombreReceptor = receptor.getNombreUsuario();
 
-        if (estaEnDirectorio(nombreContacto)) {
+        if (estaEnDirectorio(nombreReceptor)) {
             emisor.getConversacionCon(receptor).agregarMensaje(mensaje);
             actualizarUsuario(emisor);
             Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensaje);
             enviarComando(c);
 
-            if (estaConectado(nombreContacto)) {
-                ClientHandler receptorConectado = getClienteConectado(nombreContacto);
+            if (estaConectado(nombreReceptor)) {
+                ClientHandler receptorConectado = getClienteConectado(nombreReceptor);
                 receptorConectado.recibirMensaje(mensaje);
             } else {
-                mensajesPendientes.computeIfAbsent(nombreContacto, k -> new ArrayList<>()).add(mensaje);
+                mensajesPendientes.computeIfAbsent(nombreReceptor, k -> new ArrayList<>()).add(mensaje);
 
                 System.out.println(
                         "Servidor: Mensaje pendiente - Emisor: "
                                 + mensaje.getEmisor().getNombreUsuario() +
-                                " - Receptor: " + nombreContacto);
+                                " - Receptor: " + nombreReceptor);
             }
         } else {
-            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario" + nombreContacto + " no existe");
+            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario" + nombreReceptor + " no existe");
             enviarComando(c);
         }
     }
@@ -207,6 +206,7 @@ public class ClientHandler implements Runnable {
         if (!userActual.getAgenda().existeContacto(emisor)) {
             userActual.getAgenda().agregarContacto(emisor);
         }
+
 
         userActual.getConversacionCon(emisor).agregarMensaje(mensaje);
         Contacto contacto = crearContacto(userActual);
@@ -319,6 +319,7 @@ public class ClientHandler implements Runnable {
     }
 
     private void cerrarTodo(Socket socket, ObjectInputStream ois, ObjectOutputStream oos) {
+        removeClienteConectado();
         try {
             if (socket != null && !socket.isClosed()) socket.close();
             if (ois != null) ois.close();

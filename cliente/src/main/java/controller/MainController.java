@@ -177,6 +177,8 @@ public class MainController implements ClientListener {
             switch (comando.getTipoSolicitud()) {
                 case CONECTARSE_SERVIDOR:
                     notifyConnectionAttempt(comando.getTipoRespuesta());
+                    break;
+
 
                 case INICIAR_SESION:
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
@@ -216,6 +218,7 @@ public class MainController implements ClientListener {
                     } else {
                         notifyMessageReceivedFailure((String) comando.getContenido());
                     }
+                    break;
 
                 case AGREGAR_CONTACTO:
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof User) {
@@ -223,6 +226,7 @@ public class MainController implements ClientListener {
                     } else {
                         notifyAddContactFailure((String) comando.getContenido());
                     }
+                    break;
 
                 case OBTENER_DIRECTORIO:
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Directorio) {

@@ -45,7 +45,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
                 SwingUtilities.invokeLater(() -> {
                     this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
                     this.messengerPanelController.setContactoActual(seleccionado);
-                    this.messengerPanelController.revalidadTxtConversacion();
+                    this.messengerPanelController.revalidarTxtConversacion();
                     this.messengerPanelController.getVista().getTxtAreaConversacion().setText("");
 //                    this.messengerPanelController.mostrarChat(seleccionado);
 //                    this.messengerPanelController.getVista().getListChat().setSelectedValue(seleccionado, true);

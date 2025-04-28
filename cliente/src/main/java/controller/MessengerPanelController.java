@@ -75,7 +75,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
             this.recibirMensaje(mensaje);
         } else {
             conversacion.getNotificacion().setTieneMensajesNuevos(true);
-            revalidadListChat();
+            SwingUtilities.invokeLater(this::revalidarListChat);
         }
     }
 
@@ -98,25 +98,22 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
                 }
             }
 
-            revalidadTxtConversacion();
+            revalidarTxtConversacion();
             vista.getTxtAreaConversacion().setText(historial.toString());
         });
 
     }
 
-    public void revalidadTxtConversacion() {
-        SwingUtilities.invokeLater(() -> {
-            vista.getTxtAreaConversacion().revalidate();
-            vista.getTxtAreaConversacion().repaint();
-        });
-
+    public void revalidarTxtConversacion() {
+        vista.getTxtAreaConversacion().revalidate();
+        vista.getTxtAreaConversacion().repaint();
     }
 
-    public void revalidadListChat() {
-        SwingUtilities.invokeLater(() -> {
-            vista.getListChat().revalidate();
-            vista.getListChat().repaint();
-        });
+    public void revalidarListChat() {
+
+        vista.getListChat().revalidate();
+        vista.getListChat().repaint();
+
     }
 
     public void cargarConversaciones() {
@@ -128,7 +125,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
                 model.addElement(conversacion);
             }
 
-            revalidadListChat();
+            revalidarListChat();
         });
     }
 
@@ -145,9 +142,9 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
                 conversacion.getNotificacion().setTieneMensajesNuevos(false);
 
-                revalidadListChat();
 
                 SwingUtilities.invokeLater(() -> {
+                    revalidarListChat();
                     vista.mostrarContactoInfo(conversacion.getContacto());
                 });
 
