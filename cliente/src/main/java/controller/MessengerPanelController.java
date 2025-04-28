@@ -63,7 +63,9 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         SwingUtilities.invokeLater(() -> {
             DefaultListModel<Conversacion> listModel = this.vista.getListModel();
             if (!listModel.contains(conversacion)) {
-                listModel.addElement(conversacion);
+                if (!conversacion.getMensajes().isEmpty()) {
+                    listModel.addElement(conversacion);
+                }
             }
 
             if (contacto.equals(this.getContactoActual())) {
@@ -122,7 +124,9 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
             model.clear();
 
             for (Conversacion conversacion : Sesion.getInstance().getUsuarioActual().getConversacion().values()) {
-                model.addElement(conversacion);
+                if (conversacion.getMensajes() != null && !conversacion.getMensajes().isEmpty()) {
+                    model.addElement(conversacion);
+                }
             }
 
             revalidarListChat();
