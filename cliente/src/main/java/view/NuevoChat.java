@@ -57,6 +57,8 @@ public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
         this.setAlwaysOnTop(true);
         this.setLocationRelativeTo(this.getParent());
         this.setVisible(true);
+        paneBuscar.setVisible(false);
+        paneBuscar.setEnabled(false);
     }
 
     public void agregarContacto(Contacto c) {

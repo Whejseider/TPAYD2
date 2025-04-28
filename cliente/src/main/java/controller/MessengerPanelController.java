@@ -7,6 +7,7 @@ import model.*;
 import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
+import view.system.FormManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -17,7 +18,6 @@ import java.awt.event.ActionListener;
 public class MessengerPanelController implements ActionListener, ListSelectionListener, AppStateListener {
     private MessengerPanel vista;
     private Cliente cliente = Cliente.getInstance();
-    private User user = Sesion.getInstance().getUsuarioActual();
     private Contacto contactoActual;
     private MainController mainController = MainController.getInstance();
 
@@ -29,6 +29,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         this.vista.getListChat().addListSelectionListener(this);
 
         this.mainController.addAppStateListener(this);
+        cargarConversaciones();
     }
 
 
@@ -49,23 +50,13 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         this.cliente = cliente;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public void setContactoActual(Contacto contactoActual) {
         this.contactoActual = contactoActual;
     }
 
-    public void procesaMensajeEntrante(Mensaje mensaje){
+    public void procesaMensajeEntrante(Mensaje mensaje) {
 
         User receptor = mensaje.getReceptor().getUser();
-        Sesion.getInstance().setUsuarioActual(receptor); // Actualizo el usuario?
-        this.user = Sesion.getInstance().getUsuarioActual(); // Y la variable local
 
         User emisor = mensaje.getEmisor();
 
@@ -88,11 +79,11 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         SwingUtilities.invokeLater(() -> {
             contactoActual = contacto;
 
-            Conversacion conversacion = user.getConversacionCon(contacto);
+            Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto);
             StringBuilder historial = new StringBuilder();
 
             for (Mensaje mensaje : conversacion.getMensajes()) {
-                if (mensaje.getEmisor().getNombreUsuario().equals(user.getNombreUsuario())) {
+                if (mensaje.getEmisor().getNombreUsuario().equals(Sesion.getInstance().getUsuarioActual().getNombreUsuario())) {
                     historial.append("\t\t\t").append("Yo: ").append(mensaje.getContenido()).append("\n").append("\t\t\t").append(mensaje.getTiempoFormateado()).append("\n");
                 } else {
                     historial.append(contacto.getNombreUsuario()).append(": ")
@@ -106,6 +97,21 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         });
 
     }
+
+    public void cargarConversaciones() {
+        SwingUtilities.invokeLater(() -> {
+            DefaultListModel<Conversacion> model = vista.getListModel();
+            model.clear();
+
+            for (Conversacion conversacion : Sesion.getInstance().getUsuarioActual().getConversacion().values()) {
+                model.addElement(conversacion);
+            }
+
+            vista.getListChat().revalidate();
+            vista.getListChat().repaint();
+        });
+    }
+
 
     public Contacto getContactoActual() {
         return contactoActual;
@@ -136,7 +142,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
             String contenido = vista.getTxtMensaje().getText().trim();
             if (contenido.isEmpty() || contactoActual == null) return;
 
-            Mensaje mensaje = new Mensaje(contenido, this.user, contactoActual);
+            Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual);
 
             cliente.enviarMensaje(mensaje);
 
@@ -164,9 +170,6 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
     public void enviarMensaje(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
-            //TODO puede que haya otra forma mejor
-            Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
-            this.user = Sesion.getInstance().getUsuarioActual();
             vista
                     .getTxtAreaConversacion()
                     .append("\t\t\tYo: " + mensaje.getContenido() + "\n" + "\t\t\t" + mensaje.getTiempoFormateado() + "\n");
@@ -211,6 +214,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
     @Override
     public void onMessageReceivedSuccess(Mensaje mensaje) {
+        Sesion.getInstance().setUsuarioActual(mensaje.getReceptor().getUser()); //A Futuro actualizar los datos del usuario, y no el usuario en si
         procesaMensajeEntrante(mensaje);
     }
 
@@ -246,6 +250,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
     @Override
     public void onSendMessageSuccess(Mensaje mensaje) {
+        Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
         enviarMensaje(mensaje);
     }
 

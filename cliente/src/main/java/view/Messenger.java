@@ -1,6 +1,8 @@
 package view;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import connection.Cliente;
+import connection.Sesion;
 import controller.ControllerManager;
 import interfaces.IVista;
 import view.drawer.MyDrawerBuilder;
@@ -38,7 +40,7 @@ public class Messenger extends JFrame implements IVista<ControllerManager> {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                controlador.cerrarTodo();
+                Cliente.getInstance().cerrarTodo();
             }
         });
     }

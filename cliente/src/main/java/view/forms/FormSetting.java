@@ -38,7 +38,7 @@ public class FormSetting extends Form {
         tabbedPane.putClientProperty(FlatClientProperties.STYLE, "" +
                 "tabType:card");
 
-        tabbedPane.addTab("Diseño", createLayoutOption());
+//        tabbedPane.addTab("Diseño", createLayoutOption());
         tabbedPane.addTab("Estilo", createStyleOption());
         add(tabbedPane, "gapy 1 0");
         add(createThemes());
@@ -172,7 +172,7 @@ public class FormSetting extends Form {
     private JPanel createStyleOption() {
         JPanel panel = new JPanel(new MigLayout("wrap,fillx", "[fill]"));
         panel.add(createAccentColor());
-        panel.add(createDrawerStyle());
+//        panel.add(createDrawerStyle());
         return panel;
     }
 

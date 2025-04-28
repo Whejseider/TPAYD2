@@ -100,7 +100,7 @@ public class Login extends Form implements IVista<LoginController> {
         pane.add(txtPuerto);
         pane.add(lblErrorPuerto);
 //        pane.add(btnCancelar, "gapy 10, split 2, sizegroup btn");
-        pane.add(btnAceptar, "wrap");
+        pane.add(btnAceptar, "wrap, gapy 10");
         pane.add(new JSeparator(), "gapy 10 10");
         pane.add(lblSignUp, "gapy 8, split 2, sizegroup btn");
         pane.add(btnSignUp, "sizegroup btn, wrap, gapy 8");

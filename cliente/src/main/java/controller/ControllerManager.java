@@ -32,8 +32,4 @@ public class ControllerManager {
         this.vista = vista;
     }
 
-    public void cerrarTodo(){
-        Cliente.getInstance().cerrarTodo();
-    }
-
 }

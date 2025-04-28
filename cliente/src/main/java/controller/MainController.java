@@ -12,7 +12,6 @@ import java.util.List;
 
 public class MainController implements ClientListener {
     private MainForm vista;
-    private User user;
     private List<AppStateListener> listeners = new ArrayList<>(); // Lista de observadores
     private static MainController instance;
 
@@ -243,10 +242,6 @@ public class MainController implements ClientListener {
 
     public MainForm getVista() {
         return vista;
-    }
-
-    public User getUser() {
-        return user;
     }
 
 }

@@ -10,9 +10,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.regex.Pattern;
 
+/**
+ * EN DESUSO
+ */
 public class NuevoContactoController implements ActionListener {
     private NuevoContacto vista;
-    private User user = Sesion.getInstance().getUsuarioActual();
     private Contacto contacto;
 
     public NuevoContactoController(NuevoContacto vista) {
@@ -94,25 +96,6 @@ public class NuevoContactoController implements ActionListener {
                 contacto.setAlias(alias);
                 contacto.setIP(ip);
                 contacto.setPuerto(puerto);
-
-                if (this.user.getAgenda().getContactos().contains(contacto)) {
-//                    Notifications
-//                            .getInstance()
-//                            .show(
-//                                    Notifications.Type.ERROR,
-//                                    Notifications.Location.TOP_RIGHT,
-//                                    "Ya hay otro contacto registrado igual"
-//                            );
-                } else {
-                    this.user.getAgenda().agregarContacto(contacto);
-//                    Notifications
-//                            .getInstance()
-//                            .show(
-//                                    Notifications.Type.SUCCESS,
-//                                    Notifications.Location.TOP_RIGHT,
-//                                    "Contacto agregado correctamente");
-                }
-                this.vista.dispose();
             }
         }
     }

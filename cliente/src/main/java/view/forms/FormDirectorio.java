@@ -31,7 +31,7 @@ public class FormDirectorio extends Form {
         JPanel panel = new JPanel(new MigLayout("fillx,wrap", "[fill]"));
         JLabel title = new JLabel("Directorio de contactos");
         JTextPane text = new JTextPane();
-        text.setText("Test");
+        text.setText("Desde aquí se listan todos los usuarios registrados en el servidor.");
         text.setEditable(false);
         text.setBorder(BorderFactory.createEmptyBorder());
         title.putClientProperty(FlatClientProperties.STYLE, "" +
@@ -47,7 +47,7 @@ public class FormDirectorio extends Form {
 //        panel.add(createLayoutOption());
 //        panel.add(createOtherOption());
 //        panel.add(createGapOption(), "gapx 0 7");
-        panel.add(createExample(), "span 3,gapx 0 2");
+        panel.add(createDirectoryComponent(), "span 3,gapx 0 2");
         return panel;
     }
 
@@ -235,9 +235,10 @@ public class FormDirectorio extends Form {
         return spinner;
     }
 
-    private Component createExample() {
+    private Component createDirectoryComponent() {
         responsiveLayout = new ResponsiveLayout(ResponsiveLayout.JustifyContent.FIT_CONTENT, new Dimension(-1, -1), 10, 10);
         panelCard = new JPanel(responsiveLayout);
+        panelCard.setPreferredSize(new Dimension(500, 550));
         panelCard.putClientProperty(FlatClientProperties.STYLE, "" +
                 "border:10,10,10,10;");
         JScrollPane scrollPane = new JScrollPane(panelCard);
@@ -256,6 +257,7 @@ public class FormDirectorio extends Form {
         splitPane.setLeftComponent(scrollPane);
         splitPane.setRightComponent(Box.createGlue());
         splitPane.setResizeWeight(1);
+        splitPane.setDividerSize(0); // Oculta el boton
         return splitPane;
     }
 

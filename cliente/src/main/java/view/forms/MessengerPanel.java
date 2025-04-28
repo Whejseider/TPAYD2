@@ -63,14 +63,14 @@ public class MessengerPanel extends Form implements IVista<MessengerPanelControl
         btnNuevoChat = new JButton("Nuevo Chat");
         panelSupChats.add(btnNuevoChat, BorderLayout.EAST);
 
-        panelBuscarChat = new JPanel(new BorderLayout());
-        panelSupChats.add(panelBuscarChat, BorderLayout.SOUTH);
-
-        lblBuscarChat = new JLabel("Buscar chat");
-        panelBuscarChat.add(lblBuscarChat, BorderLayout.NORTH);
-
-        txtBuscarChat = new JTextField();
-        panelBuscarChat.add(txtBuscarChat, BorderLayout.SOUTH);
+//        panelBuscarChat = new JPanel(new BorderLayout());
+//        panelSupChats.add(panelBuscarChat, BorderLayout.SOUTH);
+//
+//        lblBuscarChat = new JLabel("Buscar chat");
+//        panelBuscarChat.add(lblBuscarChat, BorderLayout.NORTH);
+//
+//        txtBuscarChat = new JTextField();
+//        panelBuscarChat.add(txtBuscarChat, BorderLayout.SOUTH);
 
         panelChatLista = new JPanel(new BorderLayout());
         panelChatLista.setPreferredSize(new Dimension(220, 515));

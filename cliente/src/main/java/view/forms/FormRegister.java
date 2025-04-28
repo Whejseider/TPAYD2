@@ -119,7 +119,7 @@ public class FormRegister extends Form implements IVista<RegisterController> {
         pane.add(lblPuerto, "gapy 8");
         pane.add(txtPuerto);
         pane.add(lblErrorPuerto);
-        pane.add(btnAceptar, "wrap");
+        pane.add(btnAceptar, "wrap, gapy 10");
         pane.add(new JSeparator(), "gapy 10 10");
         pane.add(lblLogin, "gapy 8, split 2, sizegroup btn");
         pane.add(btnLogin, "sizegroup btn, wrap, gapy 8");

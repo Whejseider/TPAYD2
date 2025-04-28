@@ -35,7 +35,6 @@ public class MainForm extends JPanel {
         buttonRedo = new JButton(new FlatSVGIcon("fv/icons/redo.svg", 0.5f));
         buttonRefresh = new JButton(new FlatSVGIcon("fv/icons/refresh.svg", 0.5f));
 
-        // style
         buttonDrawer.putClientProperty(FlatClientProperties.STYLE, "" +
                 "arc:10;");
         buttonUndo.putClientProperty(FlatClientProperties.STYLE, "" +
@@ -71,12 +70,12 @@ public class MainForm extends JPanel {
                 "[light]background:tint($Panel.background,20%);" +
                 "[dark]background:tint($Panel.background,5%);");
 
-        // demo version
-//        JLabel lbDemoVersion = new JLabel("Demo: v" + Demo.DEMO_VERSION);
-//        lbDemoVersion.putClientProperty(FlatClientProperties.STYLE, "" +
+        // fv version
+//        JLabel lbFvVersion = new JLabel("Fv: v" + fv.FV_VERSION);
+//        lbFvVersion.putClientProperty(FlatClientProperties.STYLE, "" +
 //                "foreground:$Label.disabledForeground;");
-//        lbDemoVersion.setIcon(new SVGIconUIColor("raven/modal/demo/icons/git.svg", 1f, "Label.disabledForeground"));
-//        panel.add(lbDemoVersion);
+//        lbFvVersion.setIcon(new SVGIconUIColor("fv/icons/git.svg", 1f, "Label.disabledForeground"));
+//        panel.add(lbFvVersion);
 
         // java version
         String javaVendor = System.getProperty("java.vendor");
@@ -84,7 +83,7 @@ public class MainForm extends JPanel {
             javaVendor = "";
         }
         String java = javaVendor + " v" + System.getProperty("java.version").trim();
-        String st = "Running on: Java %s";
+        String st = "Ejecutándose en: Java %s";
         JLabel lbJava = new JLabel(String.format(st, java));
         lbJava.putClientProperty(FlatClientProperties.STYLE, "" +
                 "foreground:$Label.disabledForeground;");
@@ -93,7 +92,7 @@ public class MainForm extends JPanel {
 
         panel.add(new JSeparator(JSeparator.VERTICAL));
 
-        // memory
+        // barra d memoria
         MemoryBar memoryBar = new MemoryBar();
         panel.add(memoryBar);
         return panel;
@@ -123,10 +122,10 @@ public class MainForm extends JPanel {
         mainPanel.repaint();
         mainPanel.revalidate();
 
-        // check button
+        // verificar bton
         buttonUndo.setEnabled(FormManager.FORMS.isUndoAble());
         buttonRedo.setEnabled(FormManager.FORMS.isRedoAble());
-        // check component orientation and update
+        // verificar la orientacion del componente y actualizar
         if (mainPanel.getComponentOrientation().isLeftToRight() != form.getComponentOrientation().isLeftToRight()) {
             applyComponentOrientation(mainPanel.getComponentOrientation());
         }

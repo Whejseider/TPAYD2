@@ -67,6 +67,7 @@ public class ClientHandler implements Runnable {
         } else {
             if (!estaConectado(user.getNombreUsuario())) {
                 clientesConectados.add(this);
+                // o asignarle user
                 this.userActual = directorio.getUsuarioPorNombre(user.getNombreUsuario());
                 System.out.println("Servidor: Usuario conectado: " + user.getNombreUsuario());
                 Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, userActual);
@@ -101,9 +102,10 @@ public class ClientHandler implements Runnable {
             enviarComando(c);
         } else {
             System.out.println("Servidor: Cerrar sesión de usuario: " + userActual.getNombreUsuario());
-            this.removeClienteConectado();
             Comando c = new Comando(TipoSolicitud.CERRAR_SESION, TipoRespuesta.OK, null);
             enviarComando(c);
+            removeClienteConectado();
+            cerrarTodo(socket, objectInputStream, objectOutputStream);
         }
     }
 
@@ -120,11 +122,6 @@ public class ClientHandler implements Runnable {
             enviarComando(c);
             System.out.println("Servidor: ERROR al agregar contacto: " + contacto.getNombreUsuario());
         } else {
-            /**
-             * esto es para agregar el usuario actual al contacto del contacto que quiero agregar
-             * para sincronizarlo
-             */
-            Contacto userContacto = crearContacto(userActual);
 
             if (!userActual.getAgenda().existeContacto(contacto.getUser())) {
                 userActual.getAgenda().agregarContacto(contacto);
@@ -198,6 +195,7 @@ public class ClientHandler implements Runnable {
 
     /**
      * Al recibir un mensaje, verifico
+     *
      * @param mensaje
      * @throws IOException
      */
@@ -219,6 +217,7 @@ public class ClientHandler implements Runnable {
 
     /**
      * Método invocado al iniciar sesión para recibir los mensajes pendientes si tuviera alguno
+     *
      * @throws IOException
      */
     public void enviarMensajesPendientes() throws IOException {
@@ -232,6 +231,22 @@ public class ClientHandler implements Runnable {
             }
         } else {
             System.out.println("Servidor: No hay mensajes pendientes para el usuario: " + nombreUsuario);
+        }
+    }
+
+    public void obtenerConversaciones() throws IOException {
+        if (estaEnDirectorio(userActual.getNombreUsuario())) {
+            if (estaConectado(userActual.getNombreUsuario())) {
+
+            } else {
+                Comando c = new Comando(TipoSolicitud.OBTENER_CONVERSACIONES, TipoRespuesta.ERROR);
+                enviarComando(c);
+                System.out.println("Servidor: ERROR al obtener conversaciones: " + userActual.getNombreUsuario());
+            }
+        } else {
+            Comando c = new Comando(TipoSolicitud.OBTENER_CONVERSACIONES, TipoRespuesta.ERROR, "El usuario no existe");
+            enviarComando(c);
+            System.out.println("Servidor: ERROR al obtener conversaciones: " + userActual.getNombreUsuario());
         }
     }
 
@@ -283,6 +298,10 @@ public class ClientHandler implements Runnable {
                         case AGREGAR_CONTACTO -> {
                             agregarContacto();
                         }
+
+                        case OBTENER_CONVERSACIONES -> {
+                            obtenerConversaciones();
+                        }
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
@@ -293,33 +312,21 @@ public class ClientHandler implements Runnable {
     }
 
     public void removeClienteConectado() {
-        clientesConectados.remove(this);
         System.out.println("SERVIDOR: El usuario " + this.userActual.getNombreUsuario() + " se desconectó");
+        clientesConectados.remove(this);
         //TODO deberia de guarda lo ultimo del usuario en el directorio creo, mucho texto
         userActual = null;
     }
 
-    private void cerrarTodo(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
-        removeClienteConectado();
-
+    private void cerrarTodo(Socket socket, ObjectInputStream ois, ObjectOutputStream oos) {
         try {
-
-            if (objectInputStream != null) {
-                objectInputStream.close();
-            }
-
-            if (objectOutputStream != null) {
-                objectOutputStream.close();
-            }
-
-            if (socket != null) {
-                socket.close();
-            }
-
+            if (socket != null && !socket.isClosed()) socket.close();
+            if (ois != null) ois.close();
+            if (oos != null) oos.close();
         } catch (IOException e) {
             e.printStackTrace();
-
         }
     }
+
 
 }

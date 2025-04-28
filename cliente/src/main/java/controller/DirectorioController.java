@@ -17,7 +17,6 @@ public class DirectorioController implements AppStateListener, ActionListener {
     private FormDirectorio vista;
     private Directorio directorio; //TODO crear clase aparte?
     private MainController mainController = MainController.getInstance();
-    private User usuarioSesion = Sesion.getInstance().getUsuarioActual();
 
     public DirectorioController(FormDirectorio vista) {
         this.vista = vista;
@@ -29,7 +28,7 @@ public class DirectorioController implements AppStateListener, ActionListener {
         SwingUtilities.invokeLater(() -> {
             vista.getPanelCard().removeAll();
             for (User u : directorio.getDirectorio()) {
-                if (!u.getNombreUsuario().equalsIgnoreCase(usuarioSesion.getNombreUsuario())) {
+                if (!u.getNombreUsuario().equalsIgnoreCase(Sesion.getInstance().getUsuarioActual().getNombreUsuario())) {
 
                     Card c = new Card();
                     c.getTitle().setText(u.getNombreUsuario());
@@ -37,7 +36,7 @@ public class DirectorioController implements AppStateListener, ActionListener {
                     c.addAgregarListener(this);
                     c.getBtnAgregar().setActionCommand("agregar_" + u.getNombreUsuario());
 
-                    boolean estaAgregado = usuarioSesion.getAgenda().existeContacto(u);
+                    boolean estaAgregado = Sesion.getInstance().getUsuarioActual().getAgenda().existeContacto(u);
 
                     if (estaAgregado) {
                         c.getBtnAgregar().setEnabled(false);
@@ -143,7 +142,6 @@ public class DirectorioController implements AppStateListener, ActionListener {
     public void onAddContactSuccess(User user) {
         Toast.show(vista, Toast.Type.SUCCESS, "Contacto agregado correctamente.");
         Sesion.getInstance().setUsuarioActual(user);
-        this.usuarioSesion = Sesion.getInstance().getUsuarioActual();
         cargarDirectorio();
     }
 

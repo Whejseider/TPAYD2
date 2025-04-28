@@ -32,13 +32,12 @@ import java.util.Arrays;
 public class MyDrawerBuilder extends SimpleDrawerBuilder {
 
     private final int SHADOW_SIZE = 12;
-//    private String title = Sesion.getUsuarioActual().getNombreUsuario();
-//    private String description = "IP: " + Sesion.getUsuarioActual().getIP() + "\n" +
-//            "Puerto: " + Sesion.getUsuarioActual().getPuerto();
 
     public MyDrawerBuilder() {
         super(createSimpleMenuOption());
         LightDarkButtonFooter lightDarkButtonFooter = (LightDarkButtonFooter) getFooter();
+        lightDarkButtonFooter.getLightDarkButton().setDarkButtonText("Oscuro");
+        lightDarkButtonFooter.getLightDarkButton().setLightButtonText("Claro");
         lightDarkButtonFooter.addModeChangeListener(isDarkMode -> {
             // event for light dark mode changed
         });
@@ -86,13 +85,13 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
 
     public static MenuOption createSimpleMenuOption() {
 
-        // create simple menu option
+
         MenuOption simpleMenuOption = new MenuOption();
 
         MenuItem items[] = new MenuItem[]{
                 new Item.Label("MENSAJERÍA"),
                 new Item("Chat", "chat.svg", MessengerPanel.class),
-                new Item("Directorio", "eye.svg", FormDirectorio.class),
+                new Item("Directorio", "directory.svg", FormDirectorio.class),
                 new Item.Label("OTROS"),
                 new Item("Configuración", "setting.svg", FormSetting.class),
                 new Item("Acerca de", "about.svg"),
@@ -105,7 +104,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
             public void styleMenuItem(JButton menu, int[] index, boolean isMainItem) {
                 boolean isTopLevel = index.length == 1;
                 if (isTopLevel) {
-                    // adjust item menu at the top level because it's contain icon
+
                     menu.putClientProperty(FlatClientProperties.STYLE, "" +
                             "margin:-1,0,-1,0;");
                 }

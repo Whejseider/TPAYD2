@@ -11,9 +11,10 @@ import view.manager.ErrorManager;
 import view.system.FormManager;
 import view.system.MainForm;
 
+import javax.swing.*;
+
 public class MainFormController implements AppStateListener {
     private MainForm vista;
-    private User user = Sesion.getInstance().getUsuarioActual();
     private MainController mainController = MainController.getInstance();
 
     public MainFormController() {
@@ -39,8 +40,9 @@ public class MainFormController implements AppStateListener {
     @Override
     public void onLogoutSuccess() {
         Sesion.getInstance().setUsuarioActual(null);
-        Cliente.getInstance().cerrarConexion();
-        FormManager.showLogin();
+        Cliente.getInstance().cerrarTodo();
+        FormManager.removeLogin();
+        FormManager.install(FormManager.getFrame());
     }
 
     @Override
