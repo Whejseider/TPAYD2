@@ -39,8 +39,6 @@ public class Conversacion implements Serializable {
         this.mensajes.add(mensaje);
     }
 
-
-    //TODO VERIFICAR
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

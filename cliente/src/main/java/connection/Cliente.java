@@ -30,7 +30,7 @@ public class Cliente {
     }
 
     public static Cliente getInstance() {
-        if (cliente == null) {
+        if (cliente == null ) {
             cliente = new Cliente();
         }
         return cliente;
@@ -129,23 +129,6 @@ public class Cliente {
                 }
             }
         }).start();
-    }
-
-    public void cerrarConexion() {
-        try {
-
-            if (objectInputStream != null) {
-                objectInputStream.close();
-            }
-
-            if (objectOutputStream != null) {
-                objectOutputStream.close();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        }
     }
 
     public void cerrarTodo() {

@@ -72,11 +72,11 @@ public class Contacto implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Contacto contacto = (Contacto) o;
-        return Objects.equals(IP, contacto.IP) && Objects.equals(puerto, contacto.puerto);
+        return Objects.equals(user, contacto.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(IP, puerto);
+        return Objects.hashCode(user);
     }
 }

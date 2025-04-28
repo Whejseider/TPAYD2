@@ -2,9 +2,9 @@ package controller;
 
 import connection.Sesion;
 import model.Contacto;
-import model.User;
 import view.NuevoChat;
 
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
@@ -42,10 +42,16 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
         if (!e.getValueIsAdjusting()) {
             Contacto seleccionado = this.vista.getList1().getSelectedValue();
             if (seleccionado != null) {
-                this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
-                this.messengerPanelController.mostrarChat(seleccionado);
-                this.messengerPanelController.getVista().getListChat().setSelectedValue(seleccionado, true);
-                this.vista.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
+                    this.messengerPanelController.setContactoActual(seleccionado);
+                    this.messengerPanelController.revalidadTxtConversacion();
+                    this.messengerPanelController.getVista().getTxtAreaConversacion().setText("");
+//                    this.messengerPanelController.mostrarChat(seleccionado);
+//                    this.messengerPanelController.getVista().getListChat().setSelectedValue(seleccionado, true);
+                    this.vista.dispose();
+                });
+
             }
         }
     }

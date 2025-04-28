@@ -7,7 +7,6 @@ import model.*;
 import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
-import view.system.FormManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -62,16 +61,21 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
         Contacto contacto = receptor.getAgenda().getContactoPorUsuario(emisor);
 
-        //Agrega la conversacion a la vista
-        Conversacion conversacion = receptor.getConversacionCon(contacto);
-        this.getVista().agregarConversacion(conversacion);
+        Conversacion conversacion = receptor.getConversacionCon(emisor);
 
+        SwingUtilities.invokeLater(() -> {
+            DefaultListModel<Conversacion> listModel = this.vista.getListModel();
+            if (!listModel.contains(conversacion)) {
+                listModel.addElement(conversacion);
+            }
+        });
+
+        //Si el contacto del mensaje recibido, es el mismo que tengo ahora en pantalla seleccionado, muestro en pantalla el mensaje
         if (contacto.equals(this.getContactoActual())) {
             this.recibirMensaje(mensaje);
         } else {
             conversacion.getNotificacion().setTieneMensajesNuevos(true);
-            this.getVista().getListChat().repaint();
-            this.getVista().getListChat().revalidate();
+            revalidadListChat();
         }
     }
 
@@ -81,6 +85,9 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
             Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto);
             StringBuilder historial = new StringBuilder();
+            if (!vista.getListModel().contains(conversacion)) {
+                vista.getListModel().addElement(conversacion);
+            }
 
             for (Mensaje mensaje : conversacion.getMensajes()) {
                 if (mensaje.getEmisor().getNombreUsuario().equals(Sesion.getInstance().getUsuarioActual().getNombreUsuario())) {
@@ -91,11 +98,25 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
                 }
             }
 
+            revalidadTxtConversacion();
             vista.getTxtAreaConversacion().setText(historial.toString());
+        });
+
+    }
+
+    public void revalidadTxtConversacion() {
+        SwingUtilities.invokeLater(() -> {
             vista.getTxtAreaConversacion().revalidate();
             vista.getTxtAreaConversacion().repaint();
         });
 
+    }
+
+    public void revalidadListChat() {
+        SwingUtilities.invokeLater(() -> {
+            vista.getListChat().revalidate();
+            vista.getListChat().repaint();
+        });
     }
 
     public void cargarConversaciones() {
@@ -107,8 +128,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
                 model.addElement(conversacion);
             }
 
-            vista.getListChat().revalidate();
-            vista.getListChat().repaint();
+            revalidadListChat();
         });
     }
 
@@ -125,10 +145,11 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
                 conversacion.getNotificacion().setTieneMensajesNuevos(false);
 
-                vista.getListChat().revalidate();
-                this.vista.getListChat().repaint();
+                revalidadListChat();
 
-                vista.mostrarContactoInfo(conversacion.getContacto());
+                SwingUtilities.invokeLater(() -> {
+                    vista.mostrarContactoInfo(conversacion.getContacto());
+                });
 
                 setContactoActual(conversacion.getContacto());
                 mostrarChat(conversacion.getContacto());
