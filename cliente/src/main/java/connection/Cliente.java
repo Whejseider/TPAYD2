@@ -1,6 +1,6 @@
 package connection;
 
-import controller.MainController;
+import controller.ClientManager;
 import interfaces.ClientListener;
 import model.*;
 
@@ -23,8 +23,11 @@ public class Cliente {
     private ObjectInputStream objectInputStream; //Entrada
     private ObjectOutputStream objectOutputStream; //Salida
     private Comando comando;
-    private ClientListener clientListener = MainController.getInstance();
+    private ClientListener clientListener = ClientManager.getInstance();
     public static Cliente cliente;
+
+    private volatile boolean activo = true;
+
 
     private Cliente() {
     }
@@ -37,8 +40,8 @@ public class Cliente {
     }
 
     public void init(Socket socket) {
-        this.socket = socket;
         try {
+            this.socket = socket;
             this.objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             this.objectInputStream = new ObjectInputStream(socket.getInputStream());
 //            Comando c = new Comando(TipoSolicitud.CONECTARSE_SERVIDOR);
@@ -117,10 +120,12 @@ public class Cliente {
      * luego las gestiona con el patrón listener
      */
     public void escuchar() {
+        activo = true;
+
         new Thread(() -> {
             Comando respuesta;
 
-            while (socket.isConnected()) {
+            while (activo && socket != null && socket.isConnected()) {
                 try {
                     respuesta = (Comando) objectInputStream.readObject();
                     clientListener.onResponse(respuesta);
@@ -132,24 +137,34 @@ public class Cliente {
     }
 
     public void cerrarTodo() {
+        activo = false;
+
         try {
 
             if (objectInputStream != null) {
                 objectInputStream.close();
             }
-
             if (objectOutputStream != null) {
                 objectOutputStream.close();
             }
-
-            if (socket != null) {
+            if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
-
+        } finally {
+            objectInputStream = null;
+            objectOutputStream = null;
+            socket = null;
+            comando = null;
         }
+    }
+
+    public static void clearInstance() {
+        if (cliente != null) {
+            cliente.cerrarTodo();
+        }
+        cliente = null;
     }
 
     public Socket getSocket() {

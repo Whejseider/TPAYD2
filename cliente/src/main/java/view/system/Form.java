@@ -1,8 +1,16 @@
 package view.system;
 
+import interfaces.IController;
+import interfaces.IVista;
+
 import javax.swing.*;
 
-public class Form extends JPanel {
+public class Form extends JPanel implements IVista {
+
+    @Override
+    public void setControlador(IController controlador) {
+
+    }
 
     private LookAndFeel oldTheme = UIManager.getLookAndFeel();
 
@@ -28,4 +36,5 @@ public class Form extends JPanel {
             SwingUtilities.updateComponentTreeUI(this);
         }
     }
+
 }

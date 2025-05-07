@@ -2,11 +2,6 @@ package view;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import connection.Cliente;
-import connection.Sesion;
-import controller.ControllerManager;
-import interfaces.IVista;
-import view.drawer.MyDrawerBuilder;
-import view.forms.MessengerPanel;
 import view.system.FormManager;
 
 import javax.swing.*;
@@ -14,14 +9,10 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class Messenger extends JFrame implements IVista<ControllerManager> {
-    private ControllerManager controlador;
-    private MessengerPanel messengerPanel;
-    public static MyDrawerBuilder myDrawerBuilder;
+public class Messenger extends JFrame  {
 
-    public Messenger(ControllerManager controlador) throws HeadlessException {
-        this.controlador = controlador;
-        ControllerManager.getInstance().setVista(this);
+    public Messenger() throws HeadlessException {
+        setName("Messenger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
 
@@ -44,19 +35,5 @@ public class Messenger extends JFrame implements IVista<ControllerManager> {
             }
         });
     }
-
-    @Override
-    public void setControlador(ControllerManager controlador) {
-        this.controlador = controlador;
-    }
-
-    public MessengerPanel getMessengerPanel() {
-        return messengerPanel;
-    }
-
-    public ControllerManager getControlador() {
-        return controlador;
-    }
-
 
 }

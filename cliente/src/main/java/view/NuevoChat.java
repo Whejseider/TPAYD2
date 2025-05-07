@@ -1,13 +1,12 @@
 package view;
 
 import controller.NuevoChatController;
-import interfaces.IVista;
 import model.Contacto;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
+public class NuevoChat extends JDialog {
     private JPanel pane;
     private JList<Contacto> list1;
     private JTextField txtBuscar;
@@ -125,8 +124,8 @@ public class NuevoChat extends JDialog implements IVista<NuevoChatController> {
         return pane;
     }
 
-    @Override
     public void setControlador(NuevoChatController controlador) {
-        this.controlador = controlador;
+        this.list1.addListSelectionListener(controlador);
+
     }
 }

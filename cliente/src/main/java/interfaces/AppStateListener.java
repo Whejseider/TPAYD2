@@ -1,50 +1,8 @@
 package interfaces;
 
-import model.Directorio;
-import model.Mensaje;
-import model.TipoRespuesta;
-import model.User;
-
 /**
- * Desde aca gestionamos las respuestas del servidor
- * Probablemente habria que mover los listener de conexiones a uno aparte
+ * Interfaz que implementa todos los listener en caso de ser necesario
  */
-public interface AppStateListener {
-
-    //ESTE YA NI ME ACUERDO
-    void onConnectionAttempt(TipoRespuesta tipoRespuesta);
-
-    //LOGIN
-    void onLoginSuccess(User user);
-
-    void onLoginFailure(String s);
-
-    //LOGOUT
-    void onLogoutSuccess();
-
-    void onLogoutFailure(String s);
-
-    //Nuevo mensajeRecibido
-    void onMessageReceivedSuccess(Mensaje mensaje);
-
-    //No se todavia
-    void onMessageReceivedFailure(String s);
-
-    //SIGNUP
-    //TODO AGREGAR STRING
-    void onRegistrationSuccess();
-
-    void onRegistrationFailure(String s);
-
-    //CONSULTA DIRECTORIO
-    void onDirectoryInfoReceived(Directorio directorio);
-
-    //CONTACTO
-    void onAddContactSuccess(User user);
-
-    void onAddContactFailure(String s);
-
-    void onSendMessageSuccess(Mensaje contenido);
-
-    void onSendMessageFailure(String s);
+public interface AppStateListener
+        extends MessageListener, ContactsListener, AuthenticationListener, ConnectionListener, DirectoryListener {
 }

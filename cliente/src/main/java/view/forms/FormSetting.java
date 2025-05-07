@@ -33,6 +33,7 @@ public class FormSetting extends Form {
     }
 
     private void init() {
+        setName("FormSetting");
         setLayout(new MigLayout("fill", "[fill][fill,grow 0,250:250]", "[fill]"));
         tabbedPane = new JTabbedPane();
         tabbedPane.putClientProperty(FlatClientProperties.STYLE, "" +

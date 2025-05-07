@@ -2,26 +2,30 @@ package controller;
 
 import connection.Cliente;
 import connection.Sesion;
-import interfaces.AppStateListener;
-import model.*;
+import interfaces.ContactsListener;
+import interfaces.DirectoryListener;
+import interfaces.IController;
+import model.Contacto;
+import model.Directorio;
+import model.User;
 import raven.modal.Toast;
 import view.forms.FormDirectorio;
 import view.forms.other.Card;
+import view.system.Form;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class DirectorioController implements AppStateListener, ActionListener {
+public class DirectorioController implements IController, DirectoryListener, ContactsListener, ActionListener {
 
     private FormDirectorio vista;
-    private Directorio directorio; //TODO crear clase aparte?
-    private MainController mainController = MainController.getInstance();
+    private Directorio directorio;
+    private EventManager eventManager = EventManager.getInstance();
 
-    public DirectorioController(FormDirectorio vista) {
-        this.vista = vista;
-        this.directorio = new Directorio();
-        this.mainController.addAppStateListener(this);
+    public DirectorioController(FormDirectorio form) {
+        this.vista = form;
+
     }
 
     private void cargarDirectorio() {
@@ -60,6 +64,18 @@ public class DirectorioController implements AppStateListener, ActionListener {
         return c;
     }
 
+    @Override
+    public void init() {
+        this.directorio = new Directorio();
+        this.eventManager.addDirectoryListener(this);
+        this.eventManager.addContactsListener(this);
+    }
+
+    @Override
+    public Form getForm() {
+        return vista;
+    }
+
     //ACTION LISTENER
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -85,52 +101,6 @@ public class DirectorioController implements AppStateListener, ActionListener {
     }
 
 
-    //APPSTATELISTENER
-
-    @Override
-    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
-
-    }
-
-    @Override
-    public void onLoginSuccess(User user) {
-
-    }
-
-    @Override
-    public void onLoginFailure(String s) {
-
-    }
-
-    @Override
-    public void onLogoutSuccess() {
-
-    }
-
-    @Override
-    public void onLogoutFailure(String s) {
-
-    }
-
-    @Override
-    public void onMessageReceivedSuccess(Mensaje mensaje) {
-
-    }
-
-    @Override
-    public void onMessageReceivedFailure(String s) {
-
-    }
-
-    @Override
-    public void onRegistrationSuccess() {
-
-    }
-
-    @Override
-    public void onRegistrationFailure(String s) {
-    }
-
     @Override
     public void onDirectoryInfoReceived(Directorio directorio) {
         this.directorio.getDirectorio().clear();  // Limpia el ArrayList actual
@@ -146,17 +116,7 @@ public class DirectorioController implements AppStateListener, ActionListener {
     }
 
     @Override
-    public void onAddContactFailure(String s) {
-        Toast.show(vista, Toast.Type.ERROR, s);
-    }
-
-    @Override
-    public void onSendMessageSuccess(Mensaje contenido) {
-
-    }
-
-    @Override
-    public void onSendMessageFailure(String s) {
+    public void onAddContactFailure(String reason) {
 
     }
 

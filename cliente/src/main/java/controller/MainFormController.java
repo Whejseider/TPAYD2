@@ -2,34 +2,34 @@ package controller;
 
 import connection.Cliente;
 import connection.Sesion;
-import interfaces.AppStateListener;
-import model.Directorio;
-import model.Mensaje;
-import model.TipoRespuesta;
+import interfaces.AuthenticationListener;
+import interfaces.IController;
 import model.User;
 import view.manager.ErrorManager;
+import view.system.Form;
 import view.system.FormManager;
 import view.system.MainForm;
 
-import javax.swing.*;
-
-public class MainFormController implements AppStateListener {
+public class MainFormController implements IController, AuthenticationListener {
     private MainForm vista;
-    private MainController mainController = MainController.getInstance();
+    private EventManager eventManager = EventManager.getInstance();
 
-    public MainFormController() {
-        this.vista = FormManager.getMainForm();
-        this.mainController.addAppStateListener(this);
+    public MainFormController(MainForm form) {
+        this.vista = form;
     }
 
     @Override
-    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
+    public void init() {
+        this.eventManager.addAuthenticationListener(this);
+    }
 
+    @Override
+    public Form getForm() {
+        return vista;
     }
 
     @Override
     public void onLoginSuccess(User user) {
-
     }
 
     @Override
@@ -39,9 +39,11 @@ public class MainFormController implements AppStateListener {
 
     @Override
     public void onLogoutSuccess() {
+        EventManager.clearInstance();
+        ClientManager.clearInstance();
+        Cliente.clearInstance();
         Sesion.getInstance().setUsuarioActual(null);
-        Cliente.getInstance().cerrarTodo();
-        FormManager.removeLogin();
+        FormManager.clearForms();
         FormManager.install(FormManager.getFrame());
     }
 
@@ -52,15 +54,6 @@ public class MainFormController implements AppStateListener {
         FormManager.showLogin();
     }
 
-    @Override
-    public void onMessageReceivedSuccess(Mensaje mensaje) {
-
-    }
-
-    @Override
-    public void onMessageReceivedFailure(String s) {
-
-    }
 
     @Override
     public void onRegistrationSuccess() {
@@ -72,28 +65,4 @@ public class MainFormController implements AppStateListener {
 
     }
 
-    @Override
-    public void onDirectoryInfoReceived(Directorio directorio) {
-
-    }
-
-    @Override
-    public void onAddContactSuccess(User user) {
-
-    }
-
-    @Override
-    public void onAddContactFailure(String s) {
-
-    }
-
-    @Override
-    public void onSendMessageSuccess(Mensaje contenido) {
-
-    }
-
-    @Override
-    public void onSendMessageFailure(String s) {
-
-    }
 }

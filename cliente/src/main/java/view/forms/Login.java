@@ -2,14 +2,15 @@ package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import controller.LoginController;
-import interfaces.IVista;
+import interfaces.IController;
 import net.miginfocom.swing.MigLayout;
 import view.system.Form;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
-public class Login extends Form implements IVista<LoginController> {
+public class Login extends Form {
     private final JLabel lblSignUp;
     private JLabel lblErrorUsuario;
     private JLabel lblErrorPuerto;
@@ -28,6 +29,7 @@ public class Login extends Form implements IVista<LoginController> {
     private JButton btnSignUp;
 
     public Login() throws HeadlessException {
+        setName("Login");
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
         txtUsuario = new JTextField();
@@ -36,9 +38,9 @@ public class Login extends Form implements IVista<LoginController> {
         txtPuerto = new JTextField();
         txtPuerto.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el número de puerto");
 
-        btnAceptar = new JButton("Aceptar"){
+        btnAceptar = new JButton("Aceptar") {
             @Override
-            public boolean isDefaultButton(){
+            public boolean isDefaultButton() {
                 return true;
             }
         };
@@ -77,7 +79,7 @@ public class Login extends Form implements IVista<LoginController> {
 
         lblErrorPuerto = new JLabel("");
         lblErrorPuerto.putClientProperty(FlatClientProperties.STYLE, "" +
-                "font:plain;"+
+                "font:plain;" +
                 "foreground:#DC3545;");
 
         btnSignUp = new JButton("<html><a href=\"#\">Registrarse</a></html>");
@@ -181,7 +183,8 @@ public class Login extends Form implements IVista<LoginController> {
     }
 
     @Override
-    public void setControlador(LoginController controlador) {
-        this.controlador = controlador;
+    public void setControlador(IController controlador) {
+        this.btnAceptar.addActionListener((ActionListener) controlador);
+        this.btnSignUp.addActionListener((ActionListener) controlador);
     }
 }

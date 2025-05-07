@@ -12,13 +12,14 @@ import view.icons.SVGIconUIColor;
 import javax.swing.*;
 import java.awt.*;
 
-public class MainForm extends JPanel {
+public class MainForm extends Form {
 
     public MainForm() {
         init();
     }
 
     private void init() {
+        setName("MainForm");
         setLayout(new MigLayout("fillx,wrap,insets 0,gap 0", "[fill]", "[][][fill,grow][]"));
         add(createHeader());
         add(createRefreshLine(), "height 3!");

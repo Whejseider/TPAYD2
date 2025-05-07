@@ -2,11 +2,16 @@ package controller;
 
 import connection.Cliente;
 import connection.Sesion;
-import interfaces.AppStateListener;
-import model.*;
+import interfaces.IController;
+import interfaces.MessageListener;
+import model.Contacto;
+import model.Conversacion;
+import model.Mensaje;
+import model.User;
 import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
+import view.system.Form;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -14,28 +19,19 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MessengerPanelController implements ActionListener, ListSelectionListener, AppStateListener {
+public class MessengerPanelController implements IController, ActionListener, ListSelectionListener, MessageListener {
     private MessengerPanel vista;
     private Cliente cliente = Cliente.getInstance();
     private Contacto contactoActual;
-    private MainController mainController = MainController.getInstance();
+    private EventManager eventManager = EventManager.getInstance();
 
-    public MessengerPanelController(MessengerPanel vista) {
-        this.vista = vista;
-
-        this.vista.getBtnEnviar().addActionListener(this);
-        this.vista.getBtnNuevoChat().addActionListener(this);
-        this.vista.getListChat().addListSelectionListener(this);
-
-        this.mainController.addAppStateListener(this);
-        cargarConversaciones();
+    public MessengerPanelController(MessengerPanel form) {
+        this.vista = form;
     }
-
 
     public MessengerPanel getVista() {
         return vista;
     }
-
 
     public void setVista(MessengerPanel vista) {
         this.vista = vista;
@@ -165,7 +161,7 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
 
             Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual);
 
-            cliente.enviarMensaje(mensaje);
+            Cliente.getInstance().enviarMensaje(mensaje);
 
             Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
 
@@ -209,31 +205,6 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
     }
 
     @Override
-    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
-
-    }
-
-    @Override
-    public void onLoginSuccess(User user) {
-
-    }
-
-    @Override
-    public void onLoginFailure(String s) {
-
-    }
-
-    @Override
-    public void onLogoutSuccess() {
-
-    }
-
-    @Override
-    public void onLogoutFailure(String s) {
-
-    }
-
-    @Override
     public void onMessageReceivedSuccess(Mensaje mensaje) {
         Sesion.getInstance().setUsuarioActual(mensaje.getReceptor().getUser()); //A Futuro actualizar los datos del usuario, y no el usuario en si
         procesaMensajeEntrante(mensaje);
@@ -244,30 +215,6 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
         Toast.show(vista, Toast.Type.ERROR, s);
     }
 
-    @Override
-    public void onRegistrationSuccess() {
-
-    }
-
-    @Override
-    public void onRegistrationFailure(String s) {
-
-    }
-
-    @Override
-    public void onDirectoryInfoReceived(Directorio directorio) {
-
-    }
-
-    @Override
-    public void onAddContactSuccess(User user) {
-
-    }
-
-    @Override
-    public void onAddContactFailure(String s) {
-
-    }
 
     @Override
     public void onSendMessageSuccess(Mensaje mensaje) {
@@ -278,5 +225,18 @@ public class MessengerPanelController implements ActionListener, ListSelectionLi
     @Override
     public void onSendMessageFailure(String s) {
         Toast.show(vista, Toast.Type.ERROR, s);
+    }
+
+    @Override
+    public void init() {
+
+        this.eventManager.addMessageListener(this);
+
+        cargarConversaciones();
+    }
+
+    @Override
+    public Form getForm() {
+        return vista;
     }
 }

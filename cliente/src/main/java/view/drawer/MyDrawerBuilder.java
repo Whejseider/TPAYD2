@@ -134,7 +134,6 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                 } else if (i == 4) {
                     action.consume();
                     Cliente.getInstance().cerrarSesion(Sesion.getInstance().getUsuarioActual());
-//                    FormManager.showLogin(); //TODO Si no lo pongo aca no muestra el login, ver despues porque, (ACTION)
                     return;
                 }
                 if (itemClass == null || !Form.class.isAssignableFrom(itemClass)) {

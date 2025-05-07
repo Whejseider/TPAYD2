@@ -11,13 +11,14 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 @SystemForm(name = "Directorio", description = "Directorio de contactos", tags = {"directorio"})
-public class FormDirectorio extends Form {
+public class FormDirectorio extends Form  {
 
     public FormDirectorio() {
         init();
     }
 
     private void init() {
+        setName("FormDirectorio");
         setLayout(new MigLayout("wrap,fill", "[fill]", "[grow 0][fill]"));
         add(createInfo());
         add(createOptions());

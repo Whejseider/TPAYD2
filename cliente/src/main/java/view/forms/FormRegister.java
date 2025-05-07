@@ -2,14 +2,15 @@ package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import controller.RegisterController;
-import interfaces.IVista;
+import interfaces.IController;
 import net.miginfocom.swing.MigLayout;
 import view.system.Form;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
-public class FormRegister extends Form implements IVista<RegisterController> {
+public class FormRegister extends Form {
 
     private final JLabel lblIP;
     private final JLabel lblErrorIP;
@@ -32,6 +33,7 @@ public class FormRegister extends Form implements IVista<RegisterController> {
     private RegisterController controlador;
 
     public FormRegister() throws HeadlessException {
+        setName("FormRegister");
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 
         txtUsuario = new JTextField();
@@ -127,6 +129,12 @@ public class FormRegister extends Form implements IVista<RegisterController> {
         add(pane);
     }
 
+    @Override
+    public void setControlador(IController controlador) {
+        this.getBtnAceptar().addActionListener((ActionListener) controlador);
+        this.getBtnLogin().addActionListener((ActionListener) controlador);
+    }
+
     public JButton getBtnLogin() {
         return btnLogin;
     }
@@ -207,8 +215,4 @@ public class FormRegister extends Form implements IVista<RegisterController> {
         this.setVisible(true);
     }
 
-    @Override
-    public void setControlador(RegisterController controlador) {
-        this.controlador = controlador;
-    }
 }

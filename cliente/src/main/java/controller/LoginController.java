@@ -3,33 +3,51 @@ package controller;
 import com.formdev.flatlaf.FlatClientProperties;
 import connection.Cliente;
 import connection.Sesion;
-import interfaces.AppStateListener;
-import model.Directorio;
-import model.Mensaje;
-import model.TipoRespuesta;
+import interfaces.AuthenticationListener;
+import interfaces.IController;
 import model.User;
 import raven.modal.Toast;
-import view.Messenger;
 import view.forms.Login;
 import view.manager.ErrorManager;
+import view.system.Form;
 import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.Socket;
 
-public class LoginController implements ActionListener, AppStateListener {
+public class LoginController implements IController, ActionListener, AuthenticationListener {
     private Login vista;
-    private Cliente cliente;
-    private Messenger messenger;
-    private MainController mainController;
+    private EventManager eventManager;
 
     public LoginController(Login vista) {
         this.vista = vista;
-        this.mainController = MainController.getInstance();
-        this.vista.getBtnAceptar().addActionListener(this);
-        this.vista.getBtnSignUp().addActionListener(this);
+    }
 
-        this.mainController.addAppStateListener(this);
+    private void initMessenger() {
+        try {
+            Socket socket = new Socket(Cliente.IP, Cliente.PUERTO);
+            Cliente cliente = Cliente.getInstance();
+            cliente.init(socket);
+            cliente.escuchar();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void init() {
+
+        this.eventManager = EventManager.getInstance();
+        this.eventManager.addAuthenticationListener(this);
+
+        this.initMessenger();
+    }
+
+    @Override
+    public Form getForm() {
+        return vista;
     }
 
     @Override
@@ -100,23 +118,7 @@ public class LoginController implements ActionListener, AppStateListener {
         this.vista = vista;
     }
 
-    public Messenger getMessenger() {
-        return messenger;
-    }
 
-    public void setMessenger(Messenger messenger) {
-        this.messenger = messenger;
-    }
-
-    @Override
-    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
-
-    }
-
-    @Override
-    public void onRegistrationFailure(String s){
-
-    }
 
     @Override
     public void onLoginSuccess(User user) {
@@ -124,7 +126,6 @@ public class LoginController implements ActionListener, AppStateListener {
         Sesion.getInstance().setUsuarioActual(user);
         Toast.show(vista, Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
-        FormManager.removeLogin();
     }
 
     @Override
@@ -134,20 +135,11 @@ public class LoginController implements ActionListener, AppStateListener {
 
     @Override
     public void onLogoutSuccess() {
+        addListener();
     }
 
     @Override
     public void onLogoutFailure(String s) {
-
-    }
-
-    @Override
-    public void onMessageReceivedSuccess(Mensaje mensaje) {
-
-    }
-
-    @Override
-    public void onMessageReceivedFailure(String s) {
 
     }
 
@@ -157,42 +149,24 @@ public class LoginController implements ActionListener, AppStateListener {
     }
 
     @Override
-    public void onDirectoryInfoReceived(Directorio directorio) {
+    public void onRegistrationFailure(String s) {
 
     }
 
-    @Override
-    public void onAddContactSuccess(User user) {
-
-    }
-
-    @Override
-    public void onAddContactFailure(String s) {
-
-    }
-
-    @Override
-    public void onSendMessageSuccess(Mensaje contenido) {
-
-    }
-
-    @Override
-    public void onSendMessageFailure(String s) {
-
-    }
 
     public void removeListener() {
-        if (this.mainController != null) {
-            this.mainController.removeAppStateListener(this);
-            System.out.println("LoginController desregistrado como listener.");
-        }
+        this.eventManager = EventManager.getInstance();
+
+        this.eventManager.removeAuthenticationListener(this);
+        System.out.println("LoginController desregistrado como listener.");
+
     }
 
-    public void addListener(){
-        if(this.mainController == null){
-            this.mainController = MainController.getInstance();
-        }
-        this.mainController.addAppStateListener(this);
+    public void addListener() {
+        this.eventManager = EventManager.getInstance();
+
+        this.eventManager.addAuthenticationListener(this);
         System.out.println("LoginController registrado como listener.");
     }
+
 }

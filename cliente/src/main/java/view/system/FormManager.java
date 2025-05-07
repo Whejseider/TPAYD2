@@ -2,12 +2,10 @@ package view.system;
 
 
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
-import connection.Cliente;
 import connection.ConnectionManager;
 import connection.Sesion;
-import controller.LoginController;
-import controller.MainFormController;
-import controller.RegisterController;
+import factory.ControllerFactory;
+import interfaces.IController;
 import model.TipoRespuesta;
 import raven.modal.Drawer;
 import raven.modal.ModalDialog;
@@ -44,7 +42,6 @@ public class FormManager {
             TipoRespuesta tipoRespuesta = ConnectionManager.getInstance().checkConnection();
             if (tipoRespuesta == TipoRespuesta.OK) {
                 showLogin();
-                Cliente.getInstance().escuchar();
             } else {
                 ConnectionManager.getInstance().showError(() -> showLogin(), true);
             }
@@ -53,11 +50,18 @@ public class FormManager {
 
     private static void install() {
         FormSearch.getInstance().installKeyMap(getMainForm());
-        MainFormController mainFormController = new MainFormController();
+    }
+
+    public static void clearForms() {
+        FORMS.clear();
+        mainForm = null;
+        register = null;
+        login = null;
+        frame.repaint();
+        frame.revalidate();
     }
 
     public static void showForm(Form form) {
-        SwingUtilities.invokeLater(() -> {
             if (form != FORMS.getCurrent()) {
                 FlatAnimatedLafChange.showSnapshot();
                 FORMS.add(form);
@@ -67,7 +71,6 @@ public class FormManager {
                 mainForm.refresh();
                 FlatAnimatedLafChange.hideSnapshotWithAnimation();
             }
-        });
     }
 
     public static void undo() {
@@ -97,55 +100,57 @@ public class FormManager {
         }
     }
 
-    //TODO CAMbiar nombres porque me equivoque este y logout, estan al revés
     public static void showHome() {
-        MenuDrawer.getInstance().setVisible(true);
-        MenuDrawer.getInstance().setDrawerHeader(Sesion.getInstance().getUsuarioActual());
-        frame.getContentPane().removeAll();
-        frame.getContentPane().add(getMainForm());
-        Drawer.setSelectedItemClass(MessengerPanel.class);
-        frame.repaint();
-        frame.revalidate();
+            MenuDrawer.getInstance().setVisible(true);
+            MenuDrawer.getInstance().setDrawerHeader(Sesion.getInstance().getUsuarioActual());
+            frame.getContentPane().removeAll();
+            frame.getContentPane().add(getMainForm());
+            Drawer.setSelectedItemClass(MessengerPanel.class);
+            frame.repaint();
+            frame.revalidate();
     }
 
     public static void showLogin() {
-        MenuDrawer.getInstance().setVisible(false);
-        frame.getContentPane().removeAll();
-        Form login = getLogin();
-        login.formCheck();
-        frame.getContentPane().add(login);
-        FORMS.clear();
-        frame.repaint();
-        frame.revalidate();
+            MenuDrawer.getInstance().setVisible(false);
+            frame.getContentPane().removeAll();
+            Form login = getLogin();
+            login.formCheck();
+            frame.getContentPane().add(login);
+            FORMS.clear();
+            frame.repaint();
+            frame.revalidate();
     }
 
     public static void showRegister() {
-        MenuDrawer.getInstance().setVisible(false);
-        frame.getContentPane().removeAll();
-        Form register = getRegister();
-        register.formCheck();
-        frame.getContentPane().add(register);
-        FORMS.clear();
-        frame.repaint();
-        frame.revalidate();
+            MenuDrawer.getInstance().setVisible(false);
+            frame.getContentPane().removeAll();
+            Form register = getRegister();
+            register.formCheck();
+            frame.getContentPane().add(register);
+            FORMS.clear();
+            frame.repaint();
+            frame.revalidate();
     }
 
     private static Form getRegister() {
         if (register == null) {
             register = new FormRegister();
-            RegisterController registerController = new RegisterController(register);
+            ControllerFactory controllerFactory = new ControllerFactory();
+            IController controller = controllerFactory.getController(register.getName(), register);
+            register.setControlador(controller);
+            controller.init();
         }
         return register;
     }
 
     public static void showError(FormError formError) {
-        MenuDrawer.getInstance().setVisible(false);
-        frame.getContentPane().removeAll();
-        formError.formCheck();
-        frame.getContentPane().add(formError);
-        FORMS.clear();
-        frame.repaint();
-        frame.revalidate();
+            MenuDrawer.getInstance().setVisible(false);
+            frame.getContentPane().removeAll();
+            formError.formCheck();
+            frame.getContentPane().add(formError);
+            FORMS.clear();
+            frame.repaint();
+            frame.revalidate();
     }
 
     public static JFrame getFrame() {
@@ -155,6 +160,10 @@ public class FormManager {
     public static MainForm getMainForm() {
         if (mainForm == null) {
             mainForm = new MainForm();
+            ControllerFactory controllerFactory = new ControllerFactory();
+            IController controller = controllerFactory.getController(mainForm.getName(), mainForm);
+            mainForm.setControlador(controller);
+            controller.init();
         }
         return mainForm;
     }
@@ -162,13 +171,12 @@ public class FormManager {
     private static Login getLogin() {
         if (login == null) {
             login = new Login();
-            LoginController loginController = new LoginController(login);
+            ControllerFactory controllerFactory = new ControllerFactory();
+            IController controller = controllerFactory.getController(login.getName(), login);
+            login.setControlador(controller);
+            controller.init();
         }
         return login;
-    }
-
-    public static void removeLogin(){
-        login = null;
     }
 
     public static void showAbout() {
@@ -176,4 +184,5 @@ public class FormManager {
                 ModalDialog.createOption().setAnimationEnabled(false)
         );
     }
+
 }

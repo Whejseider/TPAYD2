@@ -6,9 +6,6 @@ import raven.modal.Toast;
 import view.forms.FormError;
 import view.system.FormManager;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class ConnectionManager {
 
     private ConnectionCallBack callBack;
@@ -25,16 +22,15 @@ public class ConnectionManager {
     }
 
     public TipoRespuesta checkConnection() {
-        try {
-            Socket socket = new Socket(Cliente.IP, Cliente.PUERTO);
-            Cliente cliente = Cliente.getInstance();
-            cliente.init(socket);
+
+//            Socket socket = new Socket(Cliente.IP, Cliente.PUERTO);
+//            socket.close();
+//            Cliente cliente = Cliente.getInstance();
+//            cliente.init(socket);
 //            Esto deberia de cambiarlo
             //Para que el server mande la respuesta de si hay conexion o no
             return TipoRespuesta.OK;
-        } catch (IOException e) {
-            return TipoRespuesta.ERROR;
-        }
+
     }
 
     public void showError(ConnectionCallBack callBack, boolean showReconnectButton) {

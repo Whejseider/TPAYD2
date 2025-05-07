@@ -18,7 +18,6 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
 
     public NuevoChatController(NuevoChat vista) {
         this.vista = vista;
-        this.vista.getList1().addListSelectionListener(this);
 
         for (Contacto c : Sesion.getInstance().getUsuarioActual().getAgenda().getContactos()) {
             this.vista.agregarContacto(c);
@@ -64,4 +63,5 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
             }
         }
     }
+
 }

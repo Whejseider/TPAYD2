@@ -2,111 +2,46 @@ package controller;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import connection.Cliente;
-import interfaces.AppStateListener;
-import model.Directorio;
-import model.Mensaje;
-import model.TipoRespuesta;
+import interfaces.AuthenticationListener;
+import interfaces.IController;
 import model.User;
 import raven.modal.Toast;
 import view.forms.FormRegister;
 import view.manager.ErrorManager;
+import view.system.Form;
 import view.system.FormManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.regex.Pattern;
 
-public class RegisterController implements ActionListener, AppStateListener {
+public class RegisterController implements IController, ActionListener, AuthenticationListener {
     private FormRegister vista;
-    private MainController mainController;
+    private EventManager eventManager;
     private User user;
 
-    public RegisterController(FormRegister vista) {
-        this.vista = vista;
-        this.mainController = MainController.getInstance();
-        this.vista.getBtnAceptar().addActionListener(this);
-        this.vista.getBtnLogin().addActionListener(this);
-
-        this.mainController.addAppStateListener(this);
+    public RegisterController(FormRegister form) {
+        this.vista = form;
     }
 
     public FormRegister getVista() {
         return vista;
     }
 
-    public MainController getMainController() {
-        return mainController;
+    public EventManager getMainController() {
+        return eventManager;
     }
 
     @Override
-    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
+    public void init() {
+        this.eventManager = EventManager.getInstance();
 
+        this.eventManager.addAuthenticationListener(this);
     }
 
     @Override
-    public void onLoginSuccess(User user) {
-
-    }
-
-    @Override
-    public void onLoginFailure(String s) {
-
-    }
-
-    @Override
-    public void onLogoutSuccess() {
-
-    }
-
-    @Override
-    public void onLogoutFailure(String s) {
-
-    }
-
-    @Override
-    public void onMessageReceivedSuccess(Mensaje mensaje) {
-
-    }
-
-    @Override
-    public void onMessageReceivedFailure(String s) {
-
-    }
-
-    @Override
-    public void onRegistrationSuccess() {
-        Toast.show(vista, Toast.Type.SUCCESS, "Usuario registrado correctamente.");
-        FormManager.showLogin();
-    }
-
-    @Override
-    public void onRegistrationFailure(String s) {
-        ErrorManager.getInstance().showError(s);
-    }
-
-    @Override
-    public void onDirectoryInfoReceived(Directorio directorio) {
-
-    }
-
-    @Override
-    public void onAddContactSuccess(User user) {
-
-    }
-
-    @Override
-    public void onAddContactFailure(String s) {
-
-    }
-
-    @Override
-    public void onSendMessageSuccess(Mensaje contenido) {
-
-    }
-
-    @Override
-    public void onSendMessageFailure(String s) {
-
+    public Form getForm() {
+        return vista;
     }
 
     @Override
@@ -192,4 +127,38 @@ public class RegisterController implements ActionListener, AppStateListener {
             FormManager.showLogin();
         }
     }
+
+
+    @Override
+    public void onLoginSuccess(User user) {
+
+    }
+
+    @Override
+    public void onLoginFailure(String s) {
+
+    }
+
+    @Override
+    public void onLogoutSuccess() {
+
+    }
+
+    @Override
+    public void onLogoutFailure(String s) {
+
+    }
+
+    @Override
+    public void onRegistrationSuccess() {
+        Toast.show(vista, Toast.Type.SUCCESS, "Usuario registrado correctamente.");
+        FormManager.showLogin();
+    }
+
+    @Override
+    public void onRegistrationFailure(String s) {
+        ErrorManager.getInstance().showError(s);
+    }
+
+
 }

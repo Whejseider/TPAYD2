@@ -1,9 +1,7 @@
 package view.system;
 
-import controller.DirectorioController;
-import controller.MessengerPanelController;
-import view.forms.FormDirectorio;
-import view.forms.MessengerPanel;
+import factory.ControllerFactory;
+import interfaces.IController;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -33,13 +31,11 @@ public class AllForms {
         }
         try {
             Form form = cls.getDeclaredConstructor().newInstance();
-            /*
-            Hmm....
-             */
-            if (form instanceof MessengerPanel) {
-                MessengerPanelController messengerPanelController = new MessengerPanelController((MessengerPanel) form);
-            } else if (form instanceof FormDirectorio){
-                DirectorioController directorioController = new DirectorioController((FormDirectorio) form);
+            ControllerFactory controllerFactory = new ControllerFactory();
+            IController controller = controllerFactory.getController(form.getName(), form);
+            if (controller != null) {
+                form.setControlador(controller);
+                controller.init();
             }
             getInstance().formsMap.put(cls, form);
             formInit(form);

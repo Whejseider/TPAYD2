@@ -1,7 +1,7 @@
 package view.forms;
 
 import controller.MessengerPanelController;
-import interfaces.IVista;
+import interfaces.IController;
 import model.Contacto;
 import model.Conversacion;
 import utils.ChatListRenderer;
@@ -9,10 +9,12 @@ import utils.SystemForm;
 import view.system.Form;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 @SystemForm(name = "Chats", description = "Muestra los chats activos y el crear un nuevo chat", tags = {"chat"})
-public class MessengerPanel extends Form implements IVista<MessengerPanelController> {
+public class MessengerPanel extends Form {
     private JPanel pane;
     private JPanel panelOpciones;
     private JPanel panelPrincipal;
@@ -47,6 +49,7 @@ public class MessengerPanel extends Form implements IVista<MessengerPanelControl
     }
 
     private void init() {
+        setName("MessengerPanel");
         pane = new JPanel(new BorderLayout());
         panelPrincipal = new JPanel(new BorderLayout());
         pane.add(panelPrincipal, BorderLayout.CENTER);
@@ -147,6 +150,13 @@ public class MessengerPanel extends Form implements IVista<MessengerPanelControl
         listChat.setCellRenderer(new ChatListRenderer());
     }
 
+    @Override
+    public void setControlador(IController controlador) {
+        this.btnEnviar.addActionListener((ActionListener) controlador);
+        this.btnNuevoChat.addActionListener((ActionListener) controlador);
+        this.listChat.addListSelectionListener((ListSelectionListener) controlador);
+    }
+
     public MessengerPanelController getControlador() {
         return controlador;
     }
@@ -240,10 +250,5 @@ public class MessengerPanel extends Form implements IVista<MessengerPanelControl
 
     public JPanel getPanelContactoInfo() {
         return panelContactoInfo;
-    }
-
-    @Override
-    public void setControlador(MessengerPanelController controlador) {
-        this.controlador =controlador;
     }
 }

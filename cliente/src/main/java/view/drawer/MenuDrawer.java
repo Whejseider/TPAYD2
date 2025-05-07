@@ -20,6 +20,11 @@ public class MenuDrawer {
         return instance;
     }
 
+    public static void clearInstance() {
+        if (instance != null)
+            instance = null;
+    }
+
     private MenuDrawer() {
         drawerBuilder = new MyDrawerBuilder();
         Drawer.installDrawer(FormManager.getFrame(), drawerBuilder);
