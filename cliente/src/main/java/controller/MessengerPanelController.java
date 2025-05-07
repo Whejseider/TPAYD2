@@ -30,6 +30,8 @@ public class MessengerPanelController implements IController, ActionListener, Li
     private Contacto contactoActual;
     private EventManager eventManager = EventManager.getInstance();
 
+    private LocalDate ultimaFechaMostradaEnChat = null;
+
     public MessengerPanelController(MessengerPanel form) {
         this.vista = form;
     }
@@ -54,38 +56,72 @@ public class MessengerPanelController implements IController, ActionListener, Li
         this.contactoActual = contactoActual;
     }
 
+    private void actualizarVistaMensaje(Mensaje mensaje, boolean esMio) {
+        SwingUtilities.invokeLater(() -> {
+            if (vista.getChat() == null) return;
+
+            LocalDate fechaMensaje = mensaje.getTiempo().toLocalDate();
+            LocalDate hoy = LocalDate.now();
+            LocalDate ayer = hoy.minusDays(1);
+
+            if (ultimaFechaMostradaEnChat == null || !fechaMensaje.isEqual(ultimaFechaMostradaEnChat)) {
+                String textoFecha;
+                if (fechaMensaje.isEqual(hoy)) {
+                    textoFecha = "Hoy";
+                } else if (fechaMensaje.isEqual(ayer)) {
+                    textoFecha = "Ayer";
+                } else {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    textoFecha = fechaMensaje.format(formatter);
+                }
+                vista.getChat().addDate(textoFecha);
+                ultimaFechaMostradaEnChat = fechaMensaje;
+            }
+
+            if (esMio) {
+                vista.getChat().addItemRight(mensaje);
+            } else {
+                vista.getChat().addItemLeft(mensaje);
+            }
+
+            vista.getChat().scrollToBottom();
+        });
+    }
+
     public void procesaMensajeEntrante(Mensaje mensaje) {
 
         User receptor = mensaje.getReceptor().getUser();
         User emisor = mensaje.getEmisor();
-        Contacto contacto = receptor.getAgenda().getContactoPorUsuario(emisor);
+        Contacto contactoEmisor = receptor.getAgenda().getContactoPorUsuario(emisor);
         Conversacion conversacion = receptor.getConversacionCon(emisor);
 
         SwingUtilities.invokeLater(() -> {
             DefaultListModel<Conversacion> listModel = this.vista.getListModel();
             if (!listModel.contains(conversacion)) {
-                if (!conversacion.getMensajes().isEmpty()) {
-                    listModel.addElement(conversacion);
-                }
-            }
 
-            if (contacto.equals(this.getContactoActual())) {
-                this.recibirMensaje(mensaje);
+                listModel.addElement(conversacion);
             } else {
-                revalidarListChat();
-//                System.out.println("DEBUG - Antes de set: " + conversacion.getNotificacion().tieneMensajesNuevos());
-                conversacion.getNotificacion().setTieneMensajesNuevos(true);
-                listModel.set(listModel.indexOf(conversacion), conversacion);
-//                System.out.println("DEBUG - Después de set: " + conversacion.getNotificacion().tieneMensajesNuevos());
+
+                listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
             }
 
+            if (contactoEmisor != null && contactoEmisor.equals(this.getContactoActual())) {
+                actualizarVistaMensaje(mensaje, false);
+            } else {
+
+                revalidarListChat();
+                conversacion.getNotificacion().setTieneMensajesNuevos(true);
+
+            }
         });
     }
+
 
     public void mostrarChat(Contacto contacto) {
         SwingUtilities.invokeLater(() -> {
 
-            revalidarPanelMensajes();
+            vista.getChat().clearMessages();
+            ultimaFechaMostradaEnChat = null;
 
             contactoActual = contacto;
 
@@ -96,39 +132,11 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
             List<Mensaje> mensajes = conversacion.getMensajes();
 
-
             mensajes.sort(Comparator.comparing(Mensaje::getTiempo));
 
-            LocalDate ultimaFechaMostrada = null;
-            LocalDate hoy = LocalDate.now();
-            LocalDate ayer = hoy.minusDays(1);
-
             for (Mensaje mensaje : conversacion.getMensajes()) {
-                LocalDate fechaMensaje = mensaje.getTiempo().toLocalDate();
-
-
-                if (ultimaFechaMostrada == null || !fechaMensaje.isEqual(ultimaFechaMostrada)) {
-                    String textoFecha;
-                    if (fechaMensaje.isEqual(hoy)) {
-                        textoFecha = "Hoy";
-                    } else if (fechaMensaje.isEqual(ayer)) {
-                        textoFecha = "Ayer";
-                    } else {
-
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-                        textoFecha = fechaMensaje.format(formatter);
-                    }
-                    vista.getChat().addDate(textoFecha);
-                    ultimaFechaMostrada = fechaMensaje;
-                }
                 boolean esMio = mensaje.EsMio();
-                if (esMio) {
-                    vista.getChat().addItemRight(mensaje);
-                } else {
-                    vista.getChat().addItemLeft(mensaje);
-                }
-
+                actualizarVistaMensaje(mensaje, esMio);
             }
 
         });
@@ -160,7 +168,6 @@ public class MessengerPanelController implements IController, ActionListener, Li
             revalidarListChat();
         });
     }
-
 
     public Contacto getContactoActual() {
         return contactoActual;
@@ -195,19 +202,23 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
                 Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual, true);
 
-                Cliente.getInstance().enviarMensaje(mensaje);
-
                 Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
+
+                Cliente.getInstance().enviarMensaje(mensaje);
 
                 DefaultListModel<Conversacion> listModel = this.vista.getListModel();
                 if (!listModel.contains(conversacion)) {
                     listModel.addElement(conversacion);
+                } else {
+                    listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
+                }
+
+                if(vista.getListChat().getSelectedValue() != conversacion) {
                     vista.getListChat().setSelectedValue(conversacion, true);
                 }
 
                 vista.getTxtMensaje().setText("");
                 vista.getTxtMensaje().grabFocus();
-                vista.getPanelConversacion().getChatBottom().revalidate();
 
             }
         }
@@ -219,22 +230,6 @@ public class MessengerPanelController implements IController, ActionListener, Li
             nuevoChat.setControlador(nuevoChatController);
             nuevoChat.display();
         }
-
-    }
-
-    public void enviarMensaje(Mensaje mensaje) {
-        SwingUtilities.invokeLater(() -> {
-            vista.getChat().addItemRight(mensaje);
-            vista.getTxtMensaje().setText("");
-        });
-    }
-
-    public void recibirMensaje(Mensaje mensaje) {
-        String alias = mensaje.getReceptor().getUser().getAgenda().getContactoPorUsuario(mensaje.getEmisor()).getAlias();
-        SwingUtilities.invokeLater(() -> {
-            vista.getChat().addItemLeft(mensaje);
-            vista.getTxtMensaje().setText("");
-        });
 
     }
 
@@ -253,7 +248,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
     @Override
     public void onSendMessageSuccess(Mensaje mensaje) {
         Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
-        enviarMensaje(mensaje);
+        actualizarVistaMensaje(mensaje, true);
     }
 
     @Override

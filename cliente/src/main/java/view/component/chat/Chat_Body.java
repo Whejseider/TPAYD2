@@ -72,7 +72,7 @@ public class Chat_Body extends JPanel {
         refreshMessages();
     }
 
-    private void scrollToBottom() {
+    public void scrollToBottom() {
         SwingUtilities.invokeLater(() -> {
             if (sp != null) {
                 JScrollBar verticalBar = sp.getVerticalScrollBar();
