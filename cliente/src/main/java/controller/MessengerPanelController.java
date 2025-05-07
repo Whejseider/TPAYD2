@@ -18,6 +18,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MessengerPanelController implements IController, ActionListener, ListSelectionListener, MessageListener {
     private MessengerPanel vista;
@@ -89,7 +94,34 @@ public class MessengerPanelController implements IController, ActionListener, Li
                 vista.getListModel().addElement(conversacion);
             }
 
+            List<Mensaje> mensajes = conversacion.getMensajes();
+
+
+            mensajes.sort(Comparator.comparing(Mensaje::getTiempo));
+
+            LocalDate ultimaFechaMostrada = null;
+            LocalDate hoy = LocalDate.now();
+            LocalDate ayer = hoy.minusDays(1);
+
             for (Mensaje mensaje : conversacion.getMensajes()) {
+                LocalDate fechaMensaje = mensaje.getTiempo().toLocalDate();
+
+
+                if (ultimaFechaMostrada == null || !fechaMensaje.isEqual(ultimaFechaMostrada)) {
+                    String textoFecha;
+                    if (fechaMensaje.isEqual(hoy)) {
+                        textoFecha = "Hoy";
+                    } else if (fechaMensaje.isEqual(ayer)) {
+                        textoFecha = "Ayer";
+                    } else {
+
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                        textoFecha = fechaMensaje.format(formatter);
+                    }
+                    vista.getChat().addDate(textoFecha);
+                    ultimaFechaMostrada = fechaMensaje;
+                }
                 boolean esMio = mensaje.EsMio();
                 if (esMio) {
                     vista.getChat().addItemRight(mensaje);

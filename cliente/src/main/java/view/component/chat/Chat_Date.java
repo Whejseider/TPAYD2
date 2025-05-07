@@ -7,7 +7,7 @@ public class Chat_Date extends JLayeredPane {
 
     public Chat_Date() {
         initComponents();
-        txt.setBackground(new Color(221, 221, 221, 110));
+        txt.setBackground(new Color(0, 0, 0, 110));
     }
 
     public void setText(String text) {

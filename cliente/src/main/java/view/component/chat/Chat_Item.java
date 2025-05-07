@@ -29,11 +29,7 @@ public class Chat_Item extends JLayeredPane {
         layer.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         layer.setBorder(new EmptyBorder(0, 5, 10, 5));
         lblTime = new JLabel(time);
-//        label.setForeground(new Color(110, 110, 110));
         lblTime.setHorizontalTextPosition(JLabel.LEFT);
-        lblTime.putClientProperty(FlatClientProperties.STYLE, "" +
-                "[light]background:darken(@background,30%);" +
-                "[dark]background:lighten(@background,30%)");
         layer.add(lblTime);
         add(layer);
     }
