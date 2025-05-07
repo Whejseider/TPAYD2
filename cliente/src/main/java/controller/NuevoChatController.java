@@ -53,7 +53,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
                         this.messengerPanelController.getVista().getListChat().setSelectedValue(conversacion, true);
                     } else {
                         // Si no hay mensajes, limpiar el área de chat
-                        this.messengerPanelController.getVista().getTxtAreaConversacion().setText("");
+                        this.messengerPanelController.revalidarPanelMensajes();
                         // No agregar a la lista de chats activos
                     }
 

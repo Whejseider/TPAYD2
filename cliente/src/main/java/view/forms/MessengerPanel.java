@@ -4,8 +4,11 @@ import controller.MessengerPanelController;
 import interfaces.IController;
 import model.Contacto;
 import model.Conversacion;
+import net.miginfocom.swing.MigLayout;
 import utils.ChatListRenderer;
+import utils.JIMSendTextPane;
 import utils.SystemForm;
+import view.component.chat.Chat_Body;
 import view.system.Form;
 
 import javax.swing.*;
@@ -20,7 +23,7 @@ public class MessengerPanel extends Form {
     private JPanel panelPrincipal;
     private JButton btnNuevoContacto;
     private JPanel panelChats;
-    private JPanel panelConversacion;
+    private FormChat panelConversacion;
     private JPanel panelEnviarMensaje;
     private JPanel panelSupChats;
     private JLabel lblChats;
@@ -38,7 +41,7 @@ public class MessengerPanel extends Form {
     private JLabel lblPuerto;
     private JTextField txtMensaje;
     private JButton btnEnviar;
-    private JTextArea txtAreaConversacion;
+    private Chat_Body panelMensajes;
     private JList<Conversacion> listChat;
     private DefaultListModel<Conversacion> listModel;
     private JScrollPane scrollPane;
@@ -87,60 +90,8 @@ public class MessengerPanel extends Form {
         listChat.setFixedCellHeight(60);
         scrollPane.setViewportView(listChat);
 
-        panelConversacion = new JPanel(new BorderLayout());
+        panelConversacion = new FormChat();
         panelPrincipal.add(panelConversacion, BorderLayout.CENTER);
-
-        panelContactoInfo = new JPanel(new BorderLayout());
-        panelContactoInfo.setPreferredSize(new Dimension(0, 85));
-        panelContactoInfo.setVisible(false);
-        panelConversacion.add(panelContactoInfo, BorderLayout.NORTH);
-
-        panelNombreContacto = new JPanel(new BorderLayout());
-        panelContactoInfo.add(panelNombreContacto, BorderLayout.CENTER);
-
-        panelNombreContactoAux = new JPanel(new BorderLayout());
-        panelNombreContacto.add(panelNombreContactoAux, BorderLayout.CENTER);
-
-        lblNombreMensaje = new JLabel("Nombre del contacto");
-        panelNombreContactoAux.add(lblNombreMensaje, BorderLayout.CENTER);
-
-        panelPuertoIpChat = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelNombreContactoAux.add(panelPuertoIpChat, BorderLayout.SOUTH);
-
-        lblIP = new JLabel("IP:localhost");
-        panelPuertoIpChat.add(lblIP);
-
-        lblPuerto = new JLabel("Puerto:9999");
-        panelPuertoIpChat.add(lblPuerto);
-
-        JScrollPane scrollPaneConversacion = new JScrollPane();
-        panelConversacion.add(scrollPaneConversacion, BorderLayout.CENTER);
-
-        txtAreaConversacion = new JTextArea();
-        txtAreaConversacion.setEditable(false);
-        txtAreaConversacion.setFocusable(false);
-        txtAreaConversacion.setLineWrap(true);
-        txtAreaConversacion.setWrapStyleWord(true);
-        scrollPaneConversacion.setViewportView(txtAreaConversacion);
-
-        panelEnviarMensaje = new JPanel(new BorderLayout());
-        panelConversacion.add(panelEnviarMensaje, BorderLayout.SOUTH);
-
-        btnEnviar = new JButton("Enviar");
-        panelEnviarMensaje.add(btnEnviar, BorderLayout.EAST);
-
-        txtMensaje = new JTextField();
-        panelEnviarMensaje.add(txtMensaje, BorderLayout.CENTER);
-
-//        panelOpciones = new JPanel(new MigLayout("wrap,fillx,insets 15 25 10 25", "fill,60:100"));
-//        panelOpciones.putClientProperty(FlatClientProperties.STYLE, "" +
-//                "[light]background:darken(@background,10%);" +
-//                "[dark]background:darken(@background,10%)");
-//        pane.add(panelOpciones, BorderLayout.WEST);
-//
-//        panelOpciones.add(new JSeparator(), "gapy 10 10");
-//        btnNuevoContacto = new JButton("Nuevo Contacto");
-//        panelOpciones.add(btnNuevoContacto, "gapy 10 10, sizegroup btn");
 
         setLayout(new BorderLayout());
         add(pane, BorderLayout.CENTER);
@@ -152,9 +103,13 @@ public class MessengerPanel extends Form {
 
     @Override
     public void setControlador(IController controlador) {
-        this.btnEnviar.addActionListener((ActionListener) controlador);
+        this.panelConversacion.getChatBottom().getCmd().addActionListener((ActionListener) controlador);
         this.btnNuevoChat.addActionListener((ActionListener) controlador);
         this.listChat.addListSelectionListener((ListSelectionListener) controlador);
+    }
+
+    public FormChat getPanelConversacion() {
+        return panelConversacion;
     }
 
     public MessengerPanelController getControlador() {
@@ -169,19 +124,7 @@ public class MessengerPanel extends Form {
     }
 
     public void mostrarContactoInfo(Contacto contactoSeleccionado) {
-        getPanelContactoInfo().setVisible(true);
-
-        if (contactoSeleccionado.getAlias().isEmpty()) {
-            getLblNombreMensaje().setText(contactoSeleccionado.getNombreUsuario());
-        } else {
-            getLblNombreMensaje().setText(contactoSeleccionado.getAlias());
-        }
-
-        getLblIP().setText("IP: " + contactoSeleccionado.getIP());
-        getLblPuerto().setText("Puerto: " + contactoSeleccionado.getPuerto());
-
-        getPanelContactoInfo().revalidate();
-        getPanelContactoInfo().repaint();
+        panelConversacion.getChatTitle().mostrar(contactoSeleccionado);
     }
 
     public void setListChat(JList<Conversacion> listChat) {
@@ -232,16 +175,20 @@ public class MessengerPanel extends Form {
         return lblPuerto;
     }
 
-    public JTextField getTxtMensaje() {
-        return txtMensaje;
+    public JIMSendTextPane getTxtMensaje() {
+        return panelConversacion.getChatBottom().getTxt();
     }
 
     public JButton getBtnEnviar() {
-        return btnEnviar;
+        return panelConversacion.getChatBottom().getCmd();
     }
 
-    public JTextArea getTxtAreaConversacion() {
-        return txtAreaConversacion;
+    public Chat_Body getPanelMensajes() {
+        return panelMensajes;
+    }
+
+    public Chat_Body getChat() {
+        return panelConversacion.getChatBody();
     }
 
     public JList<Conversacion> getListChat() {
@@ -251,4 +198,5 @@ public class MessengerPanel extends Form {
     public JPanel getPanelContactoInfo() {
         return panelContactoInfo;
     }
+
 }

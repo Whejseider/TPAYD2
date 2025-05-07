@@ -202,6 +202,7 @@ public class ClientHandler implements Runnable {
         User emisor = mensaje.getEmisor();
         User receptor = mensaje.getReceptor().getUser();
         String nombreEmisor = emisor.getNombreUsuario();
+        mensaje.setEsMio(false);
 
         if (!userActual.getAgenda().existeContacto(emisor)) {
             userActual.getAgenda().agregarContacto(emisor);

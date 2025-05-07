@@ -9,10 +9,19 @@ public class Conversacion implements Serializable {
     private Contacto contacto;
     private List<Mensaje> mensajes;
     private Notificacion notificacion = new Notificacion();
+    private Mensaje ultimoMensaje;
 
     public Conversacion(Contacto contacto) {
         this.contacto = contacto;
         this.mensajes = new ArrayList<>();
+    }
+
+    public Mensaje getUltimoMensaje() {
+        return ultimoMensaje;
+    }
+
+    public void setUltimoMensaje(Mensaje ultimoMensaje) {
+        this.ultimoMensaje = ultimoMensaje;
     }
 
     public Notificacion getNotificacion() {

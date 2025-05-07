@@ -10,12 +10,22 @@ public class Mensaje implements Serializable {
     private LocalDateTime tiempo;
     private User emisor;
     private Contacto receptor;
+    private boolean esMio;
 
-    public Mensaje(String contenido, User emisor, Contacto receptor) {
+    public Mensaje(String contenido, User emisor, Contacto receptor, boolean esMio) {
         this.contenido = contenido;
         this.emisor = emisor;
         this.receptor = receptor;
+        this.esMio = esMio;
         this.tiempo = LocalDateTime.now();
+    }
+
+    public boolean EsMio() {
+        return esMio;
+    }
+
+    public void setEsMio(boolean esMio) {
+        this.esMio = esMio;
     }
 
     public String getContenido() {
@@ -48,7 +58,7 @@ public class Mensaje implements Serializable {
 
     public String getTiempoFormateado(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        return "[" + tiempo.format(formatter) + "]";
+        return tiempo.format(formatter);
     }
 
     @Override
