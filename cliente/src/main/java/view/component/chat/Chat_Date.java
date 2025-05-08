@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Chat_Date extends JPanel {
 
@@ -14,23 +15,28 @@ public class Chat_Date extends JPanel {
     }
 
     private void init() {
-
         setOpaque(false);
-
-        setLayout(new MigLayout("al center", "[center]", "5[center]5"));
+        setLayout(new MigLayout("fill, insets 10", "[center]", "[center]"));
 
         labelDate = new JLabel();
-
         labelDate.putClientProperty(FlatClientProperties.STYLE, "" +
-                "background: $Chat.date.background;" +
-                "foreground: $Chat.date.foreground;" +
-                "arc: $Chat.date.arc;"
+                "font:bold small;" +
+                "background:$Chat.date.background;" +
+                "foreground:$Chat.date.foreground;" +
+                "arc:50;" +  // Forma redondeada
+                "border:5,10,5,10"  // Padding interno
         );
-        add(labelDate);
+
+        add(labelDate, "center");
     }
 
     public void setText(String text) {
         labelDate.setText(text);
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Si deseas personalizar más el fondo, puedes hacerlo aquí
+    }
 }

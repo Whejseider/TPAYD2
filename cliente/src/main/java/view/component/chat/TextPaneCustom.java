@@ -17,7 +17,6 @@ public class TextPaneCustom extends JTextPane {
     private float animate;
     private String placeholderText;
     private Color placeholderForeground;
-    private long soundCaptureMillisecond;
     private boolean input = true;
 
     @Override
@@ -52,10 +51,8 @@ public class TextPaneCustom extends JTextPane {
             g2.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
             int left = UIScale.scale(30);
             int size = UIScale.scale(10);
-            paintPlaceholder(g2, left, MethodUtil.convertMillisToTime(soundCaptureMillisecond));
             int x = (left - size) / 2;
             int y = (getHeight() - size) / 2;
-            g2.setComposite(AlphaComposite.SrcOver.derive(MethodUtil.easingMilliseconds(soundCaptureMillisecond)));
             g2.setColor(new Color(206, 40, 40));
             g2.fill(new Ellipse2D.Double(x, y, size, size));
         }
@@ -79,23 +76,4 @@ public class TextPaneCustom extends JTextPane {
         this.placeholderText = placeholderText;
     }
 
-    public void setSoundCaptureMillisecond(long millisecond) {
-        this.soundCaptureMillisecond = millisecond;
-        repaint();
-    }
-
-    public void useInput(boolean input) {
-        if (this.input != input) {
-            this.input = input;
-            if (animator.isRunning()) {
-                animator.stop();
-            }
-            animate = 0;
-            animator.start();
-            setFocusable(input);
-            if (input) {
-                grabFocus();
-            }
-        }
-    }
 }

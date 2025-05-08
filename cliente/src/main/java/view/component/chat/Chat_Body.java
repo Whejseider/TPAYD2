@@ -1,12 +1,10 @@
 package view.component.chat;
 
-// Tus imports existentes
-
 import com.formdev.flatlaf.FlatClientProperties;
 import model.Mensaje;
 import net.miginfocom.swing.MigLayout;
 import utils.ScrollBar;
-import utils.AutoWrapText; // Asumiendo que existe esta clase
+import utils.AutoWrapText;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -23,9 +21,8 @@ public class Chat_Body extends JPanel {
     }
 
     private void init() {
-        // El layout de 'body' ahora es más simple, ya que Chat_Item maneja su propio tamaño.
         body = new JPanel(new MigLayout("fillx", "", "15[bottom]15")); // Menos padding vertical, los items lo manejan
-        body.setOpaque(false); // El fondo lo da el $Chat.background a través de Chat_Item o el JScrollPane
+        body.setOpaque(false);
         body.putClientProperty(FlatClientProperties.STYLE, "background:$Chat.background");
 
 
@@ -47,7 +44,7 @@ public class Chat_Body extends JPanel {
         add(sp, BorderLayout.CENTER);
     }
 
-    private JComponent createContentComponent(String text, boolean esMio) { // Añade esMio para diferenciar estilos si es necesario
+    private JComponent createMessageComponent(String text, boolean esMio) {
         JTextPane textPane = new JTextPane();
         ((DefaultCaret) textPane.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         textPane.setEditorKit(new AutoWrapText(!esMio ? 60 : 100));
@@ -56,10 +53,10 @@ public class Chat_Body extends JPanel {
         textPane.setText(text);
 
         String backgroundKey = !esMio ? "$Chat.item.background" : "$Chat.item.myselfBackground";
-        String foregroundKey = !esMio ? "@foreground" : "$Chat.item.myselfForeground"; // Asume que definiste estos
+        String foregroundKey = !esMio ? "@foreground" : "$Chat.item.myselfForeground";
 
         textPane.putClientProperty(FlatClientProperties.STYLE, "" +
-                "background: " + backgroundKey + ";" + // El fondo del textPane debe ser el mismo que el de la burbuja
+                "background: " + backgroundKey + ";" +
                 "foreground: " + foregroundKey + ";");
 
         return textPane;
@@ -75,7 +72,7 @@ public class Chat_Body extends JPanel {
     }
 
     public void addItemLeft(Mensaje mensaje) {
-        JComponent contentComponent = createContentComponent(mensaje.getContenido(), false);
+        JComponent contentComponent = createMessageComponent(mensaje.getContenido(), false);
         Chat_Left item = new Chat_Left(contentComponent);
 
         item.addTimePanel(createTimeLabel(mensaje.getTiempoFormateado()));
@@ -86,11 +83,11 @@ public class Chat_Body extends JPanel {
 
         body.add(item, "wrap, w 100::80%");
         refreshMessages();
-        scrollToBottom(); // Es bueno hacer scroll al agregar cualquier item
+        scrollToBottom();
     }
 
     public void addItemRight(Mensaje mensaje) {
-        JComponent contentComponent = createContentComponent(mensaje.getContenido(), true);
+        JComponent contentComponent = createMessageComponent(mensaje.getContenido(), true);
         Chat_Right item = new Chat_Right(contentComponent);
 
         item.addTimePanel(createTimeLabel(mensaje.getTiempoFormateado()));
@@ -115,10 +112,6 @@ public class Chat_Body extends JPanel {
                 JScrollBar verticalBar = sp.getVerticalScrollBar();
                 if (verticalBar != null) {
                     refreshMessages();
-//                    messageWrapperPanel.revalidate();
-//                    messageWrapperPanel.repaint();
-//                    sp.revalidate(); // Revalida el scrollpane
-//                    sp.repaint();    // Repinta
                     SwingUtilities.invokeLater(() -> {
                         verticalBar.setValue(verticalBar.getMaximum());
                     });
