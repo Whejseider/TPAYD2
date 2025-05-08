@@ -3,8 +3,8 @@ package view.component.chat;
 import com.formdev.flatlaf.FlatClientProperties;
 import model.Mensaje;
 import net.miginfocom.swing.MigLayout;
-import utils.ScrollBar;
 import utils.AutoWrapText;
+import utils.ScrollBar;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;

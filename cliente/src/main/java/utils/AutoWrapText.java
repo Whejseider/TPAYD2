@@ -2,9 +2,7 @@ package utils;
 
 import com.formdev.flatlaf.util.UIScale;
 
-import javax.swing.*;
 import javax.swing.text.*;
-import java.awt.*;
 
 public class AutoWrapText extends StyledEditorKit {
 

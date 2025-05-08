@@ -1,6 +1,5 @@
 package view.component.chat;
 
-import com.formdev.flatlaf.FlatLaf;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;

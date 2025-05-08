@@ -23,8 +23,8 @@ public class Chat_Date extends JPanel {
                 "font:bold small;" +
                 "background:$Chat.date.background;" +
                 "foreground:$Chat.date.foreground;" +
-                "arc:50;" +  // Forma redondeada
-                "border:5,10,5,10"  // Padding interno
+                "arc:50;" +
+                "border:5,10,5,10"
         );
 
         add(labelDate, "center");
@@ -37,6 +37,5 @@ public class Chat_Date extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Si deseas personalizar más el fondo, puedes hacerlo aquí
     }
 }

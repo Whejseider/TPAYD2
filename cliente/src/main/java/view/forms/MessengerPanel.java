@@ -5,7 +5,6 @@ import interfaces.IController;
 import model.Contacto;
 import model.Conversacion;
 import utils.ChatListRenderer;
-import utils.AutoWrapText;
 import utils.SystemForm;
 import view.component.chat.Chat_Body;
 import view.component.chat.TextPaneCustom;

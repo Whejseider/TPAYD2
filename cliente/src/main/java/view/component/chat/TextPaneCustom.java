@@ -4,7 +4,6 @@ import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.Animator;
 import com.formdev.flatlaf.util.CubicBezierEasing;
 import com.formdev.flatlaf.util.UIScale;
-import utils.MethodUtil;
 
 import javax.swing.*;
 import java.awt.*;
