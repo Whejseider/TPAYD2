@@ -1,63 +1,107 @@
 package view.component.chat;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import utils.JIMSendTextPane;
+import com.formdev.flatlaf.ui.FlatUIUtils;
+import com.formdev.flatlaf.util.UIScale;
+import utils.GraphicsUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+public class Chat_Item extends JPanel {
 
-public class Chat_Item extends JLayeredPane {
-    private JLabel lblTime;
+    protected final int space = 8;
+    protected final int borderSize;
+    protected final int type;
+    protected int level;
+    protected JLabel labelName;
 
-    public Chat_Item() {
-        initComponents();
-        txt.setEditable(false);
-        txt.setBackground(new Color(0, 0, 0, 0));
-        txt.setOpaque(false);
+    public Chat_Item(int borderSize, int type) {
+        this.borderSize = borderSize;
+        this.type = type;
+        init();
     }
 
-    public void setText(String text) {
-        txt.setText(text);
+    private void init() {
+        String backgroundKey = type == 1 ? "$Chat.item.background" : "$Chat.item.myselfBackground";
+        String borderKey = type == 1 ? (borderSize + "," + (space + borderSize) + "," + borderSize + "," + borderSize) : (borderSize + "," + borderSize + "," + borderSize + "," + (space + borderSize));
+        putClientProperty(FlatClientProperties.STYLE, "" +
+                "border:" + borderKey + ";" +
+                "background:$Chat.background;" +
+                "foreground:" + backgroundKey);
     }
 
-    public void setTime(String time) {
-        JLayeredPane layer = new JLayeredPane();
-        layer.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        layer.setBorder(new EmptyBorder(0, 5, 10, 5));
-        lblTime = new JLabel(time);
-        lblTime.setHorizontalTextPosition(JLabel.LEFT);
-        layer.add(lblTime);
-        add(layer);
+    /**
+     * Lo dejo por las dudas
+     * @param userName
+     */
+    public void addUserName(String userName) {
+        if (userName == null) {
+            if (labelName != null) {
+                remove(labelName);
+                labelName = null;
+            }
+        } else {
+            labelName = new JLabel(userName);
+            labelName.putClientProperty(FlatClientProperties.STYLE, "" +
+                    "border:0,5,0,5;" +
+                    "foreground:$Component.accentColor;" +
+                    "font:bold");
+            add(labelName, 0);
+        }
     }
-
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        txt = new JIMSendTextPane();
-
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-
-        txt.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-//        txt.setSelectionColor(new Color(92, 188, 255));
-        add(txt);
-    }// </editor-fold>//GEN-END:initComponents
 
     @Override
-    protected void paintComponent(Graphics grphcs) {
-        Graphics2D g2 = (Graphics2D) grphcs;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-        super.paintComponent(grphcs);
+    protected void paintChildren(Graphics g) {
+        paintBackground(g, level);
+        super.paintChildren(g);
     }
 
+    protected void paintBackground(Graphics g, int level) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        FlatUIUtils.setRenderingHints(g2);
+        int x;
+        int y = 0;
+        int height = getHeight();
+        int width;
+        if (type == 1) {
+            x = UIScale.scale(space);
+            width = getWidth() - x;
+        } else {
+            x = 0;
+            width = getWidth() - UIScale.scale(space);
+        }
+        Area area = new Area(GraphicsUtil.getShape(x, y, width, height, level, type, false, false));
+        if (level == 0 || level == 3) {
+            area.add(new Area(getArrow(x, y, width, height, type)));
+        }
+        g2.setColor(getForeground());
+        g2.fill(area);
+        g2.dispose();
+    }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JIMSendTextPane txt;
-    // End of variables declaration//GEN-END:variables
+    private Shape getArrow(int x, int y, int width, int height, int type) {
+        Path2D arrow = new Path2D.Double();
+        int a = UIScale.scale(1);
+        if (type == 1) {
+            arrow.moveTo(0, height - a);
+            arrow.curveTo(0, height - a, x, height - a, x, height - Math.min(UIScale.scale(15), height - UIScale.scale(15)));
+            arrow.lineTo(x + getInsets().left, height);
+            arrow.lineTo(0, height);
+        } else if (type == 2) {
+            int s = UIScale.scale(space);
+            arrow.moveTo(width + space, height - a);
+            arrow.curveTo(width + space, height - a, width, height - a, width, height - Math.min(UIScale.scale(15), height - UIScale.scale(15)));
+            arrow.lineTo(width - getInsets().right, height);
+            arrow.lineTo(width + space, height);
+        }
+        return arrow;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
 }

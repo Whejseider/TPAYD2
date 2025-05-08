@@ -4,11 +4,11 @@ import controller.MessengerPanelController;
 import interfaces.IController;
 import model.Contacto;
 import model.Conversacion;
-import net.miginfocom.swing.MigLayout;
 import utils.ChatListRenderer;
-import utils.JIMSendTextPane;
+import utils.AutoWrapText;
 import utils.SystemForm;
 import view.component.chat.Chat_Body;
+import view.component.chat.TextPaneCustom;
 import view.system.Form;
 
 import javax.swing.*;
@@ -103,7 +103,7 @@ public class MessengerPanel extends Form {
 
     @Override
     public void setControlador(IController controlador) {
-        this.panelConversacion.getChatBottom().getCmd().addActionListener((ActionListener) controlador);
+        this.panelConversacion.getChatBottom().getBtnSend().addActionListener((ActionListener) controlador);
         this.btnNuevoChat.addActionListener((ActionListener) controlador);
         this.listChat.addListSelectionListener((ListSelectionListener) controlador);
     }
@@ -175,12 +175,12 @@ public class MessengerPanel extends Form {
         return lblPuerto;
     }
 
-    public JIMSendTextPane getTxtMensaje() {
-        return panelConversacion.getChatBottom().getTxt();
+    public TextPaneCustom getTxtMensaje() {
+        return panelConversacion.getChatBottom().getTxtInput();
     }
 
     public JButton getBtnEnviar() {
-        return panelConversacion.getChatBottom().getCmd();
+        return panelConversacion.getChatBottom().getBtnSend();
     }
 
     public Chat_Body getPanelMensajes() {

@@ -1,5 +1,6 @@
 package view.forms;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 import view.component.chat.Chat_Body;
 import view.component.chat.Chat_Bottom;
@@ -20,6 +21,14 @@ public class FormChat extends Form {
         chatTitle = new Chat_Title();
         chatBody = new Chat_Body();
         chatBottom = new Chat_Bottom();
+
+        chatBody.putClientProperty(FlatClientProperties.STYLE, "" +
+                "border:33,0,3,0;" +
+                "background:$Chat.background");
+
+        chatBody.putClientProperty(FlatClientProperties.STYLE, "" +
+                "background:$Chat.background");
+
         add(chatTitle, "wrap");
         add(chatBody, "growy, wrap");
         add(chatBottom, "h ::50%");

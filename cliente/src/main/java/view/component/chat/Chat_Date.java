@@ -1,41 +1,36 @@
 package view.component.chat;
 
-import javax.swing.*;
-import java.awt.*;
+import com.formdev.flatlaf.FlatClientProperties;
+import net.miginfocom.swing.MigLayout;
 
-public class Chat_Date extends JLayeredPane {
+import javax.swing.*;
+
+public class Chat_Date extends JPanel {
+
+    private JLabel labelDate;
 
     public Chat_Date() {
-        initComponents();
-        txt.setBackground(new Color(0, 0, 0, 110));
+        init();
+    }
+
+    private void init() {
+
+        setOpaque(false);
+
+        setLayout(new MigLayout("al center", "[center]", "5[center]5"));
+
+        labelDate = new JLabel();
+
+        labelDate.putClientProperty(FlatClientProperties.STYLE, "" +
+                "background: $Chat.date.background;" +
+                "foreground: $Chat.date.foreground;" +
+                "arc: $Chat.date.arc;"
+        );
+        add(labelDate);
     }
 
     public void setText(String text) {
-        txt.setText(text);
+        labelDate.setText(text);
     }
 
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        txt = new Chat_Item();
-
-        setLayer(txt, JLayeredPane.DEFAULT_LAYER);
-
-        GroupLayout layout = new GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(txt, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(txt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private Chat_Item txt;
-    // End of variables declaration//GEN-END:variables
 }

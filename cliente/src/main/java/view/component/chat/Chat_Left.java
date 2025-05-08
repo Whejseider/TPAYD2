@@ -1,33 +1,41 @@
 package view.component.chat;
 
 import com.formdev.flatlaf.FlatLaf;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 
 
-public class Chat_Left extends JLayeredPane {
+public class Chat_Left extends Chat_Item {
 
-    private Chat_Item txt;
+    private JLayeredPane layeredPane;
+    private JPanel timePanel;
 
-    public Chat_Left() {
-        initComponents();
-        txt.setBackground(Color.DARK_GRAY);
+    public Chat_Left(Component component) {
+        super(5, 1);
+        init();
+        layeredPane.add(component);
     }
 
-    public void setText(String text) {
-        txt.setText(text);
+    public void addTimePanel(Component component) {
+        if (timePanel == null) {
+            timePanel = new JPanel(new MigLayout("insets 0"));
+            timePanel.setOpaque(false);
+            String lc = "pos 100%-pref-5 100%-pref";
+            layeredPane.setLayer(timePanel, JLayeredPane.POPUP_LAYER);
+            layeredPane.add(timePanel, lc, 0);
+        }
+        timePanel.add(component);
     }
 
-    public void setTime(String time) {
-        txt.setTime(time);
+    private void init() {
+        layeredPane = new JLayeredPane();
+        layeredPane.setLayout(new MigLayout(
+                "insets 0", "[fill,150::]"));
+        setLayout(new MigLayout("insets 0,fillx,wrap,gapy 3", "fill"));
+        add(layeredPane);
     }
 
-    private void initComponents() {
-        txt = new Chat_Item();
-
-        setLayout(new BorderLayout());
-        add(txt, BorderLayout.CENTER);
-    }
 }
 

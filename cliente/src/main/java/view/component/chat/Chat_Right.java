@@ -1,52 +1,37 @@
 package view.component.chat;
 
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLaf;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class Chat_Right extends JLayeredPane {
+public class Chat_Right extends Chat_Item {
 
-    public Chat_Right() {
-        initComponents();
-        boolean isDark = FlatLaf.isLafDark();
-        Color bg = isDark
-                ? UIManager.getColor("Component.accentColor").brighter()
-                : UIManager.getColor("Component.accentColor").darker();
-        txt.setBackground(bg);
+    private JLayeredPane layeredPane;
+    private JPanel timePanel;
+
+    public Chat_Right(Component component) {
+        super(5, 2);
+        init();
+        layeredPane.add(component);
     }
 
-    public void setText(String text) {
-        txt.setText(text);
+    public void addTimePanel(Component component) {
+        if (timePanel == null) {
+            timePanel = new JPanel(new MigLayout("insets 0"));
+            timePanel.setOpaque(false);
+            String lc = "pos 100%-pref 100%-pref";
+            layeredPane.setLayer(timePanel, JLayeredPane.POPUP_LAYER);
+            layeredPane.add(timePanel, lc, 0);
+        }
+        timePanel.add(component);
     }
 
-    public void setTime(String time) {
-        txt.setTime(time);
+    private void init() {
+        layeredPane = new JLayeredPane();
+        layeredPane.setLayout(new MigLayout(
+                "insets 0", "[fill,150::]"));
+        setLayout(new MigLayout("insets 0,fillx,wrap,gapy 3", "fill"));
+        add(layeredPane);
     }
-
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        txt = new Chat_Item();
-
-        setLayer(txt, JLayeredPane.DEFAULT_LAYER);
-
-        GroupLayout layout = new GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(txt, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(txt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private Chat_Item txt;
-    // End of variables declaration//GEN-END:variables
 }

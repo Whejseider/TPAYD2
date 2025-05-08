@@ -1,114 +1,119 @@
 package view.component.chat;
 
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
-import interfaces.IController;
+import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import utils.JIMSendTextPane;
-import utils.ScrollBar;
-import view.system.Form;
+import utils.AutoWrapText;
+import utils.MethodUtil;
 
-public class Chat_Bottom extends Form {
+public class Chat_Bottom extends JPanel {
 
-    private JButton cmd;
-    private JIMSendTextPane txt;
+    private TextPaneCustom txtInput;
+    private JButton btnSend;
+
+    private String placeholderText = "Escribe un mensaje...";
 
     public Chat_Bottom() {
-        initComponents();
         init();
     }
 
     private void init() {
-        setLayout(new MigLayout("fillx, filly", "0[fill]0[]0[]2", "2[fill]2"));
-        JScrollPane scroll = new JScrollPane();
-        scroll.setBorder(null);
-        txt = new JIMSendTextPane();
-        txt.addKeyListener(new KeyAdapter() {
+
+        setLayout(new MigLayout("fill, insets 2", "[grow 0, sg action]0[fill,sg text]0[grow 0, sg action]", "[fill,::200]"));
+        putClientProperty(FlatClientProperties.STYLE, "arc:10");
+
+        txtInput = new TextPaneCustom();
+        txtInput.setPlaceholderText(placeholderText);
+        txtInput.setEditorKit(new AutoWrapText());
+
+        JScrollPane scrollInput = new JScrollPane(txtInput);
+        scrollInput.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        txtInput.putClientProperty(FlatClientProperties.STYLE,
+                "background:null; " +
+                        "margin:4,4,4,4;");
+
+        scrollInput.putClientProperty(FlatClientProperties.STYLE,
+                "border:0,0,0,0;");
+        scrollInput.getVerticalScrollBar().putClientProperty(FlatClientProperties.STYLE, "" +
+                "width:3");
+        scrollInput.getVerticalScrollBar().setUnitIncrement(10);
+
+        txtInput.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                revalidate();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                revalidate();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                revalidate();
+            }
+        });
+
+        txtInput.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent ke) {
                 if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (ke.isShiftDown()) {
+                    if (ke.isShiftDown() || ke.isControlDown()) {
                         try {
-                            txt.getDocument().insertString(txt.getCaretPosition(), "\n", null);
+                            txtInput.getDocument().insertString(txtInput.getCaretPosition(), "\n", null);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         ke.consume();
                     } else {
                         ke.consume();
-                        cmd.doClick();
+                        btnSend.doClick();
                     }
                 }
             }
 
-            @Override
-            public void keyTyped(KeyEvent ke) {
-                refresh();
-            }
         });
 
-        txt.setHintText("Escribe un mensaje");
-        scroll.setViewportView(txt);
-        ScrollBar sb = new ScrollBar();
-        sb.setPreferredSize(new Dimension(2, 10));
-        scroll.setVerticalScrollBar(sb);
-        add(sb);
-        add(scroll, "w 100%");
-        JPanel panel = new JPanel();
-        panel.setLayout(new MigLayout("filly", "0[]0", "0[bottom]0"));
-        panel.setPreferredSize(new Dimension(30, 28));
-//        panel.setBackground(Color.WHITE);
-        cmd = new JButton();
-        cmd.setBorder(null);
-        cmd.setContentAreaFilled(false);
-        cmd.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        cmd.setIcon(new FlatSVGIcon("fv/icons/send.svg", 0.04f));
-        panel.add(cmd);
-        add(panel);
+        add(scrollInput, "cell 1 0, grow, push");
+
+        JPanel bottomRightPanel = new JPanel(new MigLayout("insets 0, gap 3", "[]0[]", "[fill]"));
+        bottomRightPanel.setOpaque(false);
+
+        btnSend = createActionButton(MethodUtil.createIcon("fv/icons/send.svg", 0.8f));
+
+        bottomRightPanel.add(btnSend);
+        add(bottomRightPanel);
+
     }
 
-    public JButton getCmd() {
-        return cmd;
+    private JButton createActionButton(Icon icon) {
+        JButton button = new JButton(icon);
+        button.putClientProperty(FlatClientProperties.STYLE, "" +
+                "background:null;" +
+                "arc:15;" +
+                "borderWidth:0;" +
+                "focusWidth:0;" +
+                "innerFocusWidth:0;");
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFocusable(false);
+        return button;
     }
 
-    public JIMSendTextPane getTxt() {
-        return txt;
+    public TextPaneCustom getTxtInput() {
+        return txtInput;
     }
 
-    private void refresh() {
-        revalidate();
+    public JButton getBtnSend() {
+        return btnSend;
     }
 
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-//        setBackground(new Color(229, 229, 229));
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 40, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
 }

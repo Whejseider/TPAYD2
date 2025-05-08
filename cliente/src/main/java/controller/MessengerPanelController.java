@@ -186,7 +186,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
                     conversacion.getNotificacion().setTieneMensajesNuevos(false);
 
                     vista.mostrarContactoInfo(conversacion.getContacto());
-                    vista.getPanelConversacion().getChatBottom().getTxt().grabFocus();
+                    vista.getPanelConversacion().getChatBottom().getTxtInput().grabFocus();
                 });
             }
         }
