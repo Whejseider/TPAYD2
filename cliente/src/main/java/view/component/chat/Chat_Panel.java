@@ -10,13 +10,13 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
-public class Chat_Body extends JPanel {
+public class Chat_Panel extends JPanel {
 
     private JPanel body;
     private JScrollPane sp;
     private JPanel messageWrapperPanel;
 
-    public Chat_Body() {
+    public Chat_Panel() {
         init();
     }
 
@@ -65,8 +65,8 @@ public class Chat_Body extends JPanel {
     private JLabel createTimeLabel(String time) {
         JLabel timeLabel = new JLabel(time);
         timeLabel.putClientProperty(FlatClientProperties.STYLE, "" +
-                "font:-1;"
-                );
+                "font:-2;" +
+                "foreground:$Text.Foreground");
         timeLabel.setOpaque(false);
         return timeLabel;
     }
@@ -129,4 +129,5 @@ public class Chat_Body extends JPanel {
         body.removeAll();
         refreshMessages();
     }
+
 }

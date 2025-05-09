@@ -25,7 +25,7 @@ public class Chat_Bottom extends JPanel {
 
     private void init() {
 
-        setLayout(new MigLayout("fill, insets 2", "[grow 0, sg action]0[fill,sg text]0[grow 0, sg action]", "[fill,::200]"));
+        setLayout(new MigLayout("fill", "[fill][grow 0]", "[::200,bottom]"));
         putClientProperty(FlatClientProperties.STYLE, "arc:10");
 
         txtInput = new TextPaneCustom();
@@ -82,12 +82,12 @@ public class Chat_Bottom extends JPanel {
 
         });
 
-        add(scrollInput, "cell 1 0, grow, push");
+        add(scrollInput);
 
-        JPanel bottomRightPanel = new JPanel(new MigLayout("insets 0, gap 3", "[]0[]", "[fill]"));
+        JPanel bottomRightPanel = new JPanel(new MigLayout("insets 0, gap 3"));
         bottomRightPanel.setOpaque(false);
 
-        btnSend = createActionButton(MethodUtil.createIcon("fv/icons/send.svg", 0.8f));
+        btnSend = createActionButton(MethodUtil.createIcon("fv/icons/chat/send.svg", 0.8f));
 
         bottomRightPanel.add(btnSend);
         add(bottomRightPanel);

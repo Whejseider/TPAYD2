@@ -2,14 +2,14 @@ package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import view.component.chat.Chat_Body;
+import view.component.chat.Chat_Panel;
 import view.component.chat.Chat_Bottom;
 import view.component.chat.Chat_Title;
 import view.system.Form;
 
 public class FormChat extends Form {
     private Chat_Title chatTitle;
-    private Chat_Body chatBody;
+    private Chat_Panel chatBody;
     private Chat_Bottom chatBottom;
 
     public FormChat() {
@@ -19,7 +19,7 @@ public class FormChat extends Form {
     private void init() {
         setLayout(new MigLayout("fillx", "0[fill]0", "0[]0[fill, grow]0[shrink 0]0"));
         chatTitle = new Chat_Title();
-        chatBody = new Chat_Body();
+        chatBody = new Chat_Panel();
         chatBottom = new Chat_Bottom();
 
         chatBody.putClientProperty(FlatClientProperties.STYLE, "" +
@@ -38,7 +38,7 @@ public class FormChat extends Form {
         return chatTitle;
     }
 
-    public Chat_Body getChatBody() {
+    public Chat_Panel getChatBody() {
         return chatBody;
     }
 

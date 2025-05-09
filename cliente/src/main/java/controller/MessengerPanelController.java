@@ -203,8 +203,6 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
                 Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
 
-                Cliente.getInstance().enviarMensaje(mensaje);
-
                 DefaultListModel<Conversacion> listModel = this.vista.getListModel();
                 if (!listModel.contains(conversacion)) {
                     listModel.addElement(conversacion);
@@ -216,19 +214,23 @@ public class MessengerPanelController implements IController, ActionListener, Li
                     vista.getListChat().setSelectedValue(conversacion, true);
                 }
 
+                actualizarVistaMensaje(mensaje, true);
+
                 vista.getTxtMensaje().setText("");
                 vista.getTxtMensaje().grabFocus();
+
+                Cliente.getInstance().enviarMensaje(mensaje);
 
             }
         }
 
-        if (e.getSource() == this.vista.getBtnNuevoChat()) {
-            NuevoChat nuevoChat = new NuevoChat();
-            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
-            nuevoChatController.setMessengerController(this);
-            nuevoChat.setControlador(nuevoChatController);
-            nuevoChat.display();
-        }
+//        if (e.getSource() == this.vista.getBtnNuevoChat()) {
+//            NuevoChat nuevoChat = new NuevoChat();
+//            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
+//            nuevoChatController.setMessengerController(this);
+//            nuevoChat.setControlador(nuevoChatController);
+//            nuevoChat.display();
+//        }
 
     }
 
@@ -247,7 +249,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
     @Override
     public void onSendMessageSuccess(Mensaje mensaje) {
         Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
-        actualizarVistaMensaje(mensaje, true);
+//        actualizarVistaMensaje(mensaje, true);
     }
 
     @Override

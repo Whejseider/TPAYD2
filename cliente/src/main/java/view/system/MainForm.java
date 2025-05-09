@@ -24,8 +24,6 @@ public class MainForm extends Form {
         add(createHeader());
         add(createRefreshLine(), "height 3!");
         add(createMain());
-        add(new JSeparator(), "height 2!");
-        add(createFooter());
     }
 
     private JPanel createHeader() {
@@ -62,40 +60,6 @@ public class MainForm extends Form {
         toolBar.add(buttonRefresh);
         panel.add(toolBar);
         panel.add(createSearchBox(), "gapx n 135");
-        return panel;
-    }
-
-    private JPanel createFooter() {
-        JPanel panel = new JPanel(new MigLayout("insets 1 n 1 n,al trailing center,gapx 10,height 30!", "[]push[][]", "fill"));
-        panel.putClientProperty(FlatClientProperties.STYLE, "" +
-                "[light]background:tint($Panel.background,20%);" +
-                "[dark]background:tint($Panel.background,5%);");
-
-        // fv version
-//        JLabel lbFvVersion = new JLabel("Fv: v" + fv.FV_VERSION);
-//        lbFvVersion.putClientProperty(FlatClientProperties.STYLE, "" +
-//                "foreground:$Label.disabledForeground;");
-//        lbFvVersion.setIcon(new SVGIconUIColor("fv/icons/git.svg", 1f, "Label.disabledForeground"));
-//        panel.add(lbFvVersion);
-
-        // java version
-        String javaVendor = System.getProperty("java.vendor");
-        if (javaVendor.equals("Oracle Corporation")) {
-            javaVendor = "";
-        }
-        String java = javaVendor + " v" + System.getProperty("java.version").trim();
-        String st = "Ejecutándose en: Java %s";
-        JLabel lbJava = new JLabel(String.format(st, java));
-        lbJava.putClientProperty(FlatClientProperties.STYLE, "" +
-                "foreground:$Label.disabledForeground;");
-        lbJava.setIcon(new SVGIconUIColor("fv/icons/java.svg", 1f, "Label.disabledForeground"));
-        panel.add(lbJava);
-
-        panel.add(new JSeparator(JSeparator.VERTICAL));
-
-        // barra d memoria
-        MemoryBar memoryBar = new MemoryBar();
-        panel.add(memoryBar);
         return panel;
     }
 
