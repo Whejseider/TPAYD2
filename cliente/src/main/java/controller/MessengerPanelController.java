@@ -224,13 +224,13 @@ public class MessengerPanelController implements IController, ActionListener, Li
             }
         }
 
-//        if (e.getSource() == this.vista.getBtnNuevoChat()) {
-//            NuevoChat nuevoChat = new NuevoChat();
-//            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
-//            nuevoChatController.setMessengerController(this);
-//            nuevoChat.setControlador(nuevoChatController);
-//            nuevoChat.display();
-//        }
+        if (e.getSource() == this.vista.getBtnNuevoChat()) {
+            NuevoChat nuevoChat = new NuevoChat();
+            NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
+            nuevoChatController.setMessengerController(this);
+            nuevoChat.setControlador(nuevoChatController);
+            nuevoChat.display();
+        }
 
     }
 

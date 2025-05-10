@@ -129,5 +129,7 @@ public class MessengerPanel extends Form {
         return listChat;
     }
 
-
+    public JButton getBtnNuevoChat() {
+        return btnNuevoChat;
+    }
 }
