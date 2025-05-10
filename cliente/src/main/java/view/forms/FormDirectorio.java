@@ -237,9 +237,9 @@ public class FormDirectorio extends Form  {
     }
 
     private Component createDirectoryComponent() {
-        responsiveLayout = new ResponsiveLayout(ResponsiveLayout.JustifyContent.FIT_CONTENT, new Dimension(-1, -1), 10, 10);
+        responsiveLayout = new ResponsiveLayout(ResponsiveLayout.JustifyContent.START, new Dimension(-1, -1), 10, 10);
         panelCard = new JPanel(responsiveLayout);
-        panelCard.setPreferredSize(new Dimension(500, 550));
+        panelCard.setPreferredSize(new Dimension(350, 550));
         panelCard.putClientProperty(FlatClientProperties.STYLE, "" +
                 "border:10,10,10,10;");
         JScrollPane scrollPane = new JScrollPane(panelCard);
