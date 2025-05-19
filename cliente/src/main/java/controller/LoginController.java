@@ -6,6 +6,7 @@ import connection.Sesion;
 import interfaces.AuthenticationListener;
 import interfaces.IController;
 import model.User;
+import network.NetworkConstants;
 import raven.modal.Toast;
 import view.forms.Login;
 import view.manager.ErrorManager;
@@ -27,7 +28,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     private void initMessenger() {
         try {
-            Socket socket = new Socket(Cliente.IP, Cliente.PUERTO);
+            Socket socket = new Socket(NetworkConstants.IP_DEFAULT, NetworkConstants.PUERTO_CLIENTES_DEFAULT);
             Cliente cliente = Cliente.getInstance();
             cliente.init(socket);
             cliente.escuchar();
@@ -42,7 +43,7 @@ public class LoginController implements IController, ActionListener, Authenticat
         this.eventManager = EventManager.getInstance();
         this.eventManager.addAuthenticationListener(this);
 
-        this.initMessenger();
+//        this.initMessenger();
     }
 
     @Override
@@ -74,7 +75,7 @@ public class LoginController implements IController, ActionListener, Authenticat
                 vista.getLblErrorUsuario().setText("");
             }
 
-            // Validar el puerto
+            // Validar el puerto,se puede refactorizar
             try {
                 int puerto = Integer.parseInt(puertoStr);
                 if (puerto < 1000 || puerto > 65535) {
@@ -96,9 +97,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
             if (puertoValido && nombreValido) {
                 int puerto = Integer.parseInt(puertoStr);
-                User user = new User();
-                user.setNombreUsuario(userName);
-                user.setPuerto(puerto);
+                User user = new User(userName, puerto);
                 System.out.println(user);
 
                 Cliente.getInstance().iniciarSesion(user);
@@ -117,7 +116,6 @@ public class LoginController implements IController, ActionListener, Authenticat
     public void setVista(Login vista) {
         this.vista = vista;
     }
-
 
 
     @Override
@@ -140,7 +138,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     @Override
     public void onLogoutFailure(String s) {
-
+        addListener();
     }
 
     @Override

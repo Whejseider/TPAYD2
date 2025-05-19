@@ -4,6 +4,7 @@ import interfaces.ConnectionCallBack;
 import model.TipoRespuesta;
 import raven.modal.Toast;
 import view.forms.FormError;
+import view.manager.ErrorManager;
 import view.system.FormManager;
 
 public class ConnectionManager {
@@ -21,29 +22,51 @@ public class ConnectionManager {
         return instance;
     }
 
-    public TipoRespuesta checkConnection() {
+    public TipoRespuesta tryEstablishInitialConnection() {
+        Cliente cliente = Cliente.getInstance();
+        boolean conectado = cliente.conectarAlServidor();
 
-//            Socket socket = new Socket(Cliente.IP, Cliente.PUERTO);
-//            socket.close();
-//            Cliente cliente = Cliente.getInstance();
-//            cliente.init(socket);
-//            Esto deberia de cambiarlo
-            //Para que el server mande la respuesta de si hay conexion o no
+        if (conectado) {
             return TipoRespuesta.OK;
-
+        } else {
+            return TipoRespuesta.ERROR;
+        }
     }
 
-    public void showError(ConnectionCallBack callBack, boolean showReconnectButton) {
+    public void attemptReconnectionAndNotify() {
+        if (tryEstablishInitialConnection() == TipoRespuesta.OK) {
+            checkOnReconnection();
+
+            if (formError != null && formError.isVisible()) {
+                formError.setVisible(false);
+            }
+            Toast.show(FormManager.getFrame(), Toast.Type.SUCCESS, "Reconectado exitosamente");
+            FormManager.init();
+        } else {
+            Toast.show(FormManager.getFrame(), Toast.Type.ERROR, "Fallo al reconectar");
+            if (formError == null || !formError.isVisible()) {
+                showError(this.callBack, true);
+            } else {
+                if (formError.isVisible()) {
+                    formError.showReconnectOptions(true);
+                }
+            }
+        }
+    }
+
+    public void showError(ConnectionCallBack callBack, boolean showReconnectOptions) {
         getInstance().callBack = callBack;
-        Toast.show(FormManager.getFrame(), Toast.Type.ERROR, "Connection error");
-        FormManager.showError(getFormError(showReconnectButton));
+        if (formError == null || !formError.isVisible()) {
+            ErrorManager.getInstance().showError("Error de conexión");
+        }
+        FormManager.showError(getFormError(showReconnectOptions));
     }
 
-    private FormError getFormError(boolean showReconnectButton) {
+    private FormError getFormError(boolean showReconnectOptions) {
         if (formError == null) {
             formError = new FormError();
         }
-        formError.showReconnectButton(showReconnectButton);
+        formError.showReconnectOptions(showReconnectOptions);
         return formError;
     }
 
@@ -54,4 +77,3 @@ public class ConnectionManager {
         }
     }
 }
-

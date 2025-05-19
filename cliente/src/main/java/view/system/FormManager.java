@@ -37,13 +37,21 @@ public class FormManager {
     public static void init() {
         boolean logged = Sesion.getInstance().getUsuarioActual() != null;
         if (logged) {
+            System.out.println("FormManager: Usuario ya logueado, mostrando home.");
             showHome();
         } else {
-            TipoRespuesta tipoRespuesta = ConnectionManager.getInstance().checkConnection();
-            if (tipoRespuesta == TipoRespuesta.OK) {
+            System.out.println("FormManager: No hay sesión activa, verificando conexión inicial...");
+            TipoRespuesta respuestaConexion = ConnectionManager.getInstance().tryEstablishInitialConnection();
+
+            if (respuestaConexion == TipoRespuesta.OK) {
+                System.out.println("FormManager: Conexión OK, mostrando login.");
                 showLogin();
             } else {
-                ConnectionManager.getInstance().showError(() -> showLogin(), true);
+                System.out.println("FormManager: Falló la conexión inicial, mostrando error.");
+                ConnectionManager.getInstance().showError(() -> {
+                    System.out.println("FormManager: Reconexión exitosa desde pantalla de error, mostrando login.");
+                    showLogin();
+                }, true);
             }
         }
     }

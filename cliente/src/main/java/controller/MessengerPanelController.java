@@ -4,10 +4,7 @@ import connection.Cliente;
 import connection.Sesion;
 import interfaces.IController;
 import interfaces.MessageListener;
-import model.Contacto;
-import model.Conversacion;
-import model.Mensaje;
-import model.User;
+import model.*;
 import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
@@ -89,32 +86,33 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
     public void procesaMensajeEntrante(Mensaje mensaje) {
 
-        User receptor = mensaje.getReceptor().getUser();
-        User emisor = mensaje.getEmisor();
-        Contacto contactoEmisor = receptor.getAgenda().getContactoPorUsuario(emisor);
-        Conversacion conversacion = receptor.getConversacionCon(emisor);
+        User usuarioActual = Sesion.getInstance().getUsuarioActual();
+        if (usuarioActual == null) return;
+
+        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getEmisor().getNombreUsuario());
+
+        Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getEmisor().getNombreUsuario());
 
         SwingUtilities.invokeLater(() -> {
             DefaultListModel<Conversacion> listModel = this.vista.getListModel();
-            if (!listModel.contains(conversacion)) {
 
+            if (!listModel.contains(conversacion)) {
                 listModel.addElement(conversacion);
             } else {
-
                 listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
             }
 
-            if (contactoEmisor != null && contactoEmisor.equals(this.getContactoActual())) {
+            if (contactoActual != null && contactoEmisor != null &&
+                    contactoActual.getNombreUsuario().equals(contactoEmisor.getNombreUsuario())) {
                 actualizarVistaMensaje(mensaje, false);
             } else {
-
+                if (conversacion != null && conversacion.getNotificacion() != null) {
+                    conversacion.getNotificacion().setTieneMensajesNuevos(true);
+                }
                 revalidarListChat();
-                conversacion.getNotificacion().setTieneMensajesNuevos(true);
-
             }
         });
     }
-
 
     public void mostrarChat(Contacto contacto) {
         SwingUtilities.invokeLater(() -> {
@@ -124,7 +122,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
             contactoActual = contacto;
 
-            Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto);
+            Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto.getNombreUsuario());
             if (!vista.getListModel().contains(conversacion)) {
                 vista.getListModel().addElement(conversacion);
             }
@@ -134,7 +132,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
             mensajes.sort(Comparator.comparing(Mensaje::getTiempo));
 
             for (Mensaje mensaje : conversacion.getMensajes()) {
-                boolean esMio = mensaje.EsMio();
+                boolean esMio = mensaje.getEmisor().getNombreUsuario().equalsIgnoreCase(Sesion.getInstance().getUsuarioActual().getNombreUsuario());
                 actualizarVistaMensaje(mensaje, esMio);
             }
 
@@ -147,10 +145,8 @@ public class MessengerPanelController implements IController, ActionListener, Li
     }
 
     public void revalidarListChat() {
-
         vista.getListChat().revalidate();
         vista.getListChat().repaint();
-
     }
 
     public void cargarConversaciones() {
@@ -185,7 +181,9 @@ public class MessengerPanelController implements IController, ActionListener, Li
                     conversacion.getNotificacion().setTieneMensajesNuevos(false);
 
                     vista.mostrarContactoInfo(conversacion.getContacto());
-                    vista.getPanelConversacion().getChatBottom().getTxtInput().grabFocus();
+
+                    vista.getTxtMensaje().setText("");
+                    vista.getTxtMensaje().grabFocus();
                 });
             }
         }
@@ -199,9 +197,9 @@ public class MessengerPanelController implements IController, ActionListener, Li
                 vista.getTxtMensaje().grabFocus();
             } else {
 
-                Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual, true);
+                Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual.getNombreUsuario());
 
-                Conversacion conversacion = mensaje.getEmisor().getConversacionCon(mensaje.getReceptor());
+                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contactoActual.getNombreUsuario());
 
                 DefaultListModel<Conversacion> listModel = this.vista.getListModel();
                 if (!listModel.contains(conversacion)) {
@@ -210,7 +208,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
                     listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
                 }
 
-                if(vista.getListChat().getSelectedValue() != conversacion) {
+                if (vista.getListChat().getSelectedValue() != conversacion) {
                     vista.getListChat().setSelectedValue(conversacion, true);
                 }
 
@@ -235,23 +233,69 @@ public class MessengerPanelController implements IController, ActionListener, Li
     }
 
     @Override
-    public void onMessageReceivedSuccess(Mensaje mensaje) {
-        Sesion.getInstance().setUsuarioActual(mensaje.getReceptor().getUser()); //A Futuro actualizar los datos del usuario, y no el usuario en si
-        procesaMensajeEntrante(mensaje);
+    public void onMessageReceivedSuccess(Mensaje mensajeRecibido) {
+        String receptor = mensajeRecibido.getNombreReceptor();
+
+        User usuarioActual = Sesion.getInstance().getUsuarioActual();
+
+        if (usuarioActual == null) {
+            System.err.println("MessengerPanelController: usuarioActualEnSesion es null en onMessageReceivedSuccess");
+            return;
+        }
+
+        if (!usuarioActual.getNombreUsuario().equals(receptor)) {
+            System.err.println("MessengerPanelController: Mensaje recibido para un usuario diferente al de la sesión actual. Ignorando.");
+            return;
+        }
+
+        Contacto c = Agenda.crearContacto(mensajeRecibido.getEmisor());
+        usuarioActual.getAgenda().agregarContacto(c);
+        usuarioActual.getConversacionCon(c.getNombreUsuario()).agregarMensaje(mensajeRecibido);
+
+        procesaMensajeEntrante(mensajeRecibido);
+
     }
 
     @Override
     public void onMessageReceivedFailure(String s) {
-        Toast.show(vista, Toast.Type.ERROR, s);
+//        Toast.show(vista, Toast.Type.ERROR, s);
     }
-
 
     @Override
-    public void onSendMessageSuccess(Mensaje mensaje) {
-        Sesion.getInstance().setUsuarioActual(mensaje.getEmisor());
-//        actualizarVistaMensaje(mensaje, true);
+    public void onSendMessageSuccess(Mensaje mensajeEnviadoConfirmado) {
+        String emisor = mensajeEnviadoConfirmado.getEmisor().getNombreUsuario();
+        String receptor = mensajeEnviadoConfirmado.getNombreReceptor();
+        User usuarioActual = Sesion.getInstance().getUsuarioActual();
+
+        if (usuarioActual == null || !usuarioActual.getNombreUsuario().equals(emisor)) {
+            System.err.println("MessengerPanelController: Confirmación de mensaje para un emisor/sesión incorrecto.");
+            return;
+        }
+
+        Conversacion conversacion = usuarioActual.getConversacionCon(receptor);
+
+        conversacion.agregarMensaje(mensajeEnviadoConfirmado);
+        conversacion.setUltimoMensaje(mensajeEnviadoConfirmado);
+
+        if (getContactoActual() != null && getContactoActual().getNombreUsuario().equals(receptor)) {
+            SwingUtilities.invokeLater(() -> {
+                DefaultListModel<Conversacion> listModel = vista.getListModel();
+                Conversacion conversacionEnSesion = usuarioActual.getConversacionCon(receptor);
+                int index = listModel.indexOf(conversacionEnSesion);
+                if (index != -1) {
+                    listModel.setElementAt(conversacionEnSesion, index);
+                }
+            });
+        } else {
+            SwingUtilities.invokeLater(this::cargarConversaciones);
+        }
     }
 
+    /**
+     * TODO
+     *
+     * @param s
+     */
     @Override
     public void onSendMessageFailure(String s) {
         Toast.show(vista, Toast.Type.ERROR, s);

@@ -1,6 +1,7 @@
 package controller;
 
 import interfaces.ClientListener;
+import interfaces.ConnectionCallBack;
 import model.*;
 
 public class ClientManager implements ClientListener {
@@ -27,11 +28,26 @@ public class ClientManager implements ClientListener {
         System.out.println("DEBUG: Comando recibido en MainController: " + comando.getTipoSolicitud());
 
         try {
+
             switch (comando.getTipoSolicitud()) {
-                case CONECTARSE_SERVIDOR:
-                    eventManager.notifyConnectionAttempt(comando.getTipoRespuesta());
+                case CONEXION_PERDIDA: //TODO
+                    System.out.println("ClientManager: CONEXION_PERDIDA detectada. Mensaje: " + comando.getContenido());
+                    eventManager.notifyConnectionLost(
+                            comando.getContenido() != null ? (String) comando.getContenido() : "Se perdió la conexión."
+                    );
                     break;
 
+                case CONECTARSE_SERVIDOR://TODO
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
+                        System.out.println("ClientManager: CONECTARSE_SERVIDOR OK.");
+                        eventManager.notifyConnectionSuccess();
+                    } else {
+                        System.out.println("ClientManager: Error al CONECTARSE_SERVIDOR. Mensaje: " + comando.getContenido());
+                        eventManager.notifyConnectionAttemptFailure(
+                                comando.getContenido() != null ? (String) comando.getContenido() : "Fallo al conectarse al servidor."
+                        );
+                    }
+                    break;
 
                 case INICIAR_SESION:
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
@@ -74,8 +90,8 @@ public class ClientManager implements ClientListener {
                     break;
 
                 case AGREGAR_CONTACTO:
-                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof User) {
-                        eventManager.notifyAddContactSuccess((User) comando.getContenido());
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Contacto) {
+                        eventManager.notifyAddContactSuccess((Contacto) comando.getContenido());
                     } else {
                         eventManager.notifyAddContactFailure((String) comando.getContenido());
                     }

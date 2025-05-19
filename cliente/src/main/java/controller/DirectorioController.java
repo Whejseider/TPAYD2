@@ -25,9 +25,12 @@ public class DirectorioController implements IController, DirectoryListener, Con
 
     public DirectorioController(FormDirectorio form) {
         this.vista = form;
-
     }
 
+    /**
+     * Si hay tiempo, me gustaria mover esto a la primera carga, y despues verificar si cambio
+     * el directorio del server y agregar los paneles 1x1, y no redibujar todo
+     */
     private void cargarDirectorio() {
         SwingUtilities.invokeLater(() -> {
             vista.getPanelCard().removeAll();
@@ -40,7 +43,7 @@ public class DirectorioController implements IController, DirectoryListener, Con
                     c.addAgregarListener(this);
                     c.getBtnAgregar().setActionCommand("agregar_" + u.getNombreUsuario());
 
-                    boolean estaAgregado = Sesion.getInstance().getUsuarioActual().getAgenda().existeContacto(u);
+                    boolean estaAgregado = Sesion.getInstance().getUsuarioActual().getAgenda().existeContacto(u.getNombreUsuario());
 
                     if (estaAgregado) {
                         c.getBtnAgregar().setEnabled(false);
@@ -49,14 +52,17 @@ public class DirectorioController implements IController, DirectoryListener, Con
                     vista.getPanelCard().add(c);
                 }
             }
-            vista.getPanelCard().repaint();
-            vista.getPanelCard().revalidate();
+            actualizarPanelCard();
         });
+    }
+
+    private void actualizarPanelCard() {
+        vista.getPanelCard().repaint();
+        vista.getPanelCard().revalidate();
     }
 
     private Contacto crearContacto(User userSeleccionado) {
         Contacto c = new Contacto();
-        c.setUser(userSeleccionado);
         c.setNombreUsuario(userSeleccionado.getNombreUsuario());
         c.setAlias(userSeleccionado.getNombreUsuario());
         c.setIP(userSeleccionado.getIP());
@@ -67,6 +73,10 @@ public class DirectorioController implements IController, DirectoryListener, Con
     @Override
     public void init() {
         this.directorio = new Directorio();
+        initListeners();
+    }
+
+    private void initListeners() {
         this.eventManager.addDirectoryListener(this);
         this.eventManager.addContactsListener(this);
     }
@@ -94,8 +104,8 @@ public class DirectorioController implements IController, DirectoryListener, Con
             }
 
             if (userSeleccionado != null) {
-                Contacto c = crearContacto(userSeleccionado);
-                Cliente.getInstance().agregarContacto(c);
+
+                Cliente.getInstance().agregarContacto(userSeleccionado.getNombreUsuario());
             }
         }
     }
@@ -103,16 +113,19 @@ public class DirectorioController implements IController, DirectoryListener, Con
 
     @Override
     public void onDirectoryInfoReceived(Directorio directorio) {
-        this.directorio.getDirectorio().clear();  // Limpia el ArrayList actual
-        this.directorio.getDirectorio().addAll(directorio.getDirectorio());  // Agrega todos los elementos del nuevo
+        this.directorio.getDirectorio().clear();
+        this.directorio.getDirectorio().addAll(directorio.getDirectorio());
         cargarDirectorio();
     }
 
     @Override
-    public void onAddContactSuccess(User user) {
-        Toast.show(vista, Toast.Type.SUCCESS, "Contacto agregado correctamente.");
-        Sesion.getInstance().setUsuarioActual(user);
-        cargarDirectorio();
+    public void onAddContactSuccess(Contacto contacto) {
+        if (this.vista.isVisible()) {
+            Sesion.getInstance().getUsuarioActual().getAgenda().agregarContacto(contacto);
+            Toast.show(vista, Toast.Type.SUCCESS, "Contacto agregado correctamente.");
+            cargarDirectorio();
+            System.out.println("DIRECTORIO: CONTACTO AGREGADO");
+        }
     }
 
     @Override

@@ -114,9 +114,7 @@ public class RegisterController implements IController, ActionListener, Authenti
 
             if (puertoValido && nombreValido && ipValida) {
                 int puerto = Integer.parseInt(puertoStr);
-                user = new User();
-                user.setNombreUsuario(userName);
-                user.setPuerto(puerto);
+                user = new User(userName, puerto);
                 System.out.println(user);
 
                 Cliente.getInstance().registrarse(user);

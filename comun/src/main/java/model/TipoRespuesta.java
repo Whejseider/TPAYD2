@@ -3,5 +3,6 @@ package model;
 public enum TipoRespuesta {
     OK,
     ERROR,
-    UPDATE
+    UPDATE,
+    INFORMATION,
 }

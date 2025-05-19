@@ -1,9 +1,9 @@
 package interfaces;
 
-import model.User;
+import model.Contacto;
 
 public interface ContactsListener {
 
-    void onAddContactSuccess(User user);
+    void onAddContactSuccess(Contacto contacto);
     void onAddContactFailure(String reason);
 }

@@ -1,15 +1,17 @@
 package controller;
 
 import interfaces.*;
-import model.Directorio;
-import model.Mensaje;
-import model.TipoRespuesta;
-import model.User;
+import model.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * TODO PARA LSA CONEXIONES ERRORES, ETC
+ */
 public class EventManager {
 
     private final List<AppStateListener> listeners = new ArrayList<>();
@@ -116,6 +118,33 @@ public class EventManager {
         });
     }
 
+    public void notifyConnectionLost(String reason) {
+        SwingUtilities.invokeLater(() -> {
+            List<ConnectionListener> copiaListeners = new ArrayList<>(connectionListeners);
+            for (ConnectionListener listener : copiaListeners) {
+                listener.onConnectionLost(reason);
+            }
+        });
+    }
+
+    public void notifyConnectionAttemptFailure(String reason) {
+        SwingUtilities.invokeLater(() -> {
+            List<ConnectionListener> copiaListeners = new ArrayList<>(connectionListeners);
+            for (ConnectionListener listener : copiaListeners) {
+                listener.onConnectionAttemptFailure(reason);
+            }
+        });
+    }
+
+    public void notifyConnectionSuccess() {
+        SwingUtilities.invokeLater(() -> {
+            List<ConnectionListener> copiaListeners = new ArrayList<>(connectionListeners);
+            for (ConnectionListener listener : copiaListeners) {
+                listener.onConnectionEstablished();
+            }
+        });
+    }
+
     public void notifyLoginSuccess(User user) {
         SwingUtilities.invokeLater(() -> {
             List<AuthenticationListener> copiaListeners = new ArrayList<>(authenticationListeners);
@@ -179,11 +208,11 @@ public class EventManager {
         });
     }
 
-    public void notifyAddContactSuccess(User user) {
+    public void notifyAddContactSuccess(Contacto contacto) {
         SwingUtilities.invokeLater(() -> {
             List<ContactsListener> copiaListeners = new ArrayList<>(contactsListeners);
             for (ContactsListener listener : copiaListeners) {
-                listener.onAddContactSuccess(user);
+                listener.onAddContactSuccess(contacto);
             }
         });
     }

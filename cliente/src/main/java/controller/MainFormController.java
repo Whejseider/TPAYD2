@@ -1,16 +1,16 @@
 package controller;
 
 import connection.Cliente;
+import connection.ConnectionManager;
 import connection.Sesion;
-import interfaces.AuthenticationListener;
-import interfaces.IController;
-import model.User;
+import interfaces.*;
+import model.*;
 import view.manager.ErrorManager;
 import view.system.Form;
 import view.system.FormManager;
 import view.system.MainForm;
 
-public class MainFormController implements IController, AuthenticationListener {
+public class MainFormController implements IController, AuthenticationListener, ConnectionListener {
     private MainForm vista;
     private EventManager eventManager = EventManager.getInstance();
 
@@ -21,6 +21,7 @@ public class MainFormController implements IController, AuthenticationListener {
     @Override
     public void init() {
         this.eventManager.addAuthenticationListener(this);
+        this.eventManager.addConnectionListener(this);
     }
 
     @Override
@@ -37,14 +38,17 @@ public class MainFormController implements IController, AuthenticationListener {
 
     }
 
+    /**
+     * TODO!!
+     */
     @Override
     public void onLogoutSuccess() {
+        System.out.println("MainFormController: Logout exitoso.");
         EventManager.clearInstance();
         ClientManager.clearInstance();
         Cliente.clearInstance();
         Sesion.getInstance().setUsuarioActual(null);
-        FormManager.clearForms();
-        FormManager.install(FormManager.getFrame());
+        FormManager.showLogin();
     }
 
     @Override
@@ -63,6 +67,33 @@ public class MainFormController implements IController, AuthenticationListener {
     @Override
     public void onRegistrationFailure(String s) {
 
+    }
+
+    /**
+     * TODO APARTIR DE ACA
+     * @param tipoRespuesta
+     */
+    @Override
+    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
+//        FormManager.init();
+    }
+
+    @Override
+    public void onConnectionEstablished() {
+        if (Sesion.getInstance().getUsuarioActual() != null) {
+            Cliente.getInstance().iniciarSesion(Sesion.getInstance().getUsuarioActual());
+        }
+    }
+
+    @Override
+    public void onConnectionLost(String reason) {
+//        FormManager.init();
+    }
+
+    @Override
+    public void onConnectionAttemptFailure(String reason) {
+        ConnectionManager.getInstance().showError(() -> {
+        }, true);
     }
 
 }

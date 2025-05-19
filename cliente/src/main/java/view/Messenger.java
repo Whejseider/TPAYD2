@@ -31,7 +31,7 @@ public class Messenger extends JFrame  {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                Cliente.getInstance().cerrarTodo();
+                Cliente.getInstance().cerrarTodo(true);
             }
         });
     }

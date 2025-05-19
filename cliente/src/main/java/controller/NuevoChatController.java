@@ -37,24 +37,25 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
 
     }
 
+    /**
+     * TODO
+     * @param e the event that characterizes the change.
+     */
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             Contacto seleccionado = this.vista.getList1().getSelectedValue();
             if (seleccionado != null) {
-                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(seleccionado);
+                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(seleccionado.getNombreUsuario());
                 SwingUtilities.invokeLater(() -> {
                     this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
                     this.messengerPanelController.setContactoActual(seleccionado);
 
-                    // Verificar si la conversación tiene mensajes
                     if (conversacion.getMensajes() != null && !conversacion.getMensajes().isEmpty()) {
                         this.messengerPanelController.mostrarChat(seleccionado);
                         this.messengerPanelController.getVista().getListChat().setSelectedValue(conversacion, true);
                     } else {
-                        // Si no hay mensajes, limpiar el área de chat
                         this.messengerPanelController.revalidarPanelMensajes();
-                        // No agregar a la lista de chats activos
                     }
 
                     this.messengerPanelController.revalidarListChat();

@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Contacto implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String alias;
-    private User user;
+    private String nombreUsuario;
     private String IP;
     private Integer puerto;
 
@@ -15,14 +16,14 @@ public class Contacto implements Serializable {
     @Override
     public String toString() {
         String alias = getAlias();
-        String nombre = (getUser() != null) ? getUser().getNombreUsuario() : null;
+        String nombreUsuario = getNombreUsuario();
 
         String mostrar = "";
 
         if ((alias != null && !alias.isBlank())) {
             mostrar = alias;
-        } else if (nombre != null && !nombre.isBlank()) {
-            mostrar = nombre;
+        } else if (nombreUsuario != null && !nombreUsuario.isBlank()) {
+            mostrar = nombreUsuario;
         }
 
         return mostrar + "\n  IP: " + getIP() + "  Puerto: " + getPuerto();
@@ -37,11 +38,11 @@ public class Contacto implements Serializable {
     }
 
     public String getNombreUsuario() {
-        return this.user.getNombreUsuario();
+        return nombreUsuario;
     }
 
     public void setNombreUsuario(String nombreUsuario) {
-        this.user.setNombreUsuario(nombreUsuario);
+        this.nombreUsuario = nombreUsuario;
     }
 
     public String getIP() {
@@ -60,23 +61,15 @@ public class Contacto implements Serializable {
         this.puerto = puerto;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Contacto contacto = (Contacto) o;
-        return Objects.equals(user, contacto.user);
+        return Objects.equals(nombreUsuario, contacto.nombreUsuario);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(user);
+        return Objects.hashCode(nombreUsuario);
     }
 }

@@ -6,26 +6,26 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Mensaje implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String contenido;
     private LocalDateTime tiempo;
     private User emisor;
-    private Contacto receptor;
-    private boolean esMio;
+    private String nombreReceptor;
 
-    public Mensaje(String contenido, User emisor, Contacto receptor, boolean esMio) {
+    public Mensaje(String contenido, User emisor, String nombreReceptor) {
         this.contenido = contenido;
         this.emisor = emisor;
-        this.receptor = receptor;
-        this.esMio = esMio;
+        this.nombreReceptor = nombreReceptor;
         this.tiempo = LocalDateTime.now();
     }
 
-    public boolean EsMio() {
-        return esMio;
-    }
+    public Mensaje(Mensaje original) {
+        this.contenido = original.contenido;
+        this.tiempo = original.tiempo;
+        this.nombreReceptor = original.nombreReceptor;
 
-    public void setEsMio(boolean esMio) {
-        this.esMio = esMio;
+        this.emisor = original.emisor;
+
     }
 
     public String getContenido() {
@@ -44,12 +44,16 @@ public class Mensaje implements Serializable {
         this.emisor = emisor;
     }
 
-    public Contacto getReceptor() {
-        return receptor;
+    public String getNombreReceptor() {
+        return nombreReceptor;
     }
 
-    public void setReceptor(Contacto receptor) {
-        this.receptor = receptor;
+    public void setNombreReceptor(String nombreReceptor) {
+        this.nombreReceptor = nombreReceptor;
+    }
+
+    public void setTiempo(LocalDateTime tiempo) {
+        this.tiempo = tiempo;
     }
 
     public LocalDateTime getTiempo() {
@@ -65,11 +69,11 @@ public class Mensaje implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Mensaje mensaje = (Mensaje) o;
-        return Objects.equals(emisor, mensaje.emisor) && Objects.equals(receptor, mensaje.receptor);
+        return Objects.equals(emisor.getNombreUsuario(), mensaje.emisor.getNombreUsuario()) && Objects.equals(nombreReceptor, mensaje.nombreReceptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(emisor, receptor);
+        return Objects.hash(emisor.getNombreUsuario(), nombreReceptor);
     }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Agenda implements Serializable {
+    private static final long serialVersionUID = 1L;
     private List<Contacto> contactos;
 
     public Agenda() {
@@ -16,31 +17,37 @@ public class Agenda implements Serializable {
     }
 
     public void agregarContacto(Contacto contacto) {
-        this.contactos.add(contacto);
+        if (!contactos.contains(contacto)) {
+            this.contactos.add(contacto);
+        }
     }
 
-    public void agregarContacto(User user){
+//    public void agregarContacto(User user) {
+//        Contacto c = crearContacto(user);
+//        this.contactos.add(c);
+//    }
+
+    public static Contacto crearContacto(User user) {
         Contacto c = new Contacto();
-        c.setUser(user);
         c.setNombreUsuario(user.getNombreUsuario());
         c.setIP(user.getIP());
         c.setPuerto(user.getPuerto());
         c.setAlias(user.getNombreUsuario());
-        this.contactos.add(c);
+        return c;
     }
 
-    public Contacto getContactoPorUsuario(User user) {
+    public Contacto getContactoPorNombre(String nombre) {
         for (Contacto c : contactos) {
-            if (c.getNombreUsuario().equals(user.getNombreUsuario())) {
+            if (c.getNombreUsuario().equals(nombre)) {
                 return c;
             }
         }
         return null;
     }
 
-    public boolean existeContacto(User user) {
+    public boolean existeContacto(String nombre) {
         for (Contacto c : contactos) {
-            if (c.getNombreUsuario().equalsIgnoreCase(user.getNombreUsuario())) {
+            if (c.getNombreUsuario().equalsIgnoreCase(nombre)) {
                 return true;
             }
         }
@@ -49,6 +56,7 @@ public class Agenda implements Serializable {
 
     /**
      * EN desUSO
+     *
      * @param contactoOriginal
      * @param contactoActualizado
      * @return

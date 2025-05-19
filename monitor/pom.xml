@@ -9,7 +9,7 @@
         <version>3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>servidor</artifactId>
+    <artifactId>monitor</artifactId>
 
     <build>
         <plugins>
@@ -20,7 +20,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Servidor</mainClass>
+                            <mainClass>Monitor</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

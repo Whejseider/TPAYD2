@@ -4,10 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Directorio implements Serializable {
+    private static final long serialVersionUID = 1L;
     private ArrayList<User> directorio;
 
     public Directorio() {
-        directorio = new ArrayList<>();
+        this.directorio = new ArrayList<>();
     }
 
     public ArrayList<User> getDirectorio() {
@@ -36,7 +37,5 @@ public class Directorio implements Serializable {
                 .findFirst()
                 .orElse(null);
     }
-
-
 
 }

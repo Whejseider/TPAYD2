@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Conversacion implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Contacto contacto;
     private List<Mensaje> mensajes;
     private Notificacion notificacion = new Notificacion();
@@ -46,6 +47,10 @@ public class Conversacion implements Serializable {
 
     public void agregarMensaje(Mensaje mensaje) {
         this.mensajes.add(mensaje);
+    }
+
+    public void setMensajes(List<Mensaje> mensajes) {
+        this.mensajes = mensajes;
     }
 
     @Override

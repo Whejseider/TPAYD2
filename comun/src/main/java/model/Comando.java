@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 
 public class Comando implements Serializable {
+    private static final long serialVersionUID = 1L;
     private TipoSolicitud tipoSolicitud;
     private TipoRespuesta tipoRespuesta;
     private Object contenido;
