@@ -37,15 +37,14 @@ public class Servidor extends JFrame {
     private JLabel statusLabel, roleLabel, clientConnectionsLabel, directoryLabel;
     private JRadioButton primaryRadioButton, secondaryRadioButton;
     private ButtonGroup roleButtonGroup;
-    private JTextField clientPortField, internalPortField, peerIpField, peerPortField;
+    private JTextField clientPortField, internalPortField, secondaryPortField;
     private JPanel configPanel;
 
     // Server
     private ServerSocket clientServerSocket;
     private ServerSocket internalServerSocket;
     private ServerRole currentRole;
-    private String currentPeerIp;
-    private int currentPeerReplicationPort;
+    private int currentSecondaryReplicationPort;
     private int currentClientPort;
     private int currentInternalPort;
     private final int CHECK_INTERVAL_MS = 5000;
@@ -126,15 +125,14 @@ public class Servidor extends JFrame {
 
         clientPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_CLIENTES_DEFAULT), 5);
         internalPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_REPLICACION_DEFAULT), 5); // Usado por Secundario para escuchar
-        peerIpField = new JTextField(NetworkConstants.IP_DEFAULT, 10); // IP del otro servidor
-        peerPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_REPLICACION_DEFAULT), 5); // Puerto de replicación del otro servidor
+        secondaryPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_REPLICACION_DEFAULT), 5); // Puerto de replicación del otro servidor
 
         configPanel = new JPanel(new GridBagLayout());
     }
 
     private void layoutComponents() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(4, 4, 4,4);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
@@ -160,15 +158,9 @@ public class Servidor extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        configPanel.add(new JLabel("IP del servidor secundario:"), gbc);
-        gbc.gridx = 1;
-        configPanel.add(peerIpField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 4;
         configPanel.add(new JLabel("Puerto Replicación:"), gbc);
         gbc.gridx = 1;
-        configPanel.add(peerPortField, gbc);
+        configPanel.add(secondaryPortField, gbc);
 
 
         // Panel de Estado
@@ -218,31 +210,13 @@ public class Servidor extends JFrame {
         secondaryRadioButton.setEnabled(enabled);
         clientPortField.setEnabled(enabled);
         internalPortField.setEnabled(enabled);
-        peerIpField.setEnabled(enabled);
-        peerPortField.setEnabled(enabled);
+        secondaryPortField.setEnabled(enabled);
     }
 
     private void setupActions() {
         startButton.addActionListener(this::startServerAction);
         stopButton.addActionListener(e -> stopServer());
 
-        primaryRadioButton.addActionListener(e -> {
-            peerIpField.setEnabled(true);
-            peerPortField.setEnabled(true);
-            internalPortField.setEnabled(false);
-            clientPortField.setEnabled(true);
-        });
-        secondaryRadioButton.addActionListener(e -> {
-            peerIpField.setEnabled(false);
-            peerPortField.setEnabled(false);
-            internalPortField.setEnabled(true);
-            clientPortField.setEnabled(true);
-        });
-
-        peerIpField.setEnabled(primaryRadioButton.isSelected());
-        peerPortField.setEnabled(primaryRadioButton.isSelected());
-        internalPortField.setEnabled(secondaryRadioButton.isSelected());
-        clientPortField.setEnabled(primaryRadioButton.isSelected());
     }
 
     // Podria usar en otra clase, para monitor y servidor
@@ -299,19 +273,12 @@ public class Servidor extends JFrame {
         ServerRole selectedRole = primaryRadioButton.isSelected() ? ServerRole.PRIMARIO : ServerRole.SECUNDARIO;
         int clientPortToUse;
         int internalPortToUse; // Para el secundario
-        String peerIpToUse; // Para el primario, la IP del secundario
-        int peerReplicationPortToUse; // Para el primario, el puerto de replicacion del secundario
+        int secondaryReplicationPortToUse; // Para el primario, el puerto de replicacion del secundario
 
         try {
             clientPortToUse = Integer.parseInt(clientPortField.getText());
             internalPortToUse = Integer.parseInt(internalPortField.getText());
-            peerIpToUse = peerIpField.getText();
-            peerReplicationPortToUse = Integer.parseInt(peerPortField.getText());
-
-            if (selectedRole == ServerRole.PRIMARIO && (peerIpToUse.isEmpty())) {
-                JOptionPane.showMessageDialog(this, "Para el rol Primario, la IP del Secundario no puede estar vacía.", "Error de Configuración", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+            secondaryReplicationPortToUse = Integer.parseInt(secondaryPortField.getText());
 
         } catch (NumberFormatException nfe) {
             logMessage("Error: Puerto inválido. Ingrese un número.", COLOR_ERROR);
@@ -330,7 +297,9 @@ public class Servidor extends JFrame {
         }
 
         if (!checkPort(clientPortToUse)) {
-            errorMsg = "Error: El puerto (" + clientPortToUse + ") se encuentra en uso.\nIntenta cambiar el puerto de Puerto Clientes (Primario) por alguno que no esté en uso";
+            errorMsg = "Error: El puerto (" + clientPortToUse + ") se encuentra en uso." +
+                    "\nIntenta cambiar el puerto de Puerto Clientes (Primario) por alguno que no esté en uso y que sea diferente." +
+                    "\nPuertos no disponibles: " + NetworkConstants.PUERTO_REPLICACION_DEFAULT + " - " + NetworkConstants.PUERTO_HEARTBEAT_A_MONITOR_DEFAULT + " - " + NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT;;
             logMessage("Error al iniciar el servidor. El puerto (" + clientPortToUse + ") declarado en Puerto Clientes (Primario) ya está en uso.", COLOR_ERROR);
             JOptionPane.showMessageDialog(this, errorMsg, "Error de inicialización del servidor.", JOptionPane.ERROR_MESSAGE);
             return;
@@ -387,8 +356,7 @@ public class Servidor extends JFrame {
         currentRole = selectedRole;
         currentClientPort = clientPortToUse;
         currentInternalPort = internalPortToUse;
-        currentPeerIp = peerIpToUse;
-        currentPeerReplicationPort = peerReplicationPortToUse;
+        currentSecondaryReplicationPort = secondaryReplicationPortToUse;
 
         resetServerState();
         Servidor.instanciaServidorActivo = this;
@@ -660,12 +628,12 @@ public class Servidor extends JFrame {
     }
 
     private void replicateStateToPeer() {
-        if (!serverRunning || currentRole != ServerRole.PRIMARIO || currentPeerIp == null || currentPeerIp.isEmpty()) {
+        if (!serverRunning || currentRole != ServerRole.PRIMARIO ) {
             logMessage("Replicación: No es primario o no hay peer configurado.", COLOR_INFO);
             return;
         }
-        logMessage("PRIMARIO: Iniciando replicación de estado a Peer: " + currentPeerIp + ":" + currentPeerReplicationPort, COLOR_REPLICATION);
-        try (Socket socket = new Socket(currentPeerIp, currentPeerReplicationPort);
+        logMessage("PRIMARIO: Iniciando replicación de estado a Peer: " + NetworkConstants.IP_DEFAULT + ":" + currentSecondaryReplicationPort, COLOR_REPLICATION);
+        try (Socket socket = new Socket(NetworkConstants.IP_DEFAULT, currentSecondaryReplicationPort);
              ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
 
             StateData currentState;
