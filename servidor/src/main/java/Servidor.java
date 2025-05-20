@@ -148,7 +148,7 @@ public class Servidor extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        configPanel.add(new JLabel("Puerto Clientes (Primario):"), gbc);
+        configPanel.add(new JLabel("Puerto para Primario:"), gbc);
         gbc.gridx = 1;
         configPanel.add(clientPortField, gbc);
 
@@ -160,13 +160,13 @@ public class Servidor extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        configPanel.add(new JLabel("IP del Peer (Otro Servidor):"), gbc);
+        configPanel.add(new JLabel("IP del servidor secundario:"), gbc);
         gbc.gridx = 1;
         configPanel.add(peerIpField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
-        configPanel.add(new JLabel("Puerto Replicación Peer:"), gbc);
+        configPanel.add(new JLabel("Puerto Replicación:"), gbc);
         gbc.gridx = 1;
         configPanel.add(peerPortField, gbc);
 
