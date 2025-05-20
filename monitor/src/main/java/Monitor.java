@@ -35,7 +35,7 @@ public class Monitor extends JFrame {
     // logica
     private AtomicLong lastHeartbeatTime = new AtomicLong(0);
     private volatile boolean primaryConsideredDown = false;
-    private final long heartbeatTimeoutMillis = 8000; // 8 segundos
+    private final long heartbeatTimeoutMillis = 8000; // 4 segundos
 
     private String standbyIp;
     private int standbyCommandPort;
@@ -56,16 +56,16 @@ public class Monitor extends JFrame {
     private Thread clientQueryListenerThread;
     private final int clientQueryPort = NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT;
 
-    // lo mismo que el server
+    // lo mismo que el server, pasarlo a una clase compartida
     private static final Color COLOR_INFO = Color.BLACK;
     private static final Color COLOR_HEARTBEAT = new Color(0, 100, 0); // Verde oscuro
     private static final Color COLOR_WARNING = new Color(255, 140, 0); // Naranja oscuro
     private static final Color COLOR_ERROR = Color.RED;
     private static final Color COLOR_ACTION = Color.BLUE;
-    private static final Color COLOR_ROGUE = new Color(128, 0, 128); // Púrpura para rogue
+    private static final Color COLOR_ROGUE = new Color(128, 0, 128); // Violeta para el primario fantasma o rogue
 
     /**
-     * El monitor lo hice antes que el servidor, asi que no tiene los txtbox dew peurtos
+     * El monitor lo hice antes que el servidor, asi que no tiene los txtbox de los puertos
      * @param standbyIp
      * @param standbyCommandPort
      * @param monitorListenPort
@@ -327,7 +327,7 @@ public class Monitor extends JFrame {
                             }
 
                             else if (!activePrimaryClientIp.equals(hbIp) || activePrimaryClientPort != hbPort) {
-                                //O descomentar o ponerle un limite, es molesto
+                                //O descomentar o ponerle un limite, maximo no se 10 cada 1 minuto, es molesto, se mandan demasiados
                                 logMessage("HEARTBEAT FANTASMA: Recibido de " + hbIp + ":" + hbPort +
                                         ", pero el primario activo es " + activePrimaryClientIp + ":" + activePrimaryClientPort + ". IGNORANDO.", COLOR_ROGUE);
                             }
@@ -355,7 +355,7 @@ public class Monitor extends JFrame {
 
         synchronized (primaryInfoLock) {
             if (primaryConsideredDown) {
-                // Ya se detectó una caida y se esta (o se intento promover) promoviendo.
+                // Ya se detecto una caida y se esta (o se intento promover) promoviendo.
                 // No hacer nada mas hasta que un nuevo primario se establezca
                 // y sea validado en listenForHeartbeats.
                 return;

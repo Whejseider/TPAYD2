@@ -12,6 +12,9 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
+/**
+ * Sin uso todavia
+ */
 public class SimpleMessageModal extends SimpleModalBorder {
 
     private final Type type;

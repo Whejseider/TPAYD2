@@ -4,7 +4,7 @@ import interfaces.ConnectionCallBack;
 import model.TipoRespuesta;
 import raven.modal.Toast;
 import view.forms.FormError;
-import view.manager.ErrorManager;
+import view.manager.ToastManager;
 import view.system.FormManager;
 
 public class ConnectionManager {
@@ -40,12 +40,13 @@ public class ConnectionManager {
             if (formError != null && formError.isVisible()) {
                 formError.setVisible(false);
             }
-            Toast.show(FormManager.getFrame(), Toast.Type.SUCCESS, "Reconectado exitosamente");
+            ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Reconectado exitosamente");
+            formError = null;
             FormManager.init();
         } else {
-            Toast.show(FormManager.getFrame(), Toast.Type.ERROR, "Fallo al reconectar");
+//            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Fallo al reconectar");
             if (formError == null || !formError.isVisible()) {
-                showError(this.callBack, true);
+                showError(this.callBack, true, "Fallo al reconectar con el servidor");
             } else {
                 if (formError.isVisible()) {
                     formError.showReconnectOptions(true);
@@ -54,11 +55,9 @@ public class ConnectionManager {
         }
     }
 
-    public void showError(ConnectionCallBack callBack, boolean showReconnectOptions) {
+    public void showError(ConnectionCallBack callBack, boolean showReconnectOptions, String s) {
         getInstance().callBack = callBack;
-        if (formError == null || !formError.isVisible()) {
-            ErrorManager.getInstance().showError("Error de conexión");
-        }
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
         FormManager.showError(getFormError(showReconnectOptions));
     }
 

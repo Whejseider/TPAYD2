@@ -5,7 +5,8 @@ import connection.ConnectionManager;
 import connection.Sesion;
 import interfaces.*;
 import model.*;
-import view.manager.ErrorManager;
+import raven.modal.Toast;
+import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
 import view.system.MainForm;
@@ -54,7 +55,7 @@ public class MainFormController implements IController, AuthenticationListener, 
     @Override
     public void onLogoutFailure(String s) {
         Sesion.getInstance().setUsuarioActual(null);
-        ErrorManager.getInstance().showError(s);
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
         FormManager.showLogin();
     }
 
@@ -71,6 +72,7 @@ public class MainFormController implements IController, AuthenticationListener, 
 
     /**
      * TODO APARTIR DE ACA
+     *
      * @param tipoRespuesta
      */
     @Override
@@ -83,17 +85,29 @@ public class MainFormController implements IController, AuthenticationListener, 
         if (Sesion.getInstance().getUsuarioActual() != null) {
             Cliente.getInstance().iniciarSesion(Sesion.getInstance().getUsuarioActual());
         }
+        Cliente.getInstance().startPeriodicServerCheck();
     }
 
     @Override
-    public void onConnectionLost(String reason) {
-//        FormManager.init();
+    public void onConnectionLost(String s) {
+        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
+        Cliente.getInstance().stopPeriodicServerCheck();
+
+
     }
 
     @Override
-    public void onConnectionAttemptFailure(String reason) {
-        ConnectionManager.getInstance().showError(() -> {
-        }, true);
+    public void onConnectionAttemptFailure(String s) {
+        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
+        Cliente.getInstance().stopPeriodicServerCheck();
+    }
+
+    private void callBackConnection() {
+        try {
+            FormManager.restorePreviousForm();
+        } catch (Exception e) {
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, e.getMessage());
+        }
     }
 
 }

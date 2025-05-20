@@ -95,7 +95,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                 new Item.Label("OTROS"),
                 new Item("Configuración", "setting.svg", FormSetting.class),
                 new Item("Acerca de", "about.svg"),
-                new Item("Cerrar Sesión", "logout.svg")
+//                new Item("Cerrar Sesión", "logout.svg")
         };
 
         simpleMenuOption.setMenuStyle(new MenuStyle() {
@@ -131,11 +131,12 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                     action.consume();
                     FormManager.showAbout();
                     return;
-                } else if (i == 4) {
-                    action.consume();
-                    Cliente.getInstance().cerrarSesion(Sesion.getInstance().getUsuarioActual());
-                    return;
                 }
+//                else if (i == 4) {
+//                    action.consume();
+//                    Cliente.getInstance().cerrarSesion(Sesion.getInstance().getUsuarioActual());
+//                    return;
+//                }
                 if (itemClass == null || !Form.class.isAssignableFrom(itemClass)) {
                     action.consume();
                     return;

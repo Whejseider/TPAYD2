@@ -49,6 +49,14 @@ public class Servidor extends JFrame {
     private int currentClientPort;
     private int currentInternalPort;
     private final int CHECK_INTERVAL_MS = 5000;
+    // Heartneats
+    private final int INIT_DELAY_HEARTBEATS_SECONDS = 0;
+    private final int SEND_HEARTBEATS_SECONDS = 4;
+    // Replication, lo tengo que cambiar a futuro, para que cuando el secundario se conecte, le replique el estado
+    // Y luego solamente se hace el force en cambios criticos del servidor
+    // No me dio el tiempo :D
+    private final int INIT_DELAY_REPLICATION_SECONDS = 6;
+    private final int SEND_REPLICATION_SECONDS = 12;
 
     private final AtomicBoolean promotedToPrimary = new AtomicBoolean(false);
     private ScheduledExecutorService scheduler;
@@ -66,11 +74,12 @@ public class Servidor extends JFrame {
     public static final Color COLOR_INFO = Color.BLACK;
     public static final Color COLOR_CLIENT = new Color(0, 0, 139); // Azul oscuro
     public static final Color COLOR_REPLICATION = new Color(0, 100, 0); // Verde oscuro
-    public static final Color COLOR_PROMOTION = new Color(139, 0, 139); // Magenta oscuro
+    public static final Color COLOR_PROMOTION = new Color(139, 0, 139); // Violeta oscuro
     public static final Color COLOR_ERROR = Color.RED;
     public static final Color COLOR_WARNING = new Color(255, 140, 0);
 
     //A Futuro pasarlo quizas a MVC
+    // Pero no creo que haga falta
     public Servidor() {
         setTitle("Panel de Control del Servidor de Mensajería");
         setSize(800, 600);
@@ -124,7 +133,6 @@ public class Servidor extends JFrame {
     }
 
     private void layoutComponents() {
-        // Panel de Configuración
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
@@ -218,7 +226,6 @@ public class Servidor extends JFrame {
         startButton.addActionListener(this::startServerAction);
         stopButton.addActionListener(e -> stopServer());
 
-        // Habilitar/deshabilitar campos según el rol
         primaryRadioButton.addActionListener(e -> {
             peerIpField.setEnabled(true);
             peerPortField.setEnabled(true);
@@ -229,7 +236,7 @@ public class Servidor extends JFrame {
             peerIpField.setEnabled(false);
             peerPortField.setEnabled(false);
             internalPortField.setEnabled(true);
-            clientPortField.setEnabled(false);
+            clientPortField.setEnabled(true);
         });
 
         peerIpField.setEnabled(primaryRadioButton.isSelected());
@@ -260,12 +267,30 @@ public class Servidor extends JFrame {
 
     // Logica
 
+    private boolean checkPort(int puerto) {
+        try (ServerSocket socket = new ServerSocket(puerto)) {
+            socket.setReuseAddress(true);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private boolean checkNetworkPorts(int puerto) {
+        return puerto != NetworkConstants.PUERTO_REPLICACION_DEFAULT &&
+                puerto != NetworkConstants.PUERTO_HEARTBEAT_A_MONITOR_DEFAULT &&
+                puerto != NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT;
+    }
+
     /**
      * Si no está el monitor funcionando, no se puede iniciar el servidor<br>
      * El monitor como conoce los servidores maneja los roles
+     *
      * @param e
      */
     private void startServerAction(ActionEvent e) {
+        String errorMsg;
+
         if (serverRunning) {
             logMessage("El servidor ya está en ejecución.", COLOR_WARNING);
             return;
@@ -275,7 +300,7 @@ public class Servidor extends JFrame {
         int clientPortToUse;
         int internalPortToUse; // Para el secundario
         String peerIpToUse; // Para el primario, la IP del secundario
-        int peerReplicationPortToUse; // Para el primario, el puerto de replicación del secundario
+        int peerReplicationPortToUse; // Para el primario, el puerto de replicacion del secundario
 
         try {
             clientPortToUse = Integer.parseInt(clientPortField.getText());
@@ -284,8 +309,8 @@ public class Servidor extends JFrame {
             peerReplicationPortToUse = Integer.parseInt(peerPortField.getText());
 
             if (selectedRole == ServerRole.PRIMARIO && (peerIpToUse.isEmpty())) {
-                 JOptionPane.showMessageDialog(this, "Para el rol Primario, la IP del Secundario no puede estar vacía.", "Error de Configuración", JOptionPane.ERROR_MESSAGE);
-                 return;
+                JOptionPane.showMessageDialog(this, "Para el rol Primario, la IP del Secundario no puede estar vacía.", "Error de Configuración", JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
         } catch (NumberFormatException nfe) {
@@ -294,9 +319,26 @@ public class Servidor extends JFrame {
             return;
         }
 
+        //Verifico que no esten en uso los puertos
+        if (!checkNetworkPorts(clientPortToUse)) {
+            errorMsg = "Error: El puerto (" + clientPortToUse + ") es parte de otro servicio del servidor." +
+                    "\nIntenta cambiar el puerto de Puerto Clientes (Primario) por alguno que no esté en uso y que sea diferente." +
+                    "\nPuertos no disponibles: " + NetworkConstants.PUERTO_REPLICACION_DEFAULT + " - " + NetworkConstants.PUERTO_HEARTBEAT_A_MONITOR_DEFAULT + " - " + NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT;
+            logMessage("Error al iniciar el servidor. El puerto (" + clientPortToUse + ") declarado en Puerto Clientes (Primario) es parte de otro servicio del servidor.", COLOR_ERROR);
+            JOptionPane.showMessageDialog(this, errorMsg, "Error de inicialización del servidor.", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!checkPort(clientPortToUse)) {
+            errorMsg = "Error: El puerto (" + clientPortToUse + ") se encuentra en uso.\nIntenta cambiar el puerto de Puerto Clientes (Primario) por alguno que no esté en uso";
+            logMessage("Error al iniciar el servidor. El puerto (" + clientPortToUse + ") declarado en Puerto Clientes (Primario) ya está en uso.", COLOR_ERROR);
+            JOptionPane.showMessageDialog(this, errorMsg, "Error de inicialización del servidor.", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // inicio verificación con el monitor
-        String errorMsg;
         if (selectedRole == ServerRole.PRIMARIO) {
+            logMessage("Verificando puertos", COLOR_INFO);
             logMessage("Intentando iniciar como PRIMARIO. Verificando con el Monitor...", COLOR_INFO);
             try (Socket monitorSocket = new Socket(NetworkConstants.IP_MONITOR_DEFAULT, NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT);
                  ObjectOutputStream oosMonitor = new ObjectOutputStream(monitorSocket.getOutputStream());
@@ -359,7 +401,8 @@ public class Servidor extends JFrame {
                 logMessage("Servidor PRIMARIO escuchando clientes en: " + NetworkConstants.IP_DEFAULT + ":" + currentClientPort, COLOR_INFO);
                 scheduler = Executors.newScheduledThreadPool(2);
                 startHeartbeatToMonitor();
-                // startPeriodicStateReplication(); //Lo cambie para replicar solo en momentos criticos
+                startPeriodicStateReplication(); //Lo reactive porque no pude hacer todavia lo de resincronizar
+                //al iniciar el secundario
                 clientAcceptThread = new Thread(this::acceptClientConnectionsLoop);
                 clientAcceptThread.start();
             } else {
@@ -520,12 +563,10 @@ public class Servidor extends JFrame {
         }
         logMessage("SECUNDARIO: Promoviéndome a PRIMARIO...", COLOR_PROMOTION);
 
-
         currentRole = ServerRole.PRIMARIO;
         promotedToPrimary.set(true);
         primaryRadioButton.setSelected(true);
         Servidor.instanciaServidorActivo = this;
-
 
         try {
             if (internalCommsThread != null && internalCommsThread.isAlive())
@@ -553,6 +594,7 @@ public class Servidor extends JFrame {
             scheduler = Executors.newScheduledThreadPool(2);
 
             startHeartbeatToMonitor();
+            startPeriodicStateReplication();
             clientAcceptThread = new Thread(this::acceptClientConnectionsLoop);
             clientAcceptThread.start();
             logMessage("NUEVO PRIMARIO: Listo para aceptar clientes.", COLOR_PROMOTION);
@@ -581,7 +623,7 @@ public class Servidor extends JFrame {
                     logMessage("PRIMARIO: Error al enviar heartbeat al Monitor: " + e.getMessage(), COLOR_ERROR);
                 }
             }
-        }, 0, 5, TimeUnit.SECONDS);
+        }, INIT_DELAY_HEARTBEATS_SECONDS, SEND_HEARTBEATS_SECONDS, TimeUnit.SECONDS);
     }
 
     private HeartbeatData getHeartbeatData() {
@@ -596,15 +638,18 @@ public class Servidor extends JFrame {
         return new HeartbeatData(myClientListeningIp, myClientListeningPort);
     }
 
+    /**
+     * PROVISORIO
+     */
     private void startPeriodicStateReplication() {
         if (scheduler == null || scheduler.isShutdown()) {
             logMessage("Advertencia: Scheduler no disponible para iniciar replicación periódica.", COLOR_WARNING);
             return;
         }
-        scheduler.scheduleAtFixedRate(this::replicateStateToPeer, 10, 10, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::replicateStateToPeer, INIT_DELAY_REPLICATION_SECONDS, SEND_REPLICATION_SECONDS, TimeUnit.SECONDS);
     }
 
-    public void forceStateReplicationNow() {
+    public void forceStateReplication() {
         if (serverRunning && currentRole == ServerRole.PRIMARIO) {
             if (scheduler != null && !scheduler.isShutdown()) {
                 scheduler.submit(this::replicateStateToPeer);
@@ -616,7 +661,7 @@ public class Servidor extends JFrame {
 
     private void replicateStateToPeer() {
         if (!serverRunning || currentRole != ServerRole.PRIMARIO || currentPeerIp == null || currentPeerIp.isEmpty()) {
-             logMessage("Replicación: No es primario o no hay peer configurado.", COLOR_INFO);
+            logMessage("Replicación: No es primario o no hay peer configurado.", COLOR_INFO);
             return;
         }
         logMessage("PRIMARIO: Iniciando replicación de estado a Peer: " + currentPeerIp + ":" + currentPeerReplicationPort, COLOR_REPLICATION);
@@ -630,7 +675,7 @@ public class Servidor extends JFrame {
 
             oos.writeObject(currentState);
             oos.flush();
-             logMessage("PRIMARIO: Estado replicado exitosamente a Peer.", COLOR_REPLICATION);
+            logMessage("PRIMARIO: Estado replicado exitosamente a Peer.", COLOR_REPLICATION);
 
         } catch (java.net.ConnectException e) {
             logMessage("PRIMARIO: No se pudo conectar al Peer para replicar: " + e.getMessage(), COLOR_ERROR);

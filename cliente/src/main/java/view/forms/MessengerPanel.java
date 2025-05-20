@@ -95,6 +95,10 @@ public class MessengerPanel extends Form {
 
     public void mostrarContactoInfo(Contacto contactoSeleccionado) {
         panelConversacion.getChatTitle().mostrar(contactoSeleccionado);
+
+        panelConversacion.getChatBottom().setVisible(true);
+        panelConversacion.getChatBottom().getTxtInput().setText("");
+        panelConversacion.getChatBottom().getTxtInput().grabFocus();
     }
 
     public void setListChat(JList<Conversacion> listChat) {

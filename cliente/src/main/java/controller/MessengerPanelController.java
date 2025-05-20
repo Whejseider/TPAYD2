@@ -8,7 +8,9 @@ import model.*;
 import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.MessengerPanel;
+import view.manager.ToastManager;
 import view.system.Form;
+import view.system.FormManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -108,6 +110,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
             } else {
                 if (conversacion != null && conversacion.getNotificacion() != null) {
                     conversacion.getNotificacion().setTieneMensajesNuevos(true);
+//                    ToastManager.getInstance().showNotifyMessage(contactoEmisor);
                 }
                 revalidarListChat();
             }
@@ -118,6 +121,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
         SwingUtilities.invokeLater(() -> {
 
             vista.getChat().clearMessages();
+            
             ultimaFechaMostradaEnChat = null;
 
             contactoActual = contacto;
@@ -251,6 +255,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
         Contacto c = Agenda.crearContacto(mensajeRecibido.getEmisor());
         usuarioActual.getAgenda().agregarContacto(c);
         usuarioActual.getConversacionCon(c.getNombreUsuario()).agregarMensaje(mensajeRecibido);
+        usuarioActual.getConversacionCon(c.getNombreUsuario()).setUltimoMensaje(mensajeRecibido);
 
         procesaMensajeEntrante(mensajeRecibido);
 
@@ -298,7 +303,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
      */
     @Override
     public void onSendMessageFailure(String s) {
-        Toast.show(vista, Toast.Type.ERROR, s);
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
     }
 
     @Override

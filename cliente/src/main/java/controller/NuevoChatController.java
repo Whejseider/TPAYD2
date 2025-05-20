@@ -56,6 +56,7 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
                         this.messengerPanelController.getVista().getListChat().setSelectedValue(conversacion, true);
                     } else {
                         this.messengerPanelController.revalidarPanelMensajes();
+//                        this.messengerPanelController.getVista().getListChat().setSelectedValue(null, false);
                     }
 
                     this.messengerPanelController.revalidarListChat();

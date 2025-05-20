@@ -11,6 +11,7 @@ import model.User;
 import raven.modal.Toast;
 import view.forms.FormDirectorio;
 import view.forms.other.Card;
+import view.manager.ToastManager;
 import view.system.Form;
 
 import javax.swing.*;
@@ -122,7 +123,8 @@ public class DirectorioController implements IController, DirectoryListener, Con
     public void onAddContactSuccess(Contacto contacto) {
         if (this.vista.isVisible()) {
             Sesion.getInstance().getUsuarioActual().getAgenda().agregarContacto(contacto);
-            Toast.show(vista, Toast.Type.SUCCESS, "Contacto agregado correctamente.");
+            ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Contacto agregado correctamente.");
+
             cargarDirectorio();
             System.out.println("DIRECTORIO: CONTACTO AGREGADO");
         }

@@ -2,11 +2,9 @@ package connection;
 
 import controller.ClientManager;
 import interfaces.ClientListener;
-import interfaces.ConnectionCallBack;
 import model.*;
 import network.HeartbeatData;
 import network.NetworkConstants;
-import view.system.FormManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,7 +31,7 @@ public class Cliente {
     private static String lastKnownPrimaryIp = null;
     private static int lastKnownPrimaryPort = -1;
     private static final int CONNECTION_TIMEOUT_MS = 5000; // 5 segundos para timeouts de conexión
-    private static final int SERVER_CHECK_INTERVAL_SECONDS = 15; // 15 segundos para chequear la conexión con el servidor (el monitor nos da el servidor primario)
+    private static final int SERVER_CHECK_INTERVAL_SECONDS = 3; // 3 segundos para chequear la conexión con el servidor, es muy poco pero es lo que hay (el monitor nos da el servidor primario)
     private static final int RECONNECT_DELAY_MS = 3000; // 3 segundos de espera antes de intentar reconectar
     private ScheduledExecutorService scheduler;
 
@@ -77,7 +75,6 @@ public class Cliente {
 
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                // Verificar si hay una reconexión en curso
                 if (reconectando) {
                     System.out.println("Cliente: Verificación periódica - Reconexión en curso, saltando verificación");
                     return;
@@ -204,11 +201,11 @@ public class Cliente {
                 return newSocket;
             } catch (IOException e) {
                 System.err.println("Cliente: Fallo al conectar al último primario conocido: " + e.getMessage());
-                // No limpiamos lastKnownPrimaryIp/Port aquí para mantener la información
+                // Aca antes tenia lastknown ip y puerto (-1, null)
             }
         }
 
-        HeartbeatData primaryInfoFromMonitor = queryMonitorForPrimaryServer(); // Ahora devuelve HeartbeatData
+        HeartbeatData primaryInfoFromMonitor = queryMonitorForPrimaryServer();
 
         if (primaryInfoFromMonitor != null && primaryInfoFromMonitor.getPrimaryClientIp() != null && primaryInfoFromMonitor.getPrimaryClientPort() != -1) {
             String monitorIp = primaryInfoFromMonitor.getPrimaryClientIp();
@@ -245,7 +242,6 @@ public class Cliente {
         return null;
     }
 
-    // Método para intentar reconectar después de un error
     public void intentarReconectar() {
         if (reconectando) {
             System.out.println("Cliente: Reconexión ya en curso, ignorando solicitud redundante");
@@ -256,7 +252,7 @@ public class Cliente {
 
         new Thread(() -> {
             try {
-                // Pequeña espera para no saturar con intentos
+
                 Thread.sleep(RECONNECT_DELAY_MS);
 
                 System.out.println("Cliente: Ejecutando intento de reconexión programado");
@@ -331,7 +327,7 @@ public class Cliente {
     public void enviarMensaje(Mensaje mensaje) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar(); // Intentar reconectar automáticamente
+            intentarReconectar();
             return;
         }
         try {

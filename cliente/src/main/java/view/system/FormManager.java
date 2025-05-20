@@ -15,7 +15,7 @@ import view.component.About;
 import view.drawer.MenuDrawer;
 import view.forms.FormError;
 import view.forms.FormRegister;
-import view.forms.Login;
+import view.forms.FormLogin;
 import view.forms.MessengerPanel;
 
 import javax.swing.*;
@@ -25,8 +25,9 @@ public class FormManager {
     protected static final UndoRedo<Form> FORMS = new UndoRedo<>();
     private static JFrame frame;
     private static MainForm mainForm;
-    private static Login login;
+    private static FormLogin formLogin;
     private static FormRegister register;
+    private static Form lastFormBeforeError;
 
     public static void install(JFrame f) {
         frame = f;
@@ -48,10 +49,10 @@ public class FormManager {
                 showLogin();
             } else {
                 System.out.println("FormManager: Falló la conexión inicial, mostrando error.");
-                ConnectionManager.getInstance().showError(() -> {
-                    System.out.println("FormManager: Reconexión exitosa desde pantalla de error, mostrando login.");
-                    showLogin();
-                }, true);
+//                ConnectionManager.getInstance().showError(() -> {
+//                    System.out.println("FormManager: Reconexión exitosa desde pantalla de error, mostrando login.");
+//                    showLogin();
+//                }, true);
             }
         }
     }
@@ -64,7 +65,7 @@ public class FormManager {
         FORMS.clear();
         mainForm = null;
         register = null;
-        login = null;
+        formLogin = null;
         frame.repaint();
         frame.revalidate();
     }
@@ -152,6 +153,7 @@ public class FormManager {
     }
 
     public static void showError(FormError formError) {
+            lastFormBeforeError = FORMS.getCurrent();
             MenuDrawer.getInstance().setVisible(false);
             frame.getContentPane().removeAll();
             formError.formCheck();
@@ -176,15 +178,15 @@ public class FormManager {
         return mainForm;
     }
 
-    private static Login getLogin() {
-        if (login == null) {
-            login = new Login();
+    private static FormLogin getLogin() {
+        if (formLogin == null) {
+            formLogin = new FormLogin();
             ControllerFactory controllerFactory = new ControllerFactory();
-            IController controller = controllerFactory.getController(login.getName(), login);
-            login.setControlador(controller);
+            IController controller = controllerFactory.getController(formLogin.getName(), formLogin);
+            formLogin.setControlador(controller);
             controller.init();
         }
-        return login;
+        return formLogin;
     }
 
     public static void showAbout() {
@@ -193,4 +195,12 @@ public class FormManager {
         );
     }
 
+    public static void restorePreviousForm(){
+        if (lastFormBeforeError != null) {
+            showForm(lastFormBeforeError);
+            lastFormBeforeError = null;
+        } else {
+            init();
+        }
+    }
 }

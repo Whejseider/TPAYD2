@@ -26,14 +26,16 @@ public class FormError extends Form {
 
         JLabel labelMessage = new JLabel("Error de conexión con el servidor");
         JLabel labelDescription = new JLabel("Perdón, algo salió mal.");
+        JLabel labelHint = new JLabel("Intente verificar su conexión de red o reintente conectarse de nuevo en unos segundos.");
         labelMessage.putClientProperty(FlatClientProperties.STYLE, "font:bold +10");
 
         FlatSVGIcon icon = new FlatSVGIcon("fv/icons/server_error.svg", 2f);
         add(new JLabel(icon));
 
-        panel = new JPanel(new MigLayout("wrap 1, fillx", "[grow, center]", "[]3[]10[]10[][]"));
+        panel = new JPanel(new MigLayout("wrap 1, fillx", "[grow, center]", "[]3[]5[]10[]10[][]"));
         panel.add(labelMessage);
         panel.add(labelDescription);
+        panel.add(labelHint);
         panel.add(new JSeparator(), "growx, gapy 5 5");
 
         countdownLabel = new JLabel(" ");

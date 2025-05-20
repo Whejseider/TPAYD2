@@ -1,13 +1,14 @@
 package network;
 
 public final class NetworkConstants {
+
     private NetworkConstants() {}
 
     // PUERTOS SERVIDOR
     public static final int PUERTO_CLIENTES_DEFAULT = 1234;
     public static final int PUERTO_REPLICACION_DEFAULT = 1235; // Secundario para replicar estado
     public static final int PUERTO_COMANDO_MONITOR_A_STANDBY_DEFAULT = 1235; // Secundario para comando de promocion a primario
-    public static final int PUERTO_SINCRONIZACION_DEFAULT = 1239;
+    public static final int PUERTO_CLIENTES_SECUNDARIO = 1238;
 
     // MONITOR
     public static final int PUERTO_HEARTBEAT_A_MONITOR_DEFAULT = 1236;

@@ -2,6 +2,8 @@ package view.simple;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import connection.Sesion;
+import model.Contacto;
 import net.miginfocom.swing.MigLayout;
 import raven.extras.AvatarIcon;
 import raven.modal.toast.ToastCustomPanel;
@@ -10,17 +12,18 @@ import javax.swing.*;
 
 public class SimpleCustomToast extends ToastCustomPanel {
 
-    public SimpleCustomToast() {
-        init();
+    public SimpleCustomToast(Contacto contacto) {
+        init(contacto);
     }
 
-    private void init() {
+    private void init(Contacto contacto) {
         setOpaque(false);
         setLayout(new MigLayout("ay center,insets 0", "", "[sg h,bottom][sg h,top]"));
-        JLabel labelProfile = new JLabel(new AvatarIcon(getClass().getResource("/fv/images/profile_2.jpg"), 50, 50, 999));
-        JLabel labelName = new JLabel("Samantha Smith");
-        JLabel labelDescription = new JLabel("Experienced marketing professional with a focus on digital advertising.");
-        JButton buttonClose = new JButton(new FlatSVGIcon("/fv/icons/close.svg", 0.3f));
+        JLabel labelProfile = new JLabel(new AvatarIcon(new FlatSVGIcon("fv/drawer/image/avatar_male.svg", 100, 100), 50, 50, 3.5f));
+        JLabel labelName = new JLabel(contacto.getNombreUsuario());
+        JLabel labelDescription = new JLabel(Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto.getNombreUsuario()).getUltimoMensaje().getContenido());
+
+        JButton buttonClose = new JButton(new FlatSVGIcon("fv/icons/close.svg", 0.3f));
         buttonClose.setFocusable(false);
 
         labelName.putClientProperty(FlatClientProperties.STYLE, "" +

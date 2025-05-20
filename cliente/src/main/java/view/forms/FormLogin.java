@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class Login extends Form {
+public class FormLogin extends Form {
     private final JLabel lblSignUp;
     private JLabel lblErrorUsuario;
     private JLabel lblErrorPuerto;
@@ -28,7 +28,7 @@ public class Login extends Form {
     private LoginController controlador;
     private JButton btnSignUp;
 
-    public Login() throws HeadlessException {
+    public FormLogin() throws HeadlessException {
         setName("Login");
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
 

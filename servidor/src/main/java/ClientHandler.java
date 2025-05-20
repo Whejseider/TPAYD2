@@ -129,9 +129,10 @@ public class ClientHandler implements Runnable {
     }
 
     //Verificar si hace falta actualizar el directorio en estos casos
+    // pero creo que no
     public void recibirMensaje(Mensaje mensaje) throws IOException {
         String emisorOriginal = mensaje.getEmisor().getNombreUsuario();
-        boolean existeContacto = false;
+        boolean existeContacto;
 
         synchronized (Servidor.class) {
             if (this.userActual != null) {
@@ -145,10 +146,9 @@ public class ClientHandler implements Runnable {
             }
         }
 
-        if (existeContacto) {
-            Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
-            enviarComando(c);
-        }
+        Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
+        enviarComando(c);
+
 
         serverLog("Servidor: Mensaje entregado a " + this.userActual.getNombreUsuario() + " de " + emisorOriginal, Servidor.COLOR_INFO);
     }
@@ -318,9 +318,10 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    //No me gusto como manejo el mensaje, despues lo tengo que cambiar
     private void replicar(String msg) {
-        serverLog("Forzando replicación tras " + msg +".", Servidor.COLOR_REPLICATION);
-        Servidor.instanciaServidorActivo.forceStateReplicationNow();
+        serverLog("Forzando replicación tras " + msg + ".", Servidor.COLOR_REPLICATION);
+        Servidor.instanciaServidorActivo.forceStateReplication();
     }
 
     //Entrada de datos

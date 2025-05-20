@@ -7,7 +7,7 @@ import interfaces.IController;
 import model.User;
 import raven.modal.Toast;
 import view.forms.FormRegister;
-import view.manager.ErrorManager;
+import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
 
@@ -149,13 +149,13 @@ public class RegisterController implements IController, ActionListener, Authenti
 
     @Override
     public void onRegistrationSuccess() {
-        Toast.show(vista, Toast.Type.SUCCESS, "Usuario registrado correctamente.");
+        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Usuario registrado correctamente.");
         FormManager.showLogin();
     }
 
     @Override
     public void onRegistrationFailure(String s) {
-        ErrorManager.getInstance().showError(s);
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
     }
 
 

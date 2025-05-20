@@ -91,7 +91,7 @@ public class Chat_Bottom extends JPanel {
 
         bottomRightPanel.add(btnSend);
         add(bottomRightPanel);
-
+        setVisible(false);
     }
 
     private JButton createActionButton(Icon icon) {

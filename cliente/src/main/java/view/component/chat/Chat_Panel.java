@@ -21,7 +21,7 @@ public class Chat_Panel extends JPanel {
     }
 
     private void init() {
-        body = new JPanel(new MigLayout("fillx", "", "15[bottom]15")); // Menos padding vertical, los items lo manejan
+        body = new JPanel(new MigLayout("fillx", "", "15[bottom]15"));
         body.setOpaque(false);
         body.putClientProperty(FlatClientProperties.STYLE, "background:$Chat.background");
 

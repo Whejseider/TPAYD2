@@ -8,8 +8,8 @@ import interfaces.IController;
 import model.User;
 import network.NetworkConstants;
 import raven.modal.Toast;
-import view.forms.Login;
-import view.manager.ErrorManager;
+import view.forms.FormLogin;
+import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
 
@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class LoginController implements IController, ActionListener, AuthenticationListener {
-    private Login vista;
+    private FormLogin vista;
     private EventManager eventManager;
 
-    public LoginController(Login vista) {
+    public LoginController(FormLogin vista) {
         this.vista = vista;
     }
 
@@ -109,11 +109,11 @@ public class LoginController implements IController, ActionListener, Authenticat
         }
     }
 
-    public Login getVista() {
+    public FormLogin getVista() {
         return vista;
     }
 
-    public void setVista(Login vista) {
+    public void setVista(FormLogin vista) {
         this.vista = vista;
     }
 
@@ -122,13 +122,14 @@ public class LoginController implements IController, ActionListener, Authenticat
     public void onLoginSuccess(User user) {
         removeListener();
         Sesion.getInstance().setUsuarioActual(user);
-        Toast.show(vista, Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
+        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
+
         FormManager.showHome();
     }
 
     @Override
     public void onLoginFailure(String s) {
-        ErrorManager.getInstance().showError(s);
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
     }
 
     @Override
