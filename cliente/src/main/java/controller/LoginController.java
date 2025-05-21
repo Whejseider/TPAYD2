@@ -4,7 +4,9 @@ import com.formdev.flatlaf.FlatClientProperties;
 import connection.Cliente;
 import connection.Sesion;
 import interfaces.AuthenticationListener;
+import interfaces.ConnectionListener;
 import interfaces.IController;
+import model.TipoRespuesta;
 import model.User;
 import network.NetworkConstants;
 import raven.modal.Toast;
@@ -18,7 +20,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.Socket;
 
-public class LoginController implements IController, ActionListener, AuthenticationListener {
+public class LoginController implements IController, ActionListener, AuthenticationListener, ConnectionListener {
+
     private FormLogin vista;
     private EventManager eventManager;
 
@@ -42,7 +45,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
         this.eventManager = EventManager.getInstance();
         this.eventManager.addAuthenticationListener(this);
-
+        this.eventManager.addConnectionListener(this);
 //        this.initMessenger();
     }
 
@@ -120,7 +123,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     @Override
     public void onLoginSuccess(User user) {
-        removeListener();
+//        this.eventManager.removeAuthenticationListener(this);
         Sesion.getInstance().setUsuarioActual(user);
         ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
 
@@ -130,16 +133,17 @@ public class LoginController implements IController, ActionListener, Authenticat
     @Override
     public void onLoginFailure(String s) {
         ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
+        Sesion.getInstance().setUsuarioActual(null);
     }
 
     @Override
     public void onLogoutSuccess() {
-        addListener();
+        this.eventManager.addAuthenticationListener(this);
     }
 
     @Override
     public void onLogoutFailure(String s) {
-        addListener();
+        this.eventManager.addAuthenticationListener(this);
     }
 
     @Override
@@ -152,20 +156,25 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     }
 
-
-    public void removeListener() {
-        this.eventManager = EventManager.getInstance();
-
-        this.eventManager.removeAuthenticationListener(this);
-        System.out.println("LoginController desregistrado como listener.");
-
+    @Override
+    public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
+        this.eventManager.addConnectionListener(this);
     }
 
-    public void addListener() {
-        this.eventManager = EventManager.getInstance();
-
-        this.eventManager.addAuthenticationListener(this);
-        System.out.println("LoginController registrado como listener.");
+    @Override
+    public void onConnectionEstablished() {
+//        this.eventManager.removeConnectionListener(this);
     }
+
+    @Override
+    public void onConnectionLost(String reason) {
+        this.eventManager.addConnectionListener(this);
+    }
+
+    @Override
+    public void onConnectionAttemptFailure(String reason) {
+        this.eventManager.addConnectionListener(this);
+    }
+
 
 }

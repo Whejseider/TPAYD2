@@ -2,11 +2,10 @@ package view.system;
 
 
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
-import connection.ConnectionManager;
+import connection.Cliente;
 import connection.Sesion;
 import factory.ControllerFactory;
 import interfaces.IController;
-import model.TipoRespuesta;
 import raven.modal.Drawer;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
@@ -42,18 +41,7 @@ public class FormManager {
             showHome();
         } else {
             System.out.println("FormManager: No hay sesión activa, verificando conexión inicial...");
-            TipoRespuesta respuestaConexion = ConnectionManager.getInstance().tryEstablishInitialConnection();
-
-            if (respuestaConexion == TipoRespuesta.OK) {
-                System.out.println("FormManager: Conexión OK, mostrando login.");
-                showLogin();
-            } else {
-                System.out.println("FormManager: Falló la conexión inicial, mostrando error.");
-//                ConnectionManager.getInstance().showError(() -> {
-//                    System.out.println("FormManager: Reconexión exitosa desde pantalla de error, mostrando login.");
-//                    showLogin();
-//                }, true);
-            }
+            Cliente.getInstance().connectToServer();
         }
     }
 

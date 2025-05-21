@@ -82,7 +82,7 @@ public class Cliente {
 
                 if (!isConectadoYActivo()) {
                     System.out.println("Cliente: Verificación periódica - Detectó conexión inactiva, intentando reconectar...");
-                    intentarReconectar();
+                    attemptReconnect();
                     return;
                 }
 
@@ -119,7 +119,7 @@ public class Cliente {
                             clientListener.onResponse(informacionCmd);
                         }
 
-                        intentarReconectar();
+                        attemptReconnect();
                     } else {
                         System.out.println("Cliente: Verificación periódica - Conectado al servidor primario correcto.");
                     }
@@ -172,11 +172,13 @@ public class Cliente {
                     } else {
                         System.out.println("Cliente: Monitor informó que no hay primario disponible (info recibida: " +
                                 info.getPrimaryClientIp() + ":" + info.getPrimaryClientPort() + ")");
+                        cerrarTodo(false);
                         return null;
                     }
                 } else {
                     System.out.println("Cliente: Respuesta inesperada del monitor (esperaba HeartbeatData): " +
                             (response != null ? response.getClass().getName() : "null"));
+                    cerrarTodo(true);
                 }
             }
         } catch (SocketTimeoutException e) {
@@ -242,7 +244,7 @@ public class Cliente {
         return null;
     }
 
-    public void intentarReconectar() {
+    public void attemptReconnect() {
         if (reconectando) {
             System.out.println("Cliente: Reconexión ya en curso, ignorando solicitud redundante");
             return;
@@ -256,26 +258,7 @@ public class Cliente {
                 Thread.sleep(RECONNECT_DELAY_MS);
 
                 System.out.println("Cliente: Ejecutando intento de reconexión programado");
-                if (conectarAlServidor()) {
-                    System.out.println("Cliente: Reconexión exitosa");
-                    if (clientListener != null) {
-                        Comando informacionCmd = new Comando(
-                                TipoSolicitud.CONECTARSE_SERVIDOR,
-                                TipoRespuesta.OK,
-                                "Reconexión exitosa al servidor");
-                        clientListener.onResponse(informacionCmd);
-                    }
-                } else {
-                    System.err.println("Cliente: Intento de reconexión falló");
-
-                    if (clientListener != null) {
-                        Comando errorCmd = new Comando(
-                                TipoSolicitud.CONECTARSE_SERVIDOR,
-                                TipoRespuesta.ERROR,
-                                "No se pudo reconectar. Se seguirá intentando...");
-                        clientListener.onResponse(errorCmd);
-                    }
-                }
+                connectToServer();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.err.println("Cliente: Intento de reconexión interrumpido: " + e.getMessage());
@@ -285,10 +268,10 @@ public class Cliente {
         }).start();
     }
 
-    public boolean conectarAlServidor() {
+    public void connectToServer() {
         if (socket != null && socket.isConnected() && !socket.isClosed()) {
             System.out.println("Cliente: Ya conectado.");
-            return true;
+            return ;
         }
 
         System.out.println("Cliente: No conectado o conexión cerrada. Intentando (re)conectar...");
@@ -309,10 +292,8 @@ public class Cliente {
                 if (clientListener != null) {
                     clientListener.onResponse(c);
                 }
-                return true;
             } else {
                 System.err.println("Cliente: Socket obtenido pero falló la inicialización de streams.");
-                return false;
             }
         } else {
             System.err.println("Cliente: Fallo en attemptConnection().");
@@ -320,14 +301,13 @@ public class Cliente {
                 Comando errorCmd = new Comando(TipoSolicitud.CONECTARSE_SERVIDOR, TipoRespuesta.ERROR, "No se pudo conectar a ningún servidor.");
                 clientListener.onResponse(errorCmd);
             }
-            return false;
         }
     }
 
     public void enviarMensaje(Mensaje mensaje) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -338,14 +318,14 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje: " + e.getMessage());
             notificarErrorConexionPerdida("Error al enviar mensaje: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
     public void registrarse(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -356,14 +336,14 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje de registro: " + e.getMessage());
             notificarErrorConexionPerdida("Error al registrarse: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
     public void iniciarSesion(User user){
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -374,14 +354,14 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje de inicio de sesión: " + e.getMessage());
             notificarErrorConexionPerdida("Error al iniciar sesión: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
     public void cerrarSesion(User user){
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -392,14 +372,14 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje de cierre de sesión: " + e.getMessage());
             notificarErrorConexionPerdida("Error al cerrar sesión: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
     public void obtenerDirectorio(){
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -410,14 +390,14 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje de obtener directorio: " + e.getMessage());
             notificarErrorConexionPerdida("Error al obtener el directorio: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
     public void agregarContacto(String nombreUsuario) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            intentarReconectar();
+            attemptReconnect();
             return;
         }
         try {
@@ -428,7 +408,7 @@ public class Cliente {
             System.err.println("Cliente: IOException al enviar mensaje de agregar contacto: " + e.getMessage());
             notificarErrorConexionPerdida("Error al agregar un contacto: " + e.getClass().getSimpleName());
             cerrarTodo(false);
-            intentarReconectar();
+            attemptReconnect();
         }
     }
 
@@ -456,15 +436,15 @@ public class Cliente {
                         System.err.println("Cliente: clientListener es nulo. No se puede procesar respuesta.");
                     }
                 } catch (SocketTimeoutException e) {
-
+//                    cerrarTodo(true);
                 }
                 catch (java.io.EOFException | java.net.SocketException e) {
 
                     System.err.println("Cliente: Conexión cerrada por el servidor o error de socket: " + e.getMessage());
                     if (activo) {
                         notificarErrorConexionPerdida("Se perdió la conexión con el servidor: " + e.getClass().getSimpleName());
-                        cerrarTodo(false);
-                        intentarReconectar();
+                        cerrarTodo(true);
+//                        attemptReconnect();
                     }
                     break;
                 }
@@ -472,8 +452,8 @@ public class Cliente {
                     System.err.println("Cliente: Error en hilo de escucha: " + e.getMessage());
                     if (activo) {
                         notificarErrorConexionPerdida("Error de comunicación: " + e.getClass().getSimpleName());
-                        cerrarTodo(false);
-                        intentarReconectar();
+                        cerrarTodo(true);
+//                        attemptReconnect();
                     }
                     break;
                 } catch (Exception e) {
@@ -481,8 +461,8 @@ public class Cliente {
                     e.printStackTrace();
                     if (activo) {
                         notificarErrorConexionPerdida("Error inesperado: " + e.getClass().getSimpleName());
-                        cerrarTodo(false);
-                        intentarReconectar();
+                        cerrarTodo(true);
+//                        attemptReconnect();
                     }
                     break;
                 }

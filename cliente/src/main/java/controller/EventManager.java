@@ -62,7 +62,8 @@ public class EventManager {
     }
 
     public void addAppStateListener(AppStateListener listener) {
-        listeners.add(listener);
+        if (!listeners.contains(listener))
+            listeners.add(listener);
     }
 
     public void removeAppStateListener(AppStateListener listener) {
@@ -70,7 +71,8 @@ public class EventManager {
     }
 
     public void addConnectionListener(ConnectionListener listener) {
-        connectionListeners.add(listener);
+        if (!connectionListeners.contains(listener))
+            connectionListeners.add(listener);
     }
 
     public void removeConnectionListener(ConnectionListener listener) {
@@ -78,7 +80,8 @@ public class EventManager {
     }
 
     public void addAuthenticationListener(AuthenticationListener listener) {
-        authenticationListeners.add(listener);
+        if (!authenticationListeners.contains(listener))
+            authenticationListeners.add(listener);
     }
 
     public void removeAuthenticationListener(AuthenticationListener listener) {
@@ -86,7 +89,8 @@ public class EventManager {
     }
 
     public void addMessageListener(MessageListener listener) {
-        messageListeners.add(listener);
+        if (!messageListeners.contains(listener))
+            messageListeners.add(listener);
     }
 
     public void removeMessageListener(MessageListener listener) {
@@ -94,7 +98,8 @@ public class EventManager {
     }
 
     public void addContactsListener(ContactsListener listener) {
-        contactsListeners.add(listener);
+        if (!contactsListeners.contains(listener))
+            contactsListeners.add(listener);
     }
 
     public void removeContactsListener(ContactsListener listener) {
@@ -102,7 +107,8 @@ public class EventManager {
     }
 
     public void addDirectoryListener(DirectoryListener listener) {
-        directoryListeners.add(listener);
+        if (!directoryListeners.contains(listener))
+            directoryListeners.add(listener);
     }
 
     public void removeDirectoryListener(DirectoryListener listener) {

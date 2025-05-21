@@ -13,46 +13,14 @@ public class ConnectionManager {
     private static ConnectionManager instance;
     private FormError formError;
 
-    private ConnectionManager() {}
+    private ConnectionManager() {
+    }
 
     public static ConnectionManager getInstance() {
         if (instance == null) {
             instance = new ConnectionManager();
         }
         return instance;
-    }
-
-    public TipoRespuesta tryEstablishInitialConnection() {
-        Cliente cliente = Cliente.getInstance();
-        boolean conectado = cliente.conectarAlServidor();
-
-        if (conectado) {
-            return TipoRespuesta.OK;
-        } else {
-            return TipoRespuesta.ERROR;
-        }
-    }
-
-    public void attemptReconnectionAndNotify() {
-        if (tryEstablishInitialConnection() == TipoRespuesta.OK) {
-            checkOnReconnection();
-
-            if (formError != null && formError.isVisible()) {
-                formError.setVisible(false);
-            }
-            ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Reconectado exitosamente");
-            formError = null;
-            FormManager.init();
-        } else {
-//            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Fallo al reconectar");
-            if (formError == null || !formError.isVisible()) {
-                showError(this.callBack, true, "Fallo al reconectar con el servidor");
-            } else {
-                if (formError.isVisible()) {
-                    formError.showReconnectOptions(true);
-                }
-            }
-        }
     }
 
     public void showError(ConnectionCallBack callBack, boolean showReconnectOptions, String s) {
@@ -74,5 +42,17 @@ public class ConnectionManager {
             callBack.onConnected();
             callBack = null;
         }
+    }
+
+    public FormError getFormError() {
+        return formError;
+    }
+
+    public void setFormError(FormError formError) {
+        this.formError = formError;
+    }
+
+    public ConnectionCallBack getCallBack() {
+        return callBack;
     }
 }

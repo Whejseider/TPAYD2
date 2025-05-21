@@ -35,7 +35,7 @@ public class Monitor extends JFrame {
     // logica
     private AtomicLong lastHeartbeatTime = new AtomicLong(0);
     private volatile boolean primaryConsideredDown = false;
-    private final long heartbeatTimeoutMillis = 8000; // 4 segundos
+    private final long heartbeatTimeoutMillis = 8000; // 8 segundos
 
     private String standbyIp;
     private int standbyCommandPort;
@@ -278,7 +278,7 @@ public class Monitor extends JFrame {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
             try {
-                if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) { // Reducido tiempo
+                if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
                     logMessage("Scheduler no terminó a tiempo.", COLOR_WARNING);
                 }
             } catch (InterruptedException e) {

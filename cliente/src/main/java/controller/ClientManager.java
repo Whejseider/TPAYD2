@@ -1,5 +1,6 @@
 package controller;
 
+import connection.Cliente;
 import interfaces.ClientListener;
 import interfaces.ConnectionCallBack;
 import model.*;

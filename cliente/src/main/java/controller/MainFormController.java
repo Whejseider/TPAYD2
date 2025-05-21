@@ -36,7 +36,7 @@ public class MainFormController implements IController, AuthenticationListener, 
 
     @Override
     public void onLoginFailure(String s) {
-
+        FormManager.showLogin();
     }
 
     /**
@@ -45,17 +45,17 @@ public class MainFormController implements IController, AuthenticationListener, 
     @Override
     public void onLogoutSuccess() {
         System.out.println("MainFormController: Logout exitoso.");
-        EventManager.clearInstance();
-        ClientManager.clearInstance();
-        Cliente.clearInstance();
         Sesion.getInstance().setUsuarioActual(null);
+//        Cliente.getInstance().cerrarTodo(false);
         FormManager.showLogin();
     }
 
     @Override
     public void onLogoutFailure(String s) {
+        System.out.println("MainFormController: Logout fallo.");
         Sesion.getInstance().setUsuarioActual(null);
         ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
+        Cliente.getInstance().cerrarTodo(true);
         FormManager.showLogin();
     }
 
@@ -84,20 +84,37 @@ public class MainFormController implements IController, AuthenticationListener, 
     public void onConnectionEstablished() {
         if (Sesion.getInstance().getUsuarioActual() != null) {
             Cliente.getInstance().iniciarSesion(Sesion.getInstance().getUsuarioActual());
+        } else {
+            FormManager.showLogin();
         }
-        Cliente.getInstance().startPeriodicServerCheck();
+        ConnectionManager.getInstance().checkOnReconnection();
+
+        if (ConnectionManager.getInstance().getFormError() != null && ConnectionManager.getInstance().getFormError().isVisible()) {
+            ConnectionManager.getInstance().getFormError().setVisible(false);
+        }
+        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Reconectado exitosamente");
+        ConnectionManager.getInstance().setFormError(null);
+
+//        Cliente.getInstance().startPeriodicServerCheck();
     }
 
     @Override
     public void onConnectionLost(String s) {
+//        Sesion.getInstance().setUsuarioActual(null);
         ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
+        if (ConnectionManager.getInstance().getFormError() == null || !ConnectionManager.getInstance().getFormError().isVisible()) {
+            ConnectionManager.getInstance().showError(this::callBackConnection, true, "Fallo al reconectar con el servidor");
+        } else {
+            if (ConnectionManager.getInstance().getFormError().isVisible()) {
+                ConnectionManager.getInstance().getFormError().showReconnectOptions(true);
+            }
+        }
         Cliente.getInstance().stopPeriodicServerCheck();
-
-
     }
 
     @Override
     public void onConnectionAttemptFailure(String s) {
+//        Sesion.getInstance().setUsuarioActual(null);
         ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
         Cliente.getInstance().stopPeriodicServerCheck();
     }

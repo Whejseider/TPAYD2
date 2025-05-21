@@ -2,7 +2,7 @@ package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import connection.ConnectionManager;
+import connection.Cliente;
 import net.miginfocom.swing.MigLayout;
 import view.system.Form;
 
@@ -77,7 +77,7 @@ public class FormError extends Form {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                ConnectionManager.getInstance().attemptReconnectionAndNotify();
+                Cliente.getInstance().attemptReconnect();
                 return null;
             }
 
@@ -117,7 +117,6 @@ public class FormError extends Form {
             panel.repaint();
         }
     }
-
 
     private void startAutomaticReconnectTimer() {
         stopAutomaticReconnectTimer();
