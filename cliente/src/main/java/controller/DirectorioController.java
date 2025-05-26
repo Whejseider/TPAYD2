@@ -15,10 +15,12 @@ import view.manager.ToastManager;
 import view.system.Form;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class DirectorioController implements IController, DirectoryListener, ContactsListener, ActionListener {
+public class DirectorioController implements IController, DocumentListener, DirectoryListener, ContactsListener, ActionListener {
 
     private FormDirectorio vista;
     private Directorio directorio;
@@ -28,48 +30,59 @@ public class DirectorioController implements IController, DirectoryListener, Con
         this.vista = form;
     }
 
-    /**
-     * Si hay tiempo, me gustaria mover esto a la primera carga, y despues verificar si cambio
-     * el directorio del server y agregar los paneles 1x1, y no redibujar todo
-     */
     private void cargarDirectorio() {
         SwingUtilities.invokeLater(() -> {
             vista.getPanelCard().removeAll();
             for (User u : directorio.getDirectorio()) {
                 if (!u.getNombreUsuario().equalsIgnoreCase(Sesion.getInstance().getUsuarioActual().getNombreUsuario())) {
-
-                    Card c = new Card();
-                    c.getTitle().setText(u.getNombreUsuario());
-                    c.getDescription().setText(u.getIP() + " : " + u.getPuerto());
-                    c.addAgregarListener(this);
-                    c.getBtnAgregar().setActionCommand("agregar_" + u.getNombreUsuario());
-
-                    boolean estaAgregado = Sesion.getInstance().getUsuarioActual().getAgenda().existeContacto(u.getNombreUsuario());
-
-                    if (estaAgregado) {
-                        c.getBtnAgregar().setEnabled(false);
-                        c.getBtnAgregar().setText("Contacto agregado");
-                    }
-                    vista.getPanelCard().add(c);
+                    createCard(u);
                 }
             }
-            actualizarPanelCard();
+            revalidarPanelCard();
         });
     }
 
-    private void actualizarPanelCard() {
+    private void revalidarPanelCard() {
         vista.getPanelCard().repaint();
         vista.getPanelCard().revalidate();
     }
 
-    private Contacto crearContacto(User userSeleccionado) {
-        Contacto c = new Contacto();
-        c.setNombreUsuario(userSeleccionado.getNombreUsuario());
-        c.setAlias(userSeleccionado.getNombreUsuario());
-        c.setIP(userSeleccionado.getIP());
-        c.setPuerto(userSeleccionado.getPuerto());
-        return c;
+    private void filtrarUsuarios(String texto) {
+        SwingUtilities.invokeLater(() -> {
+            vista.getPanelCard().removeAll();
+
+            for (User u : directorio.getDirectorio()) {
+                if (!u.getNombreUsuario().equalsIgnoreCase(Sesion.getInstance().getUsuarioActual().getNombreUsuario())
+                        && u.getNombreUsuario().toLowerCase().contains(texto.toLowerCase())) {
+                    createCard(u);
+                }
+            }
+
+            revalidarPanelCard();
+        });
     }
+
+    private void actualizarPanel(){
+        filtrarUsuarios(this.vista.getTxtSearch().getText().trim());
+    }
+
+    private void createCard(User u) {
+        Card c = new Card();
+        c.getTitle().setText(u.getNombreUsuario());
+        c.getDescription().setText(u.getIP() + " : " + u.getPuerto());
+        c.addAgregarListener(this);
+        c.getBtnAgregar().setActionCommand("agregar_" + u.getNombreUsuario());
+
+        boolean estaAgregado = Sesion.getInstance().getUsuarioActual().getAgenda().existeContacto(u.getNombreUsuario());
+
+        if (estaAgregado) {
+            c.getBtnAgregar().setEnabled(false);
+            c.getBtnAgregar().setText("Contacto agregado");
+        }
+
+        vista.getPanelCard().add(c);
+    }
+
 
     @Override
     public void init() {
@@ -135,4 +148,20 @@ public class DirectorioController implements IController, DirectoryListener, Con
 
     }
 
+
+    // Busqueda
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        actualizarPanel();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        actualizarPanel();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        actualizarPanel();
+    }
 }

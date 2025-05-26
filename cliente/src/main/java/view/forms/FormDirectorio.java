@@ -1,6 +1,7 @@
 package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import interfaces.IController;
 import layout.ResponsiveLayout;
 import net.miginfocom.swing.MigLayout;
 import utils.SystemForm;
@@ -8,10 +9,14 @@ import view.system.Form;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 
 @SystemForm(name = "Directorio", description = "Directorio de contactos", tags = {"directorio"})
 public class FormDirectorio extends Form  {
+    private JPanel panelCard;
+    private ResponsiveLayout responsiveLayout;
+    private JTextField txtSearch;
 
     public FormDirectorio() {
         init();
@@ -44,202 +49,28 @@ public class FormDirectorio extends Form  {
     }
 
     private Component createOptions() {
-        JPanel panel = new JPanel(new MigLayout("wrap 3,fill", "[grow 0,fill][grow 0,fill][fill]0", "[fill,grow 0][fill]"));
-//        panel.add(createLayoutOption());
-//        panel.add(createOtherOption());
-//        panel.add(createGapOption(), "gapx 0 7");
-        panel.add(createDirectoryComponent(), "span 3,gapx 0 2");
+        JPanel panel = new JPanel(new MigLayout("wrap 1,fill", "[fill]", "[fill][fill]"));
+        panel.add(createSearchUser(), "gapx 0 2");
+        panel.add(createDirectoryComponent(), "gapx 0 2");
         return panel;
     }
 
-    private Component createLayoutOption() {
-        JPanel panel = new JPanel(new MigLayout("wrap 2,width 300"));
-        panel.setBorder(new TitledBorder("Justify content"));
+    private Component createSearchUser() {
+        JPanel panel = new JPanel(new MigLayout("fill", "[center]","[]"));
+        panel.setBorder(new TitledBorder("Busca un usuario"));
 
-        JRadioButton jrStart = new JRadioButton("Start");
-        JRadioButton jrEnd = new JRadioButton("End");
-        JRadioButton jrCenter = new JRadioButton("Center");
-        JRadioButton jrSpaceBetween = new JRadioButton("Space between");
-        JRadioButton jrSpaceAround = new JRadioButton("Space around");
-        JRadioButton jrSpaceEvenly = new JRadioButton("Space evenly");
-        JRadioButton jrFitContent = new JRadioButton("Fit content");
+        txtSearch = new JTextField();
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Escriba algo para comenzar a buscar");
 
-        ButtonGroup group = new ButtonGroup();
-        group.add(jrStart);
-        group.add(jrEnd);
-        group.add(jrCenter);
-        group.add(jrSpaceBetween);
-        group.add(jrSpaceAround);
-        group.add(jrSpaceEvenly);
-        group.add(jrFitContent);
-
-        jrFitContent.setSelected(true);
-
-        applyEventJustifyContent(jrStart, ResponsiveLayout.JustifyContent.START);
-        applyEventJustifyContent(jrEnd, ResponsiveLayout.JustifyContent.END);
-        applyEventJustifyContent(jrCenter, ResponsiveLayout.JustifyContent.CENTER);
-        applyEventJustifyContent(jrSpaceBetween, ResponsiveLayout.JustifyContent.SPACE_BETWEEN);
-        applyEventJustifyContent(jrSpaceAround, ResponsiveLayout.JustifyContent.SPACE_AROUND);
-        applyEventJustifyContent(jrSpaceEvenly, ResponsiveLayout.JustifyContent.SPACE_EVENLY);
-        applyEventJustifyContent(jrFitContent, ResponsiveLayout.JustifyContent.FIT_CONTENT);
-
-        panel.add(jrStart);
-        panel.add(jrEnd);
-        panel.add(jrCenter);
-        panel.add(jrSpaceBetween);
-        panel.add(jrSpaceAround);
-        panel.add(jrSpaceEvenly);
-        panel.add(jrFitContent);
+        panel.add(txtSearch, "width 500");
 
         return panel;
-    }
-
-    private void applyEventJustifyContent(JRadioButton jr, ResponsiveLayout.JustifyContent type) {
-        jr.addActionListener(e -> {
-            if (jr.isSelected()) {
-                responsiveLayout.setJustifyContent(type);
-                panelCard.revalidate();
-            }
-        });
-    }
-
-    private Component createOtherOption() {
-        JPanel panel = new JPanel(new MigLayout("wrap 2,width 300"));
-        panel.setBorder(new TitledBorder("Column and Item option"));
-
-        JCheckBox chColumn = new JCheckBox("Set column");
-        JCheckBox chWidth = new JCheckBox("Set item width");
-        JCheckBox chHeight = new JCheckBox("Set item height");
-
-        JSpinner spColumn = createSpinner(20, 1);
-        JSpinner spWidth = createSpinner(1000, 300);
-        JSpinner spHeight = createSpinner(1000, 150);
-
-        JLabel lbColumnStatus = new JLabel("( auto wrap )");
-        JLabel lbWidthStatus = new JLabel("( preferred size )");
-        JLabel lbHeightStatus = new JLabel("( preferred size )");
-
-        lbColumnStatus.putClientProperty(FlatClientProperties.STYLE, "" +
-                "foreground:$Label.disabledForeground;");
-        lbWidthStatus.putClientProperty(FlatClientProperties.STYLE, "" +
-                "foreground:$Label.disabledForeground;");
-        lbHeightStatus.putClientProperty(FlatClientProperties.STYLE, "" +
-                "foreground:$Label.disabledForeground;");
-
-        spColumn.setVisible(false);
-        spWidth.setVisible(false);
-        spHeight.setVisible(false);
-
-        chColumn.addActionListener(e -> {
-            if (chColumn.isSelected()) {
-                responsiveLayout.setColumn(Integer.parseInt(spColumn.getValue().toString()));
-                lbColumnStatus.setText("");
-            } else {
-                responsiveLayout.setColumn(-1);
-                lbColumnStatus.setText("( auto wrap )");
-            }
-            spColumn.setVisible(chColumn.isSelected());
-            panelCard.revalidate();
-        });
-        chWidth.addActionListener(e -> {
-            if (chWidth.isSelected()) {
-                lbWidthStatus.setText("");
-                Dimension size = responsiveLayout.getSize();
-                size.width = Integer.parseInt(spWidth.getValue().toString());
-                responsiveLayout.setSize(size);
-            } else {
-                Dimension size = responsiveLayout.getSize();
-                size.width = -1;
-                responsiveLayout.setSize(size);
-                lbWidthStatus.setText("( preferred size )");
-            }
-            spWidth.setVisible(chWidth.isSelected());
-            panelCard.revalidate();
-        });
-        chHeight.addActionListener(e -> {
-            if (chHeight.isSelected()) {
-                lbHeightStatus.setText("");
-                Dimension size = responsiveLayout.getSize();
-                size.height = Integer.parseInt(spHeight.getValue().toString());
-                responsiveLayout.setSize(size);
-            } else {
-                Dimension size = responsiveLayout.getSize();
-                size.height = -1;
-                responsiveLayout.setSize(size);
-                lbHeightStatus.setText("( preferred size )");
-            }
-            spHeight.setVisible(chHeight.isSelected());
-            panelCard.revalidate();
-        });
-        spColumn.addChangeListener(e -> {
-            responsiveLayout.setColumn(Integer.parseInt(spColumn.getValue().toString()));
-            panelCard.revalidate();
-        });
-        spWidth.addChangeListener(e -> {
-            Dimension size = responsiveLayout.getSize();
-            size.width = Integer.parseInt(spWidth.getValue().toString());
-            responsiveLayout.setSize(size);
-            panelCard.revalidate();
-        });
-        spHeight.addChangeListener(e -> {
-            Dimension size = responsiveLayout.getSize();
-            size.height = Integer.parseInt(spHeight.getValue().toString());
-            responsiveLayout.setSize(size);
-            panelCard.revalidate();
-        });
-
-        panel.add(chColumn);
-        panel.add(lbColumnStatus, "split 2");
-        panel.add(spColumn);
-
-        panel.add(chWidth);
-        panel.add(lbWidthStatus, "split 2");
-        panel.add(spWidth);
-
-        panel.add(chHeight);
-        panel.add(lbHeightStatus, "split 2");
-        panel.add(spHeight);
-
-        return panel;
-    }
-
-    private Component createGapOption() {
-        JPanel panel = new JPanel(new MigLayout("wrap 2"));
-        panel.setBorder(new TitledBorder("Gap option"));
-
-        JSpinner spHGap = createSpinner(500, 10);
-        JSpinner spVGap = createSpinner(500, 10);
-
-        spHGap.addChangeListener(e -> {
-            responsiveLayout.setHorizontalGap(Integer.parseInt(spHGap.getValue().toString()));
-            panelCard.revalidate();
-        });
-        spVGap.addChangeListener(e -> {
-            responsiveLayout.setVerticalGap(Integer.parseInt(spVGap.getValue().toString()));
-            panelCard.revalidate();
-        });
-
-        panel.add(new JLabel("Horizontal"));
-        panel.add(spHGap);
-        panel.add(new JLabel("Vertical"));
-        panel.add(spVGap);
-
-        return panel;
-    }
-
-    private JSpinner createSpinner(int max, int init) {
-        JSpinner spinner = new JSpinner();
-        spinner.setValue(init);
-        SpinnerNumberModel numberModel = (SpinnerNumberModel) spinner.getModel();
-        numberModel.setMinimum(1);
-        numberModel.setMaximum(max);
-        return spinner;
     }
 
     private Component createDirectoryComponent() {
         responsiveLayout = new ResponsiveLayout(ResponsiveLayout.JustifyContent.START, new Dimension(-1, -1), 10, 10);
         panelCard = new JPanel(responsiveLayout);
-        panelCard.setPreferredSize(new Dimension(380, 550));
+        panelCard.setPreferredSize(new Dimension(400, 550));
         panelCard.putClientProperty(FlatClientProperties.STYLE, "" +
                 "border:10,10,10,10;");
         JScrollPane scrollPane = new JScrollPane(panelCard);
@@ -262,6 +93,12 @@ public class FormDirectorio extends Form  {
         return splitPane;
     }
 
-    private JPanel panelCard;
-    private ResponsiveLayout responsiveLayout;
+    @Override
+    public void setControlador(IController controlador) {
+        this.txtSearch.getDocument().addDocumentListener((DocumentListener) controlador);
+    }
+
+    public JTextField getTxtSearch() {
+        return txtSearch;
+    }
 }

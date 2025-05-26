@@ -289,6 +289,9 @@ public class Monitor extends JFrame {
         scheduler = null;
     }
 
+    /**
+     * Escucha heartbeats del servidor primario
+     */
     private void listenForHeartbeats() {
         logMessage("Hilo de escucha de heartbeats iniciado.", COLOR_INFO);
         while (monitorRunning && heartbeatServerSocket != null && !heartbeatServerSocket.isClosed() && !Thread.currentThread().isInterrupted()) {
