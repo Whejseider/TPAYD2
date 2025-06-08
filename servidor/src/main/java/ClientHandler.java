@@ -85,7 +85,7 @@ public class ClientHandler implements Runnable {
     public void enviarMensaje() throws IOException {
         Mensaje mensajeRecibido = (Mensaje) comando.getContenido();
         String receptor = mensajeRecibido.getNombreReceptor();
-        String emisor = mensajeRecibido.getEmisor();
+        String emisor = mensajeRecibido.getNombreEmisor();
         Comando c;
 
         if (estaEnDirectorio(receptor)) {
@@ -134,7 +134,7 @@ public class ClientHandler implements Runnable {
     //Verificar si hace falta actualizar el directorio en estos casos
     // pero creo que no
     public void recibirMensaje(Mensaje mensaje) throws IOException {
-        String emisorOriginal = mensaje.getEmisor();
+        String emisorOriginal = mensaje.getNombreEmisor();
         boolean existeContacto;
 
         if (this.userActual != null) {

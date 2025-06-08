@@ -16,8 +16,6 @@ import view.system.Form;
 import view.system.FormManager;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
@@ -97,18 +95,16 @@ public class MessengerPanelController implements IController, LeftActionListener
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
         if (usuarioActual == null) return;
 
-        if (mensaje.getEmisor().equals(usuarioActual.getNombreUsuario())) {
+        if (mensaje.getNombreEmisor().equals(usuarioActual.getNombreUsuario())) {
             return;
         }
 
-        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getEmisor());
+        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getNombreEmisor());
+        usuarioActual.getAgenda().agregarContacto(contactoEmisor);
 
-        Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getEmisor());
-
-        Contacto contacto = conversacion.getContacto();
-        usuarioActual.getAgenda().agregarContacto(contacto);
-        usuarioActual.getConversacionCon(contacto.getNombreUsuario()).agregarMensaje(mensaje);
-        usuarioActual.getConversacionCon(contacto.getNombreUsuario()).setUltimoMensaje(mensaje);
+        Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getNombreEmisor());
+        conversacion.agregarMensaje(mensaje);
+        conversacion.setUltimoMensaje(conversacion.getUltimoMensaje());
 
         SwingUtilities.invokeLater(() -> {
 
@@ -176,11 +172,10 @@ public class MessengerPanelController implements IController, LeftActionListener
 
                 actualizarVistaMensaje(mensaje);
 
-                SwingUtilities.invokeLater(() -> {
-                    vista.getLeftPanel().selectedConversation(conversacion);
-                    vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
-                    vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
-                });
+                vista.getLeftPanel().selectedConversation(conversacion);
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
+
 
                 messageInputFocus();
 
@@ -231,7 +226,7 @@ public class MessengerPanelController implements IController, LeftActionListener
 
     @Override
     public void onSendMessageSuccess(Mensaje mensajeEnviadoConfirmado) {
-        String emisor = mensajeEnviadoConfirmado.getEmisor();
+        String emisor = mensajeEnviadoConfirmado.getNombreEmisor();
         String receptor = mensajeEnviadoConfirmado.getNombreReceptor();
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
 

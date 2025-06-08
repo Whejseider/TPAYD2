@@ -4,10 +4,8 @@ import connection.Sesion;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
-import model.User;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import persistence.AbstractProductConversation;
 
@@ -57,7 +55,7 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     mensajeElement.appendChild(contenido);
 
                     Element emisor = document.createElement("emisor");
-                    emisor.appendChild(document.createTextNode(c.getUltimoMensaje().getEmisor()));
+                    emisor.appendChild(document.createTextNode(c.getUltimoMensaje().getNombreEmisor()));
                     mensajeElement.appendChild(emisor);
 
                     Element receptor = document.createElement("receptor");

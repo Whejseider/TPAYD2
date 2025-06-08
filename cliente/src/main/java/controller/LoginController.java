@@ -136,9 +136,9 @@ public class LoginController implements IController, ActionListener, Authenticat
 //        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
         AbstractFactoryPersistence textFactory = new ConcreteFactoryText();
-        AbstractProductContacts test = textFactory.createProductContacts();
-        test.save();
-        test.load();
+        AbstractProductConversation test = textFactory.createProductConversation();
+//        test.save();
+//        test.load();
     }
 
     @Override

@@ -11,12 +11,12 @@ public class Mensaje implements Serializable {
     private static final long serialVersionUID = 1L;
     private String contenido;
     private LocalDateTime tiempo;
-    private String emisor;
+    private String nombreEmisor;
     private String nombreReceptor;
 
-    public Mensaje(String contenido, String emisor, String nombreReceptor) {
+    public Mensaje(String contenido, String nombreEmisor, String nombreReceptor) {
         this.contenido = contenido;
-        this.emisor = emisor;
+        this.nombreEmisor = nombreEmisor;
         this.nombreReceptor = nombreReceptor;
         this.tiempo = LocalDateTime.now();
     }
@@ -25,7 +25,7 @@ public class Mensaje implements Serializable {
         this.contenido = original.contenido;
         this.tiempo = original.tiempo;
         this.nombreReceptor = original.nombreReceptor;
-        this.emisor = original.emisor;
+        this.nombreEmisor = original.nombreEmisor;
     }
 
     public Mensaje() {
@@ -39,12 +39,12 @@ public class Mensaje implements Serializable {
         this.contenido = contenido;
     }
 
-    public String getEmisor() {
-        return emisor;
+    public String getNombreEmisor() {
+        return nombreEmisor;
     }
 
-    public void setEmisor(String emisor) {
-        this.emisor = emisor;
+    public void setNombreEmisor(String nombreEmisor) {
+        this.nombreEmisor = nombreEmisor;
     }
 
     public String getNombreReceptor() {
@@ -71,7 +71,7 @@ public class Mensaje implements Serializable {
 
     @JsonIgnore
     public boolean esMio(User u) {
-        return !emisor.isEmpty() && emisor.equalsIgnoreCase(u.getNombreUsuario());
+        return !nombreEmisor.isEmpty() && nombreEmisor.equalsIgnoreCase(u.getNombreUsuario());
     }
 
     @Override
@@ -79,11 +79,11 @@ public class Mensaje implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Mensaje mensaje = (Mensaje) o;
-        return Objects.equals(contenido, mensaje.contenido) && Objects.equals(tiempo, mensaje.tiempo) && Objects.equals(emisor, mensaje.emisor) && Objects.equals(nombreReceptor, mensaje.nombreReceptor);
+        return Objects.equals(contenido, mensaje.contenido) && Objects.equals(tiempo, mensaje.tiempo) && Objects.equals(nombreEmisor, mensaje.nombreEmisor) && Objects.equals(nombreReceptor, mensaje.nombreReceptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(contenido, tiempo, emisor, nombreReceptor);
+        return Objects.hash(contenido, tiempo, nombreEmisor, nombreReceptor);
     }
 }

@@ -22,7 +22,7 @@ public class ConcreteProductContactsText implements AbstractProductContacts {
         File contactsFile = new File(contactsDir, "contactos.txt");
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(contactsFile))) {
-            writer.println("[CONTACTOS DE" + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + " ]");
+            writer.println("[CONTACTOS DE " + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + "]");
             writer.println();
 
             int contador = 1;
