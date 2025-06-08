@@ -26,7 +26,7 @@ public class ConcreteProductContactsJSON implements AbstractProductContacts {
         }
 
         try {
-            File contactsFile = new File(userDir, "contacts.json");
+            File contactsFile = new File(userDir, "contactos.json");
             mapper.writerWithDefaultPrettyPrinter().writeValue(contactsFile, contactos);
             System.out.println("Contactos guardados guardados correctamente");
 
