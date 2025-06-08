@@ -4,6 +4,6 @@ import persistence.xml.ConcreteProductContactsXML;
 import persistence.xml.ConcreteProductConversationXML;
 
 public interface AbstractFactoryPersistence {
-    ConcreteProductContactsXML createProductContacts();
-    ConcreteProductConversationXML createProductConversation();
+    AbstractProductContacts createProductContacts();
+    AbstractProductConversation createProductConversation();
 }

@@ -10,6 +10,8 @@ import model.TipoRespuesta;
 import model.User;
 import network.NetworkConstants;
 import persistence.AbstractFactoryPersistence;
+import persistence.AbstractProductContacts;
+import persistence.AbstractProductConversation;
 import persistence.xml.ConcreteFactoryXML;
 import persistence.xml.ConcreteProductContactsXML;
 import persistence.xml.ConcreteProductConversationXML;
@@ -132,10 +134,10 @@ public class LoginController implements IController, ActionListener, Authenticat
 //        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
         AbstractFactoryPersistence xmlFactory = new ConcreteFactoryXML();
-        ConcreteProductContactsXML concreteProductUserXML = xmlFactory.createProductContacts();
-        concreteProductUserXML.save(user);
+        AbstractProductContacts concreteProductContactsXML = xmlFactory.createProductContacts();
+        concreteProductContactsXML.save(user);
 //        concreteProductUserXML.load(user);
-        ConcreteProductConversationXML concreteProductConversationXML = xmlFactory.createProductConversation();
+        AbstractProductConversation concreteProductConversationXML = xmlFactory.createProductConversation();
         concreteProductConversationXML.save(user);
         concreteProductConversationXML.load(user);
     }

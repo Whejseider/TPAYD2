@@ -1,15 +1,17 @@
 package persistence.xml;
 
 import persistence.AbstractFactoryPersistence;
+import persistence.AbstractProductContacts;
+import persistence.AbstractProductConversation;
 
 public class ConcreteFactoryXML implements AbstractFactoryPersistence {
     @Override
-    public ConcreteProductContactsXML createProductContacts() {
+    public AbstractProductContacts createProductContacts() {
         return new ConcreteProductContactsXML();
     }
 
     @Override
-    public ConcreteProductConversationXML createProductConversation() {
+    public AbstractProductConversation createProductConversation() {
         return new ConcreteProductConversationXML();
     }
 }
