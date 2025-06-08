@@ -1,6 +1,7 @@
 package persistence.xml;
 
 
+import connection.Sesion;
 import model.Contacto;
 import model.User;
 import org.w3c.dom.Document;
@@ -22,9 +23,9 @@ public class ConcreteProductContactsXML implements AbstractProductContacts {
     private static final String FILE_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Messenger" + File.separator;
 
     @Override
-    public void save(User user) {
+    public void save() {
         try {
-            File directory = new File(FILE_PATH + user.getNombreUsuario());
+            File directory = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
             if (!directory.exists()) {
                 directory.mkdirs();
             }
@@ -37,7 +38,7 @@ public class ConcreteProductContactsXML implements AbstractProductContacts {
             Element rootElement = document.createElement("contactos");
             document.appendChild(rootElement);
 
-            for (Contacto c : user.getAgenda().getContactos()) {
+            for (Contacto c : Sesion.getInstance().getUsuarioActual().getAgenda().getContactos()) {
                 Element contactoElement = document.createElement("contacto");
 
                 contactoElement.appendChild(document.createElement("alias"))
@@ -61,7 +62,7 @@ public class ConcreteProductContactsXML implements AbstractProductContacts {
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             DOMSource source = new DOMSource(document);
 
-            StreamResult result = new StreamResult(FILE_PATH + user.getNombreUsuario() + File.separator + "contactos.xml");
+            StreamResult result = new StreamResult(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + File.separator + "contactos.xml");
             transformer.transform(source, result);
 
         } catch (Exception e) {
@@ -71,11 +72,11 @@ public class ConcreteProductContactsXML implements AbstractProductContacts {
     }
 
     @Override
-    public void load(User user) {
+    public void load() {
         try {
-            File directory = new File(FILE_PATH + user.getNombreUsuario());
+            File directory = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
             if (directory.exists()) {
-                File xmlFile = new File(FILE_PATH + user.getNombreUsuario() + File.separator + "contactos.xml");
+                File xmlFile = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + File.separator + "contactos.xml");
 
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();

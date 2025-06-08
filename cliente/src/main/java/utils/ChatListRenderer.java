@@ -15,7 +15,7 @@ public class ChatListRenderer extends DefaultListCellRenderer {
 
         if (value instanceof Conversacion conversacion) {
 
-            if (conversacion.getNotificacion().tieneMensajesNuevos()) {
+            if (conversacion.getNotificacion().isTieneMensajesNuevos()) {
                 label.setText(conversacion.getContacto().getAlias() + " - IP: " + conversacion.getContacto().getIP() + "  Puerto: " + conversacion.getContacto().getPuerto() + "  *");
                 label.setForeground(isSelected ? Color.WHITE : Color.GREEN.darker());
             } else {

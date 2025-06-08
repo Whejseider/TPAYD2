@@ -1,4 +1,6 @@
 package model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,14 +9,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Conversacion implements Serializable {
     private static final long serialVersionUID = 1L;
+    @JsonIgnore
     private Contacto contacto;
-    private List<Mensaje> mensajes;
+    private List<Mensaje> mensajes = new CopyOnWriteArrayList<>();;
     private Notificacion notificacion = new Notificacion();
+    @JsonIgnore
     private Mensaje ultimoMensaje;
 
     public Conversacion(Contacto contacto) {
         this.contacto = contacto;
-        this.mensajes = new CopyOnWriteArrayList<>();
     }
 
     public Conversacion(Conversacion conversacionOriginal) {
@@ -33,7 +36,10 @@ public class Conversacion implements Serializable {
     }
 
     public Mensaje getUltimoMensaje() {
-        return ultimoMensaje;
+        if (mensajes == null || mensajes.isEmpty()) {
+            return null;
+        }
+        return mensajes.get(mensajes.size() - 1);
     }
 
     public void setUltimoMensaje(Mensaje ultimoMensaje) {

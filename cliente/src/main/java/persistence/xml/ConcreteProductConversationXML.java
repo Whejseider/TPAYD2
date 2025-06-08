@@ -1,5 +1,6 @@
 package persistence.xml;
 
+import connection.Sesion;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
@@ -20,15 +21,17 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public class ConcreteProductConversationXML implements AbstractProductConversation {
 
     private static final String FILE_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Messenger" + File.separator;
 
     @Override
-    public void save(User user) {
+    public void save() {
+        Map<String, Conversacion> conversacion = Sesion.getInstance().getUsuarioActual().getConversaciones();
         try {
-            File directory = new File(FILE_PATH + user.getNombreUsuario());
+            File directory = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
             if (!directory.exists()) {
                 directory.mkdirs();
             }
@@ -41,29 +44,9 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
             Element rootElement = document.createElement("conversaciones");
             document.appendChild(rootElement);
 
-            for (Conversacion c : user.getConversaciones().values()) {
+            for (Conversacion c : conversacion.values()) {
                 Element conversationElement = document.createElement("conversacion");
                 conversationElement.setAttribute("con", c.getContacto().getNombreUsuario());
-
-                Element ultimoMensaje = document.createElement("ultimoMensaje");
-
-                Element contenidoUltimoMensaje = document.createElement("contenido");
-                contenidoUltimoMensaje.appendChild(document.createTextNode(c.getUltimoMensaje().getContenido()));
-                ultimoMensaje.appendChild(contenidoUltimoMensaje);
-
-                Element emisorUltimoMensaje = document.createElement("emisor");
-                emisorUltimoMensaje.appendChild(document.createTextNode(c.getUltimoMensaje().getEmisor()));
-                ultimoMensaje.appendChild(emisorUltimoMensaje);
-
-                Element receptorUltimoMensaje = document.createElement("receptor");
-                receptorUltimoMensaje.appendChild(document.createTextNode(c.getUltimoMensaje().getNombreReceptor()));
-                ultimoMensaje.appendChild(receptorUltimoMensaje);
-
-                Element horaUltimoMensaje = document.createElement("hora");
-                horaUltimoMensaje.appendChild(document.createTextNode(c.getUltimoMensaje().getTiempo().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
-                ultimoMensaje.appendChild(horaUltimoMensaje);
-
-                conversationElement.appendChild(ultimoMensaje);
 
                 Element mensajesElement = document.createElement("mensajes");
                 for (Mensaje m : c.getMensajes()) {
@@ -98,7 +81,7 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             DOMSource source = new DOMSource(document);
 
-            StreamResult result = new StreamResult(FILE_PATH + user.getNombreUsuario() + File.separator + "conversaciones.xml");
+            StreamResult result = new StreamResult(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + File.separator + "conversaciones.xml");
             transformer.transform(source, result);
 
         } catch (Exception e) {
@@ -108,9 +91,9 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
     }
 
     @Override
-    public void load(User user) {
+    public void load() {
         try {
-            File xmlFile = new File(FILE_PATH + user.getNombreUsuario() + File.separator + "conversaciones.xml");
+            File xmlFile = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + File.separator + "conversaciones.xml");
 
             if (!xmlFile.exists()) {
                 return;
@@ -127,13 +110,8 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                 Element conversacionElement = (Element) conversacionNodes.item(i);
                 String contactoNombre = conversacionElement.getAttribute("con");
 
-                Contacto contacto = user.getAgenda().getContactoPorNombre(contactoNombre);
-                Conversacion conversacion = new Conversacion(contacto);
-
-                String ultimoMensajeTexto = conversacionElement
-                        .getElementsByTagName("ultimoMensaje")
-                        .item(0)
-                        .getTextContent();
+                Contacto contacto = Sesion.getInstance().getUsuarioActual().getAgenda().getContactoPorNombre(contactoNombre);
+                Conversacion conv = new Conversacion(contacto);
 
                 Element mensajesElement = (Element) conversacionElement.getElementsByTagName("mensajes").item(0);
                 NodeList mensajeNodes = mensajesElement.getElementsByTagName("mensaje");
@@ -149,16 +127,16 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     Mensaje mensaje = new Mensaje(contenido, emisor, receptor);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                     mensaje.setTiempo(LocalDateTime.parse(hora, formatter));
-                    conversacion.agregarMensaje(mensaje);
+                    conv.agregarMensaje(mensaje);
                 }
 
-                if (!conversacion.getMensajes().isEmpty()) {
-                    conversacion.setUltimoMensaje(conversacion.getUltimoMensaje());
-                } else {
-                    conversacion.setUltimoMensaje(new Mensaje(contactoNombre, user.getNombreUsuario(), ultimoMensajeTexto));
+                if (!conv.getMensajes().isEmpty()) {
+                    int lastMessageIndex = conv.getMensajes().size() - 1;
+                    Mensaje ultimoMensajeReal = conv.getMensajes().get(lastMessageIndex);
+                    conv.setUltimoMensaje(ultimoMensajeReal);
                 }
 
-                user.agregarConversacion(conversacion);
+                Sesion.getInstance().getUsuarioActual().agregarConversacion(conv);
             }
 
         } catch (Exception e) {

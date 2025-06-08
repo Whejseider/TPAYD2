@@ -99,7 +99,7 @@ public class Item extends JButton {
         }
 
         public void actualizarApariencia() {
-            if (data.getNotificacion().tieneMensajesNuevos()) {
+            if (data.getNotificacion().isTieneMensajesNuevos()) {
 
                 panelLabel.lbEmisorName.setForeground(new Color(0, 150, 0));
                 panelLabel.lbMensaje.setForeground(new Color(0, 150, 0)); // Un verde oscuro

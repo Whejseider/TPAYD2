@@ -1,5 +1,7 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,11 +63,13 @@ public class Mensaje implements Serializable {
         return tiempo;
     }
 
+    @JsonIgnore
     public String getTiempoFormateado(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return tiempo.format(formatter);
     }
 
+    @JsonIgnore
     public boolean esMio(User u) {
         return !emisor.isEmpty() && emisor.equalsIgnoreCase(u.getNombreUsuario());
     }

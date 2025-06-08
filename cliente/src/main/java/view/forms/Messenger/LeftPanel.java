@@ -153,7 +153,7 @@ public class LeftPanel extends JPanel {
 
     public boolean loadData() {
         try {
-            Map<Contacto, Conversacion> response = Sesion.getInstance().getUsuarioActual().getConversaciones();
+            Map<String, Conversacion> response = Sesion.getInstance().getUsuarioActual().getConversaciones();
             String filter = textSearch != null ? textSearch.toLowerCase() : null;
 
             for (Conversacion d : response.values()) {

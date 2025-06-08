@@ -1,5 +1,8 @@
 package model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.MapSerializer;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
@@ -9,10 +12,10 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String nombreUsuario;
-    private String IP = "127.0.0.1"; //TODO
+    private String IP = "127.0.0.1";
     private Integer puerto;
     private Agenda agenda;
-    private Map<Contacto, Conversacion> conversaciones;
+    private Map<String, Conversacion> conversaciones;
 
     public User() {
     }
@@ -32,7 +35,7 @@ public class User implements Serializable {
         this.conversaciones = new ConcurrentHashMap<>();
         if (userOriginal.getConversaciones() != null) {
             for (Conversacion c : userOriginal.getConversaciones().values()) {
-                this.conversaciones.computeIfAbsent(c.getContacto(), k -> new Conversacion(c));
+                this.conversaciones.computeIfAbsent(c.getContacto().getNombreUsuario(), k -> new Conversacion(c));
             }
         }
     }
@@ -69,21 +72,21 @@ public class User implements Serializable {
         this.agenda = agenda;
     }
 
-    public void setConversaciones(Map<Contacto, Conversacion> conversaciones) {
+    public void setConversaciones(Map<String, Conversacion> conversaciones) {
         this.conversaciones = conversaciones;
     }
 
-    public Map<Contacto, Conversacion> getConversaciones() {
+    public Map<String, Conversacion> getConversaciones() {
         return conversaciones;
     }
 
     public Conversacion getConversacionCon(String nombre) {
         Contacto contacto = this.agenda.getContactoPorNombre(nombre);
-        return this.conversaciones.computeIfAbsent(contacto, k -> new Conversacion(contacto));
+        return this.conversaciones.computeIfAbsent(contacto.getNombreUsuario(), k -> new Conversacion(contacto));
     }
 
     public void agregarConversacion(Conversacion conversacion) {
-        this.conversaciones.putIfAbsent(conversacion.getContacto(), conversacion);
+        this.conversaciones.putIfAbsent(conversacion.getContacto().getNombreUsuario(), conversacion);
     }
 
     @Override

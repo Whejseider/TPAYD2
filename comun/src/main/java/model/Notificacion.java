@@ -9,7 +9,7 @@ public class Notificacion implements Serializable {
     public Notificacion() {
     }
 
-    public synchronized boolean tieneMensajesNuevos() {
+    public synchronized boolean isTieneMensajesNuevos() {
         return this.tieneMensajesNuevos;
     }
 

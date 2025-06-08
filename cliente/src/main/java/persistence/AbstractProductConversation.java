@@ -1,8 +1,11 @@
 package persistence;
 
-import model.User;
+import model.Contacto;
+import model.Conversacion;
+
+import java.util.Map;
 
 public interface AbstractProductConversation {
-    void save(User user) ;
-    void load(User user);
+    void save() ;
+    void load();
 }

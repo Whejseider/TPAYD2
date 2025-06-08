@@ -12,6 +12,7 @@ import network.NetworkConstants;
 import persistence.AbstractFactoryPersistence;
 import persistence.AbstractProductContacts;
 import persistence.AbstractProductConversation;
+import persistence.JSON.ConcreteFactoryJSON;
 import persistence.xml.ConcreteFactoryXML;
 import persistence.xml.ConcreteProductContactsXML;
 import persistence.xml.ConcreteProductConversationXML;
@@ -133,13 +134,10 @@ public class LoginController implements IController, ActionListener, Authenticat
         Sesion.getInstance().setUsuarioActual(user);
 //        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
-        AbstractFactoryPersistence xmlFactory = new ConcreteFactoryXML();
-        AbstractProductContacts concreteProductContactsXML = xmlFactory.createProductContacts();
-        concreteProductContactsXML.save(user);
-//        concreteProductUserXML.load(user);
-        AbstractProductConversation concreteProductConversationXML = xmlFactory.createProductConversation();
-        concreteProductConversationXML.save(user);
-        concreteProductConversationXML.load(user);
+        AbstractFactoryPersistence xmlFactory = new ConcreteFactoryJSON();
+        AbstractProductConversation test = xmlFactory.createProductConversation();
+        test.save();
+        test.load();
     }
 
     @Override

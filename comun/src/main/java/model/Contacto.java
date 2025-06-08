@@ -1,4 +1,6 @@
 package model;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 import java.util.Objects;
 
