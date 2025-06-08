@@ -13,6 +13,7 @@ import persistence.AbstractFactoryPersistence;
 import persistence.AbstractProductContacts;
 import persistence.AbstractProductConversation;
 import persistence.JSON.ConcreteFactoryJSON;
+import persistence.text.ConcreteFactoryText;
 import persistence.xml.ConcreteFactoryXML;
 import persistence.xml.ConcreteProductContactsXML;
 import persistence.xml.ConcreteProductConversationXML;
@@ -134,8 +135,8 @@ public class LoginController implements IController, ActionListener, Authenticat
         Sesion.getInstance().setUsuarioActual(user);
 //        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
-        AbstractFactoryPersistence xmlFactory = new ConcreteFactoryJSON();
-        AbstractProductConversation test = xmlFactory.createProductConversation();
+        AbstractFactoryPersistence textFactory = new ConcreteFactoryText();
+        AbstractProductContacts test = textFactory.createProductContacts();
         test.save();
         test.load();
     }
