@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import controller.LoginController;
 import interfaces.IController;
 import net.miginfocom.swing.MigLayout;
+import raven.modal.component.DropShadowBorder;
 import view.system.Form;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ public class FormLogin extends Form {
     public FormLogin() throws HeadlessException {
         setName("Login");
         setLayout(new MigLayout("fill,insets 20", "[center]", "[center]"));
+        updateUI();
 
         txtUsuario = new JTextField();
         txtUsuario.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese su nombre de usuario");
@@ -45,11 +47,21 @@ public class FormLogin extends Form {
             }
         };
         btnAceptar.putClientProperty(FlatClientProperties.STYLE, "" +
-                "foreground:#FFFFFF;");
+                "margin:4,10,4,10;" +
+                "arc:12;");
 
         btnCancelar = new JButton("Cancelar");
 
-        pane = new JPanel(new MigLayout("wrap,fillx,insets 35 45 30 45", "fill,250:280"));
+        pane = new JPanel(new MigLayout("wrap,fillx,insets 35 45 30 45", "fill,250:280")){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                applyShadowBorder(this);
+            }
+        };
+        pane.setOpaque(false);
+        applyShadowBorder(pane);
+
         pane.putClientProperty(FlatClientProperties.STYLE, "" +
                 "arc:20;" +
                 "[light]background:darken(@background,3%);" +
@@ -108,6 +120,12 @@ public class FormLogin extends Form {
         pane.add(btnSignUp, "sizegroup btn, wrap, gapy 8");
 
         add(pane);
+    }
+
+    private void applyShadowBorder(JPanel panel) {
+        if (panel != null) {
+            panel.setBorder(new DropShadowBorder(new Insets(5, 7, 6, 7), 1, 25));
+        }
     }
 
     public JLabel getLblSignUp() {
