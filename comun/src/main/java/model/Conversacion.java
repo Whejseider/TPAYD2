@@ -1,9 +1,9 @@
 package model;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Conversacion implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -14,7 +14,22 @@ public class Conversacion implements Serializable {
 
     public Conversacion(Contacto contacto) {
         this.contacto = contacto;
-        this.mensajes = new ArrayList<>();
+        this.mensajes = new CopyOnWriteArrayList<>();
+    }
+
+    public Conversacion(Conversacion conversacionOriginal) {
+        this.notificacion = conversacionOriginal.getNotificacion();
+        this.ultimoMensaje = new Mensaje(conversacionOriginal.getUltimoMensaje());
+        this.mensajes = new CopyOnWriteArrayList<>();
+        if (conversacionOriginal.getMensajes() != null){
+            for (Mensaje m : conversacionOriginal.getMensajes()){
+                this.mensajes.add(new Mensaje(m));
+            }
+        }
+        this.contacto = new Contacto(conversacionOriginal.getContacto());
+    }
+
+    public Conversacion() {
     }
 
     public Mensaje getUltimoMensaje() {
@@ -46,15 +61,24 @@ public class Conversacion implements Serializable {
     }
 
     public void agregarMensaje(Mensaje mensaje) {
-        this.mensajes.add(mensaje);
+        if (mensaje != null && !mensajes.contains(mensaje)) {
+            mensajes.add(mensaje);
+        }
     }
 
+
     public void setMensajes(List<Mensaje> mensajes) {
-        this.mensajes = mensajes;
+        if (mensajes != null) {
+            this.mensajes.clear();
+            this.mensajes.addAll(mensajes);
+        } else {
+            this.mensajes.clear();
+        }
     }
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Conversacion that = (Conversacion) o;
         return Objects.equals(contacto, that.contacto);

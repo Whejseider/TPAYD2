@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,20 +25,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Servidor extends JFrame {
 
     // GUI
     private JTextPane logArea;
-    private JButton startButton, stopButton;
     private JLabel statusLabel, roleLabel, clientConnectionsLabel, directoryLabel;
-    private JRadioButton primaryRadioButton, secondaryRadioButton;
-    private ButtonGroup roleButtonGroup;
-    private JTextField clientPortField, internalPortField, secondaryPortField;
     private JPanel configPanel;
 
     // Server
@@ -65,8 +60,8 @@ public class Servidor extends JFrame {
 
     // Compartido entre servidores
     public static Directorio directorio = new Directorio();
-    public static Map<String, List<Mensaje>> mensajesPendientes = new HashMap<>();
-    public static ArrayList<ClientHandler> clientesConectados = new ArrayList<>();
+    public static Map<String, List<Mensaje>> mensajesPendientes = new ConcurrentHashMap<>();
+    public static List<ClientHandler> clientesConectados = new CopyOnWriteArrayList<>();
     public static Servidor instanciaServidorActivo;
 
     // Colores para el log, mover esto a una clase aparte, igual que el monitor
@@ -87,9 +82,8 @@ public class Servidor extends JFrame {
 
         initComponents();
         layoutComponents();
-        setupActions();
+        startServerAction();
 
-        logMessage("Servidor listo. Configure y presione 'Iniciar'.", COLOR_INFO);
         updateStatusLabel();
 
         addWindowListener(new WindowAdapter() {
@@ -107,61 +101,16 @@ public class Servidor extends JFrame {
         logArea.setEditable(false);
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-        startButton = new JButton("Iniciar Servidor");
-        stopButton = new JButton("Detener Servidor");
-        stopButton.setEnabled(false);
-
         statusLabel = new JLabel();
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         roleLabel = new JLabel("Rol: No definido");
         directoryLabel = new JLabel("Usuarios registrados: 0");
 //        clientConnectionsLabel = new JLabel("Clientes conectados: 0");
 
-        primaryRadioButton = new JRadioButton("Primario", true);
-        secondaryRadioButton = new JRadioButton("Secundario");
-        roleButtonGroup = new ButtonGroup();
-        roleButtonGroup.add(primaryRadioButton);
-        roleButtonGroup.add(secondaryRadioButton);
-
-        clientPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_CLIENTES_DEFAULT), 5);
-        internalPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_REPLICACION_DEFAULT), 5); // Usado por Secundario para escuchar
-        secondaryPortField = new JTextField(Integer.toString(NetworkConstants.PUERTO_REPLICACION_DEFAULT), 5); // Puerto de replicación del otro servidor
-
         configPanel = new JPanel(new GridBagLayout());
     }
 
     private void layoutComponents() {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 4, 4,4);
-        gbc.anchor = GridBagConstraints.WEST;
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        configPanel.add(new JLabel("Rol del Servidor:"), gbc);
-        gbc.gridx = 1;
-        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        radioPanel.add(primaryRadioButton);
-        radioPanel.add(secondaryRadioButton);
-        configPanel.add(radioPanel, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        configPanel.add(new JLabel("Puerto para Primario:"), gbc);
-        gbc.gridx = 1;
-        configPanel.add(clientPortField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        configPanel.add(new JLabel("Puerto Interno (Secundario):"), gbc);
-        gbc.gridx = 1;
-        configPanel.add(internalPortField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        configPanel.add(new JLabel("Puerto Replicación:"), gbc);
-        gbc.gridx = 1;
-        configPanel.add(secondaryPortField, gbc);
-
 
         // Panel de Estado
         JPanel statusDisplayPanel = new JPanel(new GridLayout(3, 1, 5, 5));
@@ -172,15 +121,12 @@ public class Servidor extends JFrame {
 
         // Panel Superior (Config + Estado)
         JPanel topOuterPanel = new JPanel(new BorderLayout(10, 10));
-        topOuterPanel.add(configPanel, BorderLayout.CENTER);
-        topOuterPanel.add(statusDisplayPanel, BorderLayout.EAST);
+        topOuterPanel.add(statusDisplayPanel, BorderLayout.CENTER);
         topOuterPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 
         // Panel de Botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        buttonPanel.add(startButton);
-        buttonPanel.add(stopButton);
 
         JScrollPane scrollPane = new JScrollPane(logArea);
 
@@ -199,25 +145,12 @@ public class Servidor extends JFrame {
             statusLabel.setForeground(Color.RED);
         }
         roleLabel.setText("Rol Actual: " + (currentRole != null ? currentRole.toString() : "No iniciado"));
-        synchronized (Servidor.class) {
+
 //            clientConnectionsLabel.setText("Clientes conectados: " + clientesConectados.size());
-            directoryLabel.setText("Usuarios registrados: " + Servidor.directorio.getDirectorio().size());
-        }
-    }
-
-    private void setConfigFieldsEnabled(boolean enabled) {
-        primaryRadioButton.setEnabled(enabled);
-        secondaryRadioButton.setEnabled(enabled);
-        clientPortField.setEnabled(enabled);
-        internalPortField.setEnabled(enabled);
-        secondaryPortField.setEnabled(enabled);
-    }
-
-    private void setupActions() {
-        startButton.addActionListener(this::startServerAction);
-        stopButton.addActionListener(e -> stopServer());
+        directoryLabel.setText("Usuarios registrados: " + Servidor.directorio.getDirectorio().size());
 
     }
+
 
     // Podria usar en otra clase, para monitor y servidor
     public void logMessage(String message, Color color) {
@@ -260,9 +193,8 @@ public class Servidor extends JFrame {
      * Si no está el monitor funcionando, no se puede iniciar el servidor<br>
      * El monitor como conoce los servidores maneja los roles
      *
-     * @param e
      */
-    private void startServerAction(ActionEvent e) {
+    private void startServerAction() {
         String errorMsg;
 
         if (serverRunning) {
@@ -270,21 +202,10 @@ public class Servidor extends JFrame {
             return;
         }
 
-        ServerRole selectedRole = primaryRadioButton.isSelected() ? ServerRole.PRIMARIO : ServerRole.SECUNDARIO;
-        int clientPortToUse;
-        int internalPortToUse; // Para el secundario
-        int secondaryReplicationPortToUse; // Para el primario, el puerto de replicacion del secundario
-
-        try {
-            clientPortToUse = Integer.parseInt(clientPortField.getText());
-            internalPortToUse = Integer.parseInt(internalPortField.getText());
-            secondaryReplicationPortToUse = Integer.parseInt(secondaryPortField.getText());
-
-        } catch (NumberFormatException nfe) {
-            logMessage("Error: Puerto inválido. Ingrese un número.", COLOR_ERROR);
-            JOptionPane.showMessageDialog(this, "Error en el formato de los puertos. Deben ser números.", "Error de Configuración", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        ServerRole selectedRole = ServerRole.PRIMARIO;
+        int clientPortToUse = NetworkConstants.PUERTO_CLIENTES_DEFAULT;
+        int internalPortToUse = NetworkConstants.PUERTO_REPLICACION_DEFAULT; // Para el secundario
+        int secondaryReplicationPortToUse = NetworkConstants.PUERTO_REPLICACION_DEFAULT; // Para el primario, el puerto de replicacion del secundario
 
         //Verifico que no esten en uso los puertos
         if (!checkNetworkPorts(clientPortToUse)) {
@@ -297,59 +218,50 @@ public class Servidor extends JFrame {
         }
 
         if (!checkPort(clientPortToUse)) {
-            errorMsg = "Error: El puerto (" + clientPortToUse + ") se encuentra en uso." +
-                    "\nIntenta cambiar el puerto de Puerto Clientes (Primario) por alguno que no esté en uso y que sea diferente." +
-                    "\nPuertos no disponibles: " + NetworkConstants.PUERTO_REPLICACION_DEFAULT + " - " + NetworkConstants.PUERTO_HEARTBEAT_A_MONITOR_DEFAULT + " - " + NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT;;
-            logMessage("Error al iniciar el servidor. El puerto (" + clientPortToUse + ") declarado en Puerto Clientes (Primario) ya está en uso.", COLOR_ERROR);
-            JOptionPane.showMessageDialog(this, errorMsg, "Error de inicialización del servidor.", JOptionPane.ERROR_MESSAGE);
-            return;
+            clientPortToUse = NetworkConstants.PUERTO_CLIENTES_SECUNDARIO;
+//            selectedRole = ServerRole.SECUNDARIO;
         }
 
         // inicio verificación con el monitor
-        if (selectedRole == ServerRole.PRIMARIO) {
-            logMessage("Verificando puertos", COLOR_INFO);
-            logMessage("Intentando iniciar como PRIMARIO. Verificando con el Monitor...", COLOR_INFO);
-            try (Socket monitorSocket = new Socket(NetworkConstants.IP_MONITOR_DEFAULT, NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT);
-                 ObjectOutputStream oosMonitor = new ObjectOutputStream(monitorSocket.getOutputStream());
-                 ObjectInputStream oisMonitor = new ObjectInputStream(monitorSocket.getInputStream())) {
+        logMessage("Verificando puertos", COLOR_INFO);
+        logMessage("Intentando iniciar como PRIMARIO. Verificando con el Monitor...", COLOR_INFO);
+        try (Socket monitorSocket = new Socket(NetworkConstants.IP_MONITOR_DEFAULT, NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT);
+             ObjectOutputStream oosMonitor = new ObjectOutputStream(monitorSocket.getOutputStream());
+             ObjectInputStream oisMonitor = new ObjectInputStream(monitorSocket.getInputStream())) {
 
-                monitorSocket.setSoTimeout(CHECK_INTERVAL_MS);
+            monitorSocket.setSoTimeout(CHECK_INTERVAL_MS);
 
-                oosMonitor.writeObject("PUEDO_SER_PRIMARIO?");
-                oosMonitor.flush();
+            oosMonitor.writeObject("PUEDO_SER_PRIMARIO?");
+            oosMonitor.flush();
 
-                Object responseObj = oisMonitor.readObject();
-                if (responseObj instanceof String response) {
-                    if (response.startsWith("PRIMARIO_YA_EXISTE:")) {
-                        String infoExistePrimario = response.substring("PRIMARIO_YA_EXISTE:".length());
-                        errorMsg = "No se puede iniciar como Primario.\nEl Monitor informa que ya existe un Primario activo en: " + infoExistePrimario +
-                                "\n\nPor favor, inicie como Secundario o verifique la configuración.";
-                        logMessage("Monitor informó: Ya existe un primario activo en " + infoExistePrimario, COLOR_ERROR);
-                        JOptionPane.showMessageDialog(this, errorMsg, "Error de Inicio - Primario Existente", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    } else if (response.equals("OK_SER_PRIMARIO")) {
-                        logMessage("Monitor confirmó: OK para iniciar como Primario.", COLOR_INFO);
-                    } else {
-                        errorMsg = "Respuesta inesperada del Monitor: " + response + "\nNo se puede iniciar como Primario.";
-                        logMessage(errorMsg, COLOR_ERROR);
-                        JOptionPane.showMessageDialog(this, errorMsg, "Error de Comunicación con Monitor", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
+            Object responseObj = oisMonitor.readObject();
+            if (responseObj instanceof String response) {
+                if (response.startsWith("PRIMARIO_YA_EXISTE:")) {
+                    String infoExistePrimario = response.substring("PRIMARIO_YA_EXISTE:".length());
+                    logMessage("Monitor informó: Ya existe un primario activo en " + infoExistePrimario + ". Se promoverá a SECUNDARIO", COLOR_ERROR);
+                    selectedRole = ServerRole.SECUNDARIO;
+                } else if (response.equals("OK_SER_PRIMARIO")) {
+                    logMessage("Monitor confirmó: OK para iniciar como Primario.", COLOR_INFO);
                 } else {
-                    errorMsg = "Respuesta inesperada (formato incorrecto) del Monitor.\nNo se puede iniciar como Primario.";
-                    logMessage("Respuesta inesperada (no String) del Monitor.", COLOR_ERROR);
+                    errorMsg = "Respuesta inesperada del Monitor: " + response + "\nNo se puede iniciar como Primario.";
+                    logMessage(errorMsg, COLOR_ERROR);
                     JOptionPane.showMessageDialog(this, errorMsg, "Error de Comunicación con Monitor", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-            } catch (IOException | ClassNotFoundException ex) {
-                errorMsg = "No se pudo contactar o comunicar con el Monitor para verificar el estado del Primario.\n" +
-                        "Error: " + ex.getMessage() +
-                        "\n\nNo se puede iniciar como Primario sin la confirmación del Monitor.";
-                logMessage("Error al consultar al Monitor: " + ex.getMessage(), COLOR_ERROR);
+            } else {
+                errorMsg = "Respuesta inesperada (formato incorrecto) del Monitor.\nNo se puede iniciar como Primario.";
+                logMessage("Respuesta inesperada (no String) del Monitor.", COLOR_ERROR);
                 JOptionPane.showMessageDialog(this, errorMsg, "Error de Comunicación con Monitor", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
+        } catch (IOException | ClassNotFoundException ex) {
+            errorMsg = "No se pudo contactar o comunicar con el Monitor para verificar el estado del Primario.\n" +
+                    "Error: " + ex.getMessage() +
+                    "\n\nNo se puede iniciar como Primario sin la confirmación del Monitor.";
+            logMessage("Error al consultar al Monitor: " + ex.getMessage(), COLOR_ERROR);
+//            JOptionPane.showMessageDialog(this, errorMsg, "Error de Comunicación con Monitor", JOptionPane.ERROR_MESSAGE);
+            return;
         }
         // fin verificación monitor
 
@@ -383,9 +295,6 @@ public class Servidor extends JFrame {
 
             serverRunning = true;
             promotedToPrimary.set(currentRole == ServerRole.PRIMARIO);
-            setConfigFieldsEnabled(false);
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
             updateStatusLabel();
 
         } catch (IOException ex) {
@@ -394,9 +303,6 @@ public class Servidor extends JFrame {
             serverRunning = false;
             cleanupSocketsAndScheduler();
 
-            setConfigFieldsEnabled(true);
-            startButton.setEnabled(true);
-            stopButton.setEnabled(false);
             currentRole = null;
             Servidor.instanciaServidorActivo = null;
             updateStatusLabel();
@@ -405,11 +311,11 @@ public class Servidor extends JFrame {
 
     private void resetServerState() {
 
-        synchronized (Servidor.class) {
-            directorio = new Directorio();
-            mensajesPendientes = new HashMap<>();
-            clientesConectados = new ArrayList<>();
-        }
+
+        directorio = new Directorio();
+        mensajesPendientes = new HashMap<>();
+        clientesConectados = new ArrayList<>();
+
         promotedToPrimary.set(false);
     }
 
@@ -421,6 +327,9 @@ public class Servidor extends JFrame {
         }
         logMessage("Deteniendo servidor...", COLOR_INFO);
         serverRunning = false;
+        for (ClientHandler ch : new ArrayList<>(clientesConectados)) { // Iterar sobre una copia
+            ch.shutdown(); // Necesitarás implementar este método en ClientHandler
+        }
         Servidor.instanciaServidorActivo = null;
 
 
@@ -429,9 +338,6 @@ public class Servidor extends JFrame {
 
         cleanupSocketsAndScheduler();
 
-        setConfigFieldsEnabled(true);
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
         currentRole = null;
         updateStatusLabel();
         logMessage("Servidor detenido.", COLOR_INFO);
@@ -503,10 +409,10 @@ public class Servidor extends JFrame {
                         break;
                     }
                 } else if (receivedObject instanceof StateData state) {
-                    synchronized (Servidor.class) {
-                        Servidor.directorio = state.getDirectorio();
-                        Servidor.mensajesPendientes = state.getMensajesPendientes();
-                    }
+
+                    Servidor.directorio = state.getDirectorio();
+                    Servidor.mensajesPendientes = state.getMensajesPendientes();
+
                     logMessage("SECUNDARIO: Estado replicado recibido y actualizado.", COLOR_REPLICATION);
                 }
             } catch (java.net.SocketException se) {
@@ -533,7 +439,6 @@ public class Servidor extends JFrame {
 
         currentRole = ServerRole.PRIMARIO;
         promotedToPrimary.set(true);
-        primaryRadioButton.setSelected(true);
         Servidor.instanciaServidorActivo = this;
 
         try {
@@ -552,9 +457,9 @@ public class Servidor extends JFrame {
             clientServerSocket = new ServerSocket(currentClientPort, 50, InetAddress.getByName(NetworkConstants.IP_DEFAULT));
             logMessage("NUEVO PRIMARIO: Escuchando clientes en: " + NetworkConstants.IP_DEFAULT + ":" + currentClientPort, COLOR_PROMOTION);
 
-            synchronized (Servidor.class) {
-                Servidor.clientesConectados.clear();
-            }
+
+            Servidor.clientesConectados.clear();
+
             SwingUtilities.invokeLater(this::updateStatusLabel);
 
 
@@ -628,7 +533,7 @@ public class Servidor extends JFrame {
     }
 
     private void replicateStateToPeer() {
-        if (!serverRunning || currentRole != ServerRole.PRIMARIO ) {
+        if (!serverRunning || currentRole != ServerRole.PRIMARIO) {
             logMessage("Replicación: No es primario o no hay peer configurado.", COLOR_INFO);
             return;
         }
@@ -636,16 +541,24 @@ public class Servidor extends JFrame {
         try (Socket socket = new Socket(NetworkConstants.IP_DEFAULT, currentSecondaryReplicationPort);
              ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
 
+            socket.setSoTimeout(CHECK_INTERVAL_MS);
+
             StateData currentState;
-            synchronized (Servidor.class) {
-                currentState = new StateData(directorio, mensajesPendientes);
+            Directorio dirCopy = new Directorio(Servidor.directorio);;
+            Map<String, List<Mensaje>> msgPenCopy = new HashMap<>();
+
+            for (Map.Entry<String, List<Mensaje>> entry : Servidor.mensajesPendientes.entrySet()) {
+                msgPenCopy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
             }
+
+            currentState = new StateData(dirCopy, msgPenCopy);
+
 
             oos.writeObject(currentState);
             oos.flush();
             logMessage("PRIMARIO: Estado replicado exitosamente a Peer.", COLOR_REPLICATION);
 
-        } catch (java.net.ConnectException e) {
+        } catch (ConnectException e) {
             logMessage("PRIMARIO: No se pudo conectar al Peer para replicar: " + e.getMessage(), COLOR_ERROR);
         } catch (IOException e) {
             logMessage("PRIMARIO: Error de IO al replicar estado a Peer: " + e.getMessage(), COLOR_ERROR);
@@ -653,6 +566,15 @@ public class Servidor extends JFrame {
             logMessage("PRIMARIO: Error general durante la replicación a Peer: " + e.getMessage(), COLOR_ERROR);
             e.printStackTrace();
         }
+    }
+
+    // En Servidor.java
+    public boolean isServerRunning() {
+        return serverRunning;
+    }
+
+    public ServerRole getCurrentRole() {
+        return currentRole;
     }
 
     public static void main(String[] args) {

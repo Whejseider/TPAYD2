@@ -1,23 +1,40 @@
 package model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String nombreUsuario;
     private String IP = "127.0.0.1"; //TODO
     private Integer puerto;
     private Agenda agenda;
-    private Map<Contacto, Conversacion> conversacion;
+    private Map<Contacto, Conversacion> conversaciones;
+
+    public User() {
+    }
 
     public User(String userName, int puerto) {
         this.nombreUsuario = userName;
         this.puerto = puerto;
-        this.conversacion = new HashMap<>();
+        this.conversaciones = new ConcurrentHashMap<>();
         this.agenda = new Agenda();
+    }
+
+    public User(User userOriginal) {
+        this.nombreUsuario = userOriginal.getNombreUsuario();
+        this.IP = userOriginal.getIP();
+        this.puerto = userOriginal.getPuerto();
+        this.agenda = new Agenda(userOriginal.getAgenda());
+        this.conversaciones = new ConcurrentHashMap<>();
+        if (userOriginal.getConversaciones() != null) {
+            for (Conversacion c : userOriginal.getConversaciones().values()) {
+                this.conversaciones.computeIfAbsent(c.getContacto(), k -> new Conversacion(c));
+            }
+        }
     }
 
     public String getNombreUsuario() {
@@ -52,13 +69,21 @@ public class User implements Serializable {
         this.agenda = agenda;
     }
 
-    public Map<Contacto, Conversacion> getConversacion() {
-        return conversacion;
+    public void setConversaciones(Map<Contacto, Conversacion> conversaciones) {
+        this.conversaciones = conversaciones;
+    }
+
+    public Map<Contacto, Conversacion> getConversaciones() {
+        return conversaciones;
     }
 
     public Conversacion getConversacionCon(String nombre) {
         Contacto contacto = this.agenda.getContactoPorNombre(nombre);
-        return this.conversacion.computeIfAbsent(contacto, k -> new Conversacion(contacto));
+        return this.conversaciones.computeIfAbsent(contacto, k -> new Conversacion(contacto));
+    }
+
+    public void agregarConversacion(Conversacion conversacion) {
+        this.conversaciones.putIfAbsent(conversacion.getContacto(), conversacion);
     }
 
     @Override
@@ -74,7 +99,7 @@ public class User implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(nombreUsuario, user.nombreUsuario);
+        return Objects.equals(nombreUsuario.toLowerCase(), user.nombreUsuario.toLowerCase());
     }
 
     @Override

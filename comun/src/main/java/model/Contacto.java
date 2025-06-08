@@ -1,5 +1,4 @@
 package model;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,6 +11,14 @@ public class Contacto implements Serializable {
 
     public Contacto() {
     }
+
+    public Contacto(Contacto contactoOriginal){
+        this.alias = contactoOriginal.getAlias();
+        this.nombreUsuario = contactoOriginal.getNombreUsuario();
+        this.IP = contactoOriginal.getIP();
+        this.puerto = contactoOriginal.getPuerto();
+    }
+
 
     @Override
     public String toString() {
@@ -63,13 +70,14 @@ public class Contacto implements Serializable {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Contacto contacto = (Contacto) o;
-        return Objects.equals(nombreUsuario, contacto.nombreUsuario);
+        return Objects.equals(alias, contacto.alias) && Objects.equals(nombreUsuario.toLowerCase(), contacto.nombreUsuario.toLowerCase()) && Objects.equals(IP, contacto.IP) && Objects.equals(puerto, contacto.puerto);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(nombreUsuario);
+        return Objects.hash(alias, nombreUsuario, IP, puerto);
     }
 }

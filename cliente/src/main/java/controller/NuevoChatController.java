@@ -48,18 +48,8 @@ public class NuevoChatController implements ActionListener, ListSelectionListene
             if (seleccionado != null) {
                 Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(seleccionado.getNombreUsuario());
                 SwingUtilities.invokeLater(() -> {
-                    this.messengerPanelController.getVista().mostrarContactoInfo(seleccionado);
-                    this.messengerPanelController.setContactoActual(seleccionado);
-
-                    if (conversacion.getMensajes() != null && !conversacion.getMensajes().isEmpty()) {
-                        this.messengerPanelController.mostrarChat(seleccionado);
-                        this.messengerPanelController.getVista().getListChat().setSelectedValue(conversacion, true);
-                    } else {
-                        this.messengerPanelController.revalidarPanelMensajes();
-//                        this.messengerPanelController.getVista().getListChat().setSelectedValue(null, false);
-                    }
-
-                    this.messengerPanelController.revalidarListChat();
+                    this.messengerPanelController.setConversacionActual(conversacion);
+                    this.messengerPanelController.changeConversation(conversacion);
                     this.vista.dispose();
                 });
             }

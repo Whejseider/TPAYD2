@@ -7,7 +7,7 @@ import utils.SystemForm;
 import view.component.EmptyModalBorder;
 import view.component.FormSearchPanel;
 import view.forms.FormSetting;
-import view.forms.MessengerPanel;
+import view.forms.Messenger.MessengerPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;

@@ -3,13 +3,28 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Agenda implements Serializable {
     private static final long serialVersionUID = 1L;
     private List<Contacto> contactos;
 
     public Agenda() {
-        this.contactos = new ArrayList<>();
+        this.contactos = new CopyOnWriteArrayList<Contacto>();
+    }
+
+    public Agenda(Agenda agendaOriginal){
+        this.contactos = new CopyOnWriteArrayList<>();
+        if (agendaOriginal != null) {
+            for (Contacto contacto : agendaOriginal.getContactos()) {
+                this.contactos.add(new Contacto(contacto));
+            }
+        }
+    }
+
+    public void setContactos(List<Contacto> contactos) {
+        this.contactos = contactos;
     }
 
     public List<Contacto> getContactos() {
@@ -81,4 +96,16 @@ public class Agenda implements Serializable {
         return null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Agenda agenda = (Agenda) o;
+        return Objects.equals(contactos, agenda.contactos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(contactos);
+    }
 }

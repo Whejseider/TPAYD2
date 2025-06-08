@@ -82,12 +82,23 @@ public class MainFormController implements IController, AuthenticationListener, 
 
     @Override
     public void onConnectionEstablished() {
+        boolean exito = false;
+
         if (Sesion.getInstance().getUsuarioActual() != null) {
             Cliente.getInstance().iniciarSesion(Sesion.getInstance().getUsuarioActual());
+            if (Sesion.getInstance().getUsuarioActual() != null) {
+                exito = true;
+            } else {
+                FormManager.showLogin();
+            }
         } else {
             FormManager.showLogin();
         }
         ConnectionManager.getInstance().checkOnReconnection();
+
+        if (exito) {
+            EventManager.getInstance().notifySessionReloaded();
+        }
 
         if (ConnectionManager.getInstance().getFormError() != null && ConnectionManager.getInstance().getFormError().isVisible()) {
             ConnectionManager.getInstance().getFormError().setVisible(false);

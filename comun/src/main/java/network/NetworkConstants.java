@@ -19,4 +19,8 @@ public final class NetworkConstants {
 
     // PURTO DE CONSULTA DE SERVIDOR PRIMARIO
     public static final int PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT = 1237;
+
+    // En network.NetworkConstants.java (o donde tengas tus constantes)
+    public static final int PUERTO_NOTIFICACION_SECUNDARIO_LISTO_DEFAULT = 1239; // Elige un puerto no usado
+    public static String IP_PRIMARIO_CONOCIDO_POR_SECUNDARIO = IP_DEFAULT; // Variable para almacenar la IP del primario si se conoce
 }

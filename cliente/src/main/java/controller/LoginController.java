@@ -9,6 +9,10 @@ import interfaces.IController;
 import model.TipoRespuesta;
 import model.User;
 import network.NetworkConstants;
+import persistence.AbstractFactoryPersistence;
+import persistence.xml.ConcreteFactoryXML;
+import persistence.xml.ConcreteProductContactsXML;
+import persistence.xml.ConcreteProductConversationXML;
 import raven.modal.Toast;
 import view.forms.FormLogin;
 import view.manager.ToastManager;
@@ -125,9 +129,15 @@ public class LoginController implements IController, ActionListener, Authenticat
     public void onLoginSuccess(User user) {
 //        this.eventManager.removeAuthenticationListener(this);
         Sesion.getInstance().setUsuarioActual(user);
-        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
-
+//        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
         FormManager.showHome();
+        AbstractFactoryPersistence xmlFactory = new ConcreteFactoryXML();
+        ConcreteProductContactsXML concreteProductUserXML = xmlFactory.createProductContacts();
+        concreteProductUserXML.save(user);
+//        concreteProductUserXML.load(user);
+        ConcreteProductConversationXML concreteProductConversationXML = xmlFactory.createProductConversation();
+        concreteProductConversationXML.save(user);
+        concreteProductConversationXML.load(user);
     }
 
     @Override
@@ -138,12 +148,12 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     @Override
     public void onLogoutSuccess() {
-        this.eventManager.addAuthenticationListener(this);
+//        this.eventManager.addAuthenticationListener(this);
     }
 
     @Override
     public void onLogoutFailure(String s) {
-        this.eventManager.addAuthenticationListener(this);
+//        this.eventManager.addAuthenticationListener(this);
     }
 
     @Override
@@ -158,7 +168,7 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     @Override
     public void onConnectionAttempt(TipoRespuesta tipoRespuesta) {
-        this.eventManager.addConnectionListener(this);
+//        this.eventManager.addConnectionListener(this);
     }
 
     @Override
@@ -168,12 +178,12 @@ public class LoginController implements IController, ActionListener, Authenticat
 
     @Override
     public void onConnectionLost(String reason) {
-        this.eventManager.addConnectionListener(this);
+//        this.eventManager.addConnectionListener(this);
     }
 
     @Override
     public void onConnectionAttemptFailure(String reason) {
-        this.eventManager.addConnectionListener(this);
+//        this.eventManager.addConnectionListener(this);
     }
 
 

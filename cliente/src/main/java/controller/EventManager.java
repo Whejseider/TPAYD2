@@ -20,13 +20,14 @@ public class EventManager {
     private final List<MessageListener> messageListeners = new ArrayList<>();
     private final List<ContactsListener> contactsListeners = new ArrayList<>();
     private final List<DirectoryListener> directoryListeners = new ArrayList<>();
+    private final List<SessionListener> sessionListeners = new ArrayList<>();
 
     private static EventManager instance;
 
     public EventManager() {
     }
 
-    public static EventManager getInstance() {
+    public static synchronized EventManager getInstance() {
         if (instance == null) {
             instance = new EventManager();
         }
@@ -59,6 +60,19 @@ public class EventManager {
 
         if (directoryListeners != null)
             directoryListeners.clear();
+
+        if (sessionListeners != null)
+            sessionListeners.clear();
+    }
+
+    public void addSessionListener(SessionListener l) {
+        if (!sessionListeners.contains(l)) {
+            sessionListeners.add(l);
+        }
+    }
+
+    public void removeSessionListener(SessionListener l) {
+        sessionListeners.remove(l);
     }
 
     public void addAppStateListener(AppStateListener listener) {
@@ -113,6 +127,15 @@ public class EventManager {
 
     public void removeDirectoryListener(DirectoryListener listener) {
         directoryListeners.remove(listener);
+    }
+
+    public void notifySessionReloaded() {
+        SwingUtilities.invokeLater(() -> {
+            List<SessionListener> copiaListeners = new ArrayList<>(sessionListeners);
+            for (SessionListener listener : copiaListeners) {
+                listener.onSessionReloaded();
+            }
+        });
     }
 
     public void notifyConnectionAttempt(TipoRespuesta tipoRespuesta) {

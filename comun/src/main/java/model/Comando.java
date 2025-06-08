@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 
 public class Comando implements Serializable {
@@ -47,5 +48,18 @@ public class Comando implements Serializable {
 
     public void setTipoAccion(TipoSolicitud tipoSolicitud) {
         this.tipoSolicitud = tipoSolicitud;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comando comando = (Comando) o;
+        return tipoSolicitud == comando.tipoSolicitud && tipoRespuesta == comando.tipoRespuesta && Objects.equals(contenido, comando.contenido);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tipoSolicitud, tipoRespuesta, contenido);
     }
 }

@@ -4,10 +4,13 @@ import connection.Cliente;
 import connection.Sesion;
 import interfaces.IController;
 import interfaces.MessageListener;
+import interfaces.SessionListener;
 import model.*;
 import raven.modal.Toast;
 import view.NuevoChat;
-import view.forms.MessengerPanel;
+import view.forms.Messenger.Item;
+import view.forms.Messenger.LeftActionListener;
+import view.forms.Messenger.MessengerPanel;
 import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
@@ -22,16 +25,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
-public class MessengerPanelController implements IController, ActionListener, ListSelectionListener, MessageListener {
+public class MessengerPanelController implements IController, LeftActionListener, ActionListener, MessageListener, SessionListener {
     private MessengerPanel vista;
     private Cliente cliente = Cliente.getInstance();
-    private Contacto contactoActual;
+    private Conversacion conversacionActual;
     private EventManager eventManager = EventManager.getInstance();
 
     private LocalDate ultimaFechaMostradaEnChat = null;
 
     public MessengerPanelController(MessengerPanel form) {
         this.vista = form;
+        this.vista.getLeftPanel().setEvent(this);
     }
 
     public MessengerPanel getVista() {
@@ -50,13 +54,15 @@ public class MessengerPanelController implements IController, ActionListener, Li
         this.cliente = cliente;
     }
 
-    public void setContactoActual(Contacto contactoActual) {
-        this.contactoActual = contactoActual;
+    public void setConversacionActual(Conversacion contactoActual) {
+        this.conversacionActual = contactoActual;
     }
 
-    private void actualizarVistaMensaje(Mensaje mensaje, boolean esMio) {
+    private void actualizarVistaMensaje(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
             if (vista.getChat() == null) return;
+
+            boolean esMio = mensaje.esMio(Sesion.getInstance().getUsuarioActual());
 
             LocalDate fechaMensaje = mensaje.getTiempo().toLocalDate();
             LocalDate hoy = LocalDate.now();
@@ -91,142 +97,93 @@ public class MessengerPanelController implements IController, ActionListener, Li
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
         if (usuarioActual == null) return;
 
-        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getEmisor().getNombreUsuario());
+        if (mensaje.getEmisor().equals(usuarioActual.getNombreUsuario())) {
+            return;
+        }
 
-        Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getEmisor().getNombreUsuario());
+        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getEmisor());
+
+        Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getEmisor());
+
+        Contacto contacto = conversacion.getContacto();
+        usuarioActual.getAgenda().agregarContacto(contacto);
+        usuarioActual.getConversacionCon(contacto.getNombreUsuario()).agregarMensaje(mensaje);
+        usuarioActual.getConversacionCon(contacto.getNombreUsuario()).setUltimoMensaje(mensaje);
 
         SwingUtilities.invokeLater(() -> {
-            DefaultListModel<Conversacion> listModel = this.vista.getListModel();
 
-            if (!listModel.contains(conversacion)) {
-                listModel.addElement(conversacion);
-            } else {
-                listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
-            }
+            vista.getLeftPanel().userMessage(conversacion, mensaje);
 
-            if (contactoActual != null && contactoEmisor != null &&
-                    contactoActual.getNombreUsuario().equals(contactoEmisor.getNombreUsuario())) {
-                actualizarVistaMensaje(mensaje, false);
+            if (conversacionActual != null && contactoEmisor != null &&
+                    conversacionActual.getContacto().getNombreUsuario().equals(contactoEmisor.getNombreUsuario())) {
+                actualizarVistaMensaje(mensaje);
+                conversacion.getNotificacion().setTieneMensajesNuevos(false);
             } else {
-                if (conversacion != null && conversacion.getNotificacion() != null) {
+                if (conversacion.getNotificacion() != null) {
                     conversacion.getNotificacion().setTieneMensajesNuevos(true);
-//                    ToastManager.getInstance().showNotifyMessage(contactoEmisor);
                 }
-                revalidarListChat();
             }
+
+            Item item = vista.getLeftPanel().getSelectedConversation(conversacion);
+            if (item != null) {
+                item.actualizarApariencia();
+            }
+
         });
     }
 
-    public void mostrarChat(Contacto contacto) {
+    public void mostrarChat(Conversacion conversacion) {
         SwingUtilities.invokeLater(() -> {
 
             vista.getChat().clearMessages();
-            
+
             ultimaFechaMostradaEnChat = null;
 
-            contactoActual = contacto;
-
-            Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contacto.getNombreUsuario());
-            if (!vista.getListModel().contains(conversacion)) {
-                vista.getListModel().addElement(conversacion);
-            }
+            conversacionActual = conversacion;
 
             List<Mensaje> mensajes = conversacion.getMensajes();
 
             mensajes.sort(Comparator.comparing(Mensaje::getTiempo));
 
             for (Mensaje mensaje : conversacion.getMensajes()) {
-                boolean esMio = mensaje.getEmisor().getNombreUsuario().equalsIgnoreCase(Sesion.getInstance().getUsuarioActual().getNombreUsuario());
-                actualizarVistaMensaje(mensaje, esMio);
+                actualizarVistaMensaje(mensaje);
             }
 
         });
 
     }
 
-    public void revalidarPanelMensajes() {
-        vista.getChat().clearMessages();
+    public Conversacion getConversacionActual() {
+        return conversacionActual;
     }
 
-    public void revalidarListChat() {
-        vista.getListChat().revalidate();
-        vista.getListChat().repaint();
-    }
-
-    public void cargarConversaciones() {
-        SwingUtilities.invokeLater(() -> {
-            DefaultListModel<Conversacion> model = vista.getListModel();
-            model.clear();
-
-            for (Conversacion conversacion : Sesion.getInstance().getUsuarioActual().getConversacion().values()) {
-                if (conversacion.getMensajes() != null && !conversacion.getMensajes().isEmpty()) {
-                    model.addElement(conversacion);
-                }
-            }
-
-            revalidarListChat();
-        });
-    }
-
-    public Contacto getContactoActual() {
-        return contactoActual;
-    }
-
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting()) {
-            Conversacion conversacion = this.vista.getListChat().getSelectedValue();
-            if (conversacion != null) {
-                SwingUtilities.invokeLater(() -> {
-                    setContactoActual(conversacion.getContacto());
-                    mostrarChat(conversacion.getContacto());
-
-                    revalidarListChat();
-                    conversacion.getNotificacion().setTieneMensajesNuevos(false);
-
-                    vista.mostrarContactoInfo(conversacion.getContacto());
-
-                    vista.getTxtMensaje().setText("");
-                    vista.getTxtMensaje().grabFocus();
-                });
-            }
-        }
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.vista.getBtnEnviar()) {
             String contenido = vista.getTxtMensaje().getText().trim();
-            if (contenido.isEmpty() || contactoActual == null) {
+            if (contenido.isEmpty() || conversacionActual == null) {
                 vista.getTxtMensaje().grabFocus();
             } else {
 
-                Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual(), contactoActual.getNombreUsuario());
+                Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual().getNombreUsuario(), conversacionActual.getContacto().getNombreUsuario());
 
-                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(contactoActual.getNombreUsuario());
+                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(conversacionActual.getContacto().getNombreUsuario());
+                conversacion.agregarMensaje(mensaje);
+                conversacion.setUltimoMensaje(mensaje);
 
-                DefaultListModel<Conversacion> listModel = this.vista.getListModel();
-                if (!listModel.contains(conversacion)) {
-                    listModel.addElement(conversacion);
-                } else {
-                    listModel.setElementAt(conversacion, listModel.indexOf(conversacion));
-                }
+                vista.getLeftPanel().userMessage(conversacion, mensaje);
 
-                if (vista.getListChat().getSelectedValue() != conversacion) {
-                    vista.getListChat().setSelectedValue(conversacion, true);
-                }
+                actualizarVistaMensaje(mensaje);
 
-                actualizarVistaMensaje(mensaje, true);
-
-                vista.getTxtMensaje().setText("");
-                vista.getTxtMensaje().grabFocus();
+                messageInputFocus();
 
                 Cliente.getInstance().enviarMensaje(mensaje);
 
             }
         }
 
-        if (e.getSource() == this.vista.getBtnNuevoChat()) {
+        if (e.getSource() == this.vista.getLeftPanel().getBtnNuevoChat()) {
             NuevoChat nuevoChat = new NuevoChat();
             NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
             nuevoChatController.setMessengerController(this);
@@ -234,6 +191,11 @@ public class MessengerPanelController implements IController, ActionListener, Li
             nuevoChat.display();
         }
 
+    }
+
+    private void messageInputFocus() {
+        vista.getTxtMensaje().setText("");
+        vista.getTxtMensaje().grabFocus();
     }
 
     @Override
@@ -252,11 +214,6 @@ public class MessengerPanelController implements IController, ActionListener, Li
             return;
         }
 
-        Contacto c = Agenda.crearContacto(mensajeRecibido.getEmisor());
-        usuarioActual.getAgenda().agregarContacto(c);
-        usuarioActual.getConversacionCon(c.getNombreUsuario()).agregarMensaje(mensajeRecibido);
-        usuarioActual.getConversacionCon(c.getNombreUsuario()).setUltimoMensaje(mensajeRecibido);
-
         procesaMensajeEntrante(mensajeRecibido);
 
     }
@@ -268,7 +225,7 @@ public class MessengerPanelController implements IController, ActionListener, Li
 
     @Override
     public void onSendMessageSuccess(Mensaje mensajeEnviadoConfirmado) {
-        String emisor = mensajeEnviadoConfirmado.getEmisor().getNombreUsuario();
+        String emisor = mensajeEnviadoConfirmado.getEmisor();
         String receptor = mensajeEnviadoConfirmado.getNombreReceptor();
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
 
@@ -282,25 +239,8 @@ public class MessengerPanelController implements IController, ActionListener, Li
         conversacion.agregarMensaje(mensajeEnviadoConfirmado);
         conversacion.setUltimoMensaje(mensajeEnviadoConfirmado);
 
-        if (getContactoActual() != null && getContactoActual().getNombreUsuario().equals(receptor)) {
-            SwingUtilities.invokeLater(() -> {
-                DefaultListModel<Conversacion> listModel = vista.getListModel();
-                Conversacion conversacionEnSesion = usuarioActual.getConversacionCon(receptor);
-                int index = listModel.indexOf(conversacionEnSesion);
-                if (index != -1) {
-                    listModel.setElementAt(conversacionEnSesion, index);
-                }
-            });
-        } else {
-            SwingUtilities.invokeLater(this::cargarConversaciones);
-        }
     }
 
-    /**
-     * TODO
-     *
-     * @param s
-     */
     @Override
     public void onSendMessageFailure(String s) {
         ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
@@ -310,12 +250,102 @@ public class MessengerPanelController implements IController, ActionListener, Li
     public void init() {
 
         this.eventManager.addMessageListener(this);
-
-        cargarConversaciones();
+        this.eventManager.addSessionListener(this);
     }
 
     @Override
     public Form getForm() {
         return vista;
+    }
+
+    @Override
+    public void onConversationSelected(Conversacion conversacion) {
+        changeConversation(conversacion);
+    }
+
+    public void changeConversation(Conversacion conversacion) {
+        if (conversacion != null) {
+            if (!conversacion.getMensajes().isEmpty()) {
+
+                conversacion.getNotificacion().setTieneMensajesNuevos(false);
+                Item itemSeleccionado = vista.getLeftPanel().getSelectedConversation(conversacion);
+                if (itemSeleccionado != null) {
+                    itemSeleccionado.actualizarApariencia();
+                }
+
+                vista.getLeftPanel().selectedConversation(conversacion);
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+                vista.getChat().clearMessages();
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
+                mostrarChat(conversacion);
+                checkUser(conversacion.getContacto());
+            } else {
+                messageInputFocus();
+                vista.getChat().clearMessages();
+                checkUser(conversacion.getContacto());
+            }
+        } else {
+            messageInputFocus();
+            vista.getChat().scrollToBottom();
+        }
+    }
+
+    private void checkUser(Contacto contacto) {
+        try {
+            vista.mostrarContactoInfo(contacto);
+            messageInputFocus();
+        } catch (Exception e) {
+            messageInputFocus();
+            System.out.println("CHECKUSER MSNPANEL: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void onSessionReloaded() {
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("MessengerPanelController: Sesión refrescada, actualizando UI.");
+            User usuarioActualSesion = Sesion.getInstance().getUsuarioActual();
+            if (usuarioActualSesion == null) {
+                System.err.println("MessengerPanelController.onSessionRefreshed: Usuario actual es null. No se puede refrescar.");
+                FormManager.showLogin();
+                return;
+            }
+
+
+            String nombreContactoConversacionActual = null;
+            if (this.conversacionActual != null && this.conversacionActual.getContacto() != null) {
+                nombreContactoConversacionActual = this.conversacionActual.getContacto().getNombreUsuario();
+            }
+            this.conversacionActual = null;
+
+
+            if (vista != null && vista.getLeftPanel() != null) {
+                vista.getLeftPanel().initData();
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+                vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
+            }
+
+
+            if (nombreContactoConversacionActual != null) {
+                Conversacion conversacionRestaurada = usuarioActualSesion.getConversacionCon(nombreContactoConversacionActual);
+                if (conversacionRestaurada != null) {
+
+                    changeConversation(conversacionRestaurada);
+                } else {
+
+                    vista.getChat().clearMessages();
+                    ultimaFechaMostradaEnChat = null;
+                    vista.mostrarContactoInfo(null);
+                    if (vista.getLeftPanel() != null) {
+                        vista.getLeftPanel().selectedConversation(null);
+                    }
+                }
+            } else {
+
+                vista.getChat().clearMessages();
+                ultimaFechaMostradaEnChat = null;
+                vista.mostrarContactoInfo(null);
+            }
+        });
     }
 }

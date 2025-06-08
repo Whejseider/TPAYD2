@@ -15,7 +15,7 @@ import view.drawer.MenuDrawer;
 import view.forms.FormError;
 import view.forms.FormRegister;
 import view.forms.FormLogin;
-import view.forms.MessengerPanel;
+import view.forms.Messenger.MessengerPanel;
 
 import javax.swing.*;
 
@@ -65,7 +65,6 @@ public class FormManager {
                 form.formCheck();
                 form.formOpen();
                 mainForm.setForm(form);
-                mainForm.refresh();
                 FlatAnimatedLafChange.hideSnapshotWithAnimation();
             }
     }
@@ -87,13 +86,6 @@ public class FormManager {
             form.formOpen();
             mainForm.setForm(form);
             Drawer.setSelectedItemClass(form.getClass());
-        }
-    }
-
-    public static void refresh() {
-        if (FORMS.getCurrent() != null) {
-            FORMS.getCurrent().formRefresh();
-            mainForm.refresh();
         }
     }
 

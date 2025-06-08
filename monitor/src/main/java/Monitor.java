@@ -26,7 +26,6 @@ public class Monitor extends JFrame {
 
     // gui
     private JTextPane logArea;
-    private JButton startButton, stopButton, restartButton;
     private JLabel statusLabel;
     private JLabel monitorInfoLabel;
     private JLabel standbyInfoLabel;
@@ -82,11 +81,10 @@ public class Monitor extends JFrame {
 
         initComponents();
         layoutComponents();
-        setupActions();
+        startMonitor();
 
         updateMonitorInfoLabel();
         updateActivePrimaryLabel();
-        logMessage("Monitor listo. Presione 'Iniciar' para comenzar.", COLOR_INFO);
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -102,12 +100,6 @@ public class Monitor extends JFrame {
         logArea = new JTextPane();
         logArea.setEditable(false);
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-
-        startButton = new JButton("Iniciar Monitor");
-        stopButton = new JButton("Detener Monitor");
-        stopButton.setEnabled(false);
-        restartButton = new JButton("Reiniciar Monitor");
-        restartButton.setEnabled(false);
 
         statusLabel = new JLabel("Estado: Detenido");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -125,18 +117,11 @@ public class Monitor extends JFrame {
         topPanel.add(activePrimaryLabel);
         topPanel.add(statusLabel);
 
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        buttonPanel.add(startButton);
-        buttonPanel.add(stopButton);
-        buttonPanel.add(restartButton);
-
         JScrollPane scrollPane = new JScrollPane(logArea);
 
         setLayout(new BorderLayout(10,10));
         add(topPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     private void updateMonitorInfoLabel() {
@@ -159,15 +144,6 @@ public class Monitor extends JFrame {
                 activePrimaryLabel.setForeground(COLOR_ROGUE);
             }
         }
-    }
-
-    private void setupActions() {
-        startButton.addActionListener(e -> startMonitor());
-        stopButton.addActionListener(e -> stopMonitor());
-        restartButton.addActionListener(e -> {
-            stopMonitor();
-            new Timer(1000, ae -> startMonitor()) {{ setRepeats(false); start(); }}.start();
-        });
     }
 
     private void logMessage(String message, Color color) {
@@ -221,9 +197,6 @@ public class Monitor extends JFrame {
 
             statusLabel.setText("Estado: Corriendo");
             statusLabel.setForeground(new Color(0,128,0)); // Verde
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
-            restartButton.setEnabled(true);
             logMessage("Monitor iniciado. Escuchando heartbeats en el puerto: " + monitorListenPort, COLOR_INFO);
             logMessage("Escuchando consultas de clientes en el puerto: " + clientQueryPort, COLOR_INFO);
             logMessage("Configurado para comandar al Secundario en: " + standbyIp + ":" + standbyCommandPort, COLOR_INFO);
@@ -254,9 +227,6 @@ public class Monitor extends JFrame {
 
         statusLabel.setText("Estado: Detenido");
         statusLabel.setForeground(Color.RED);
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
-        restartButton.setEnabled(false);
         logMessage("Monitor detenido.", COLOR_INFO);
     }
 

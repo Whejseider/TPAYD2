@@ -1,6 +1,5 @@
 package view;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import connection.Cliente;
 import view.system.FormManager;
 
@@ -13,8 +12,8 @@ public class Messenger extends JFrame  {
 
     public Messenger() throws HeadlessException {
         setName("Messenger");
+        setTitle("Messenger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
 
         addWindowListener(new WindowAdapter() {
             @Override

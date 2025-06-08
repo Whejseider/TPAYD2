@@ -89,7 +89,7 @@ public class FormDirectorio extends Form  {
         splitPane.setLeftComponent(scrollPane);
         splitPane.setRightComponent(Box.createGlue());
         splitPane.setResizeWeight(1);
-        splitPane.setDividerSize(0); // Oculta el boton
+        splitPane.setDividerSize(0);
         return splitPane;
     }
 

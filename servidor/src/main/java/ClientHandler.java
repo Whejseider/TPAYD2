@@ -17,6 +17,7 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream objectOutputStream;
     private Comando comando;
     private User userActual;
+    private volatile boolean running = true;
 
     public ClientHandler(Socket socket) {
         try {
@@ -30,9 +31,11 @@ public class ClientHandler implements Runnable {
         }
     }
 
+
+
     private void iniciarSesion() throws IOException {
         User user = (User) comando.getContenido();
-        synchronized (Servidor.class) {
+
             if (!estaEnDirectorio(user.getNombreUsuario())) {
                 Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "El usuario es inexistente");
                 enviarComando(c);
@@ -56,48 +59,48 @@ public class ClientHandler implements Runnable {
                     enviarComando(c);
                 }
             }
-        }
+
     }
 
     private void registrarse() throws IOException {
         User user = (User) comando.getContenido();
-        synchronized (Servidor.class) {
-            if (!estaEnDirectorio(user.getNombreUsuario())) {
-                Servidor.directorio.add(user);
-                serverLog("Servidor: Usuario registrado: " + user.getNombreUsuario(), Servidor.COLOR_INFO);
-                Comando c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.OK);
-                enviarComando(c);
-                replicar("registro de usuario");
-            } else {
-                Comando c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.ERROR, "Ya existe un usuario con el mismo nombre");
-                enviarComando(c);
-            }
+        Comando c;
+        boolean exito = false;
+
+        if (!estaEnDirectorio(user.getNombreUsuario())) {
+            Servidor.directorio.add(user);
+            serverLog("Servidor: Usuario registrado: " + user.getNombreUsuario(), Servidor.COLOR_INFO);
+            c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.OK);
+            exito = true;
+        } else {
+            c = new Comando(TipoSolicitud.REGISTRARSE, TipoRespuesta.ERROR, "Ya existe un usuario con el mismo nombre");
+        }
+
+        enviarComando(c);
+        if (exito) {
+            replicar("registro de usuario");
         }
     }
 
     public void enviarMensaje() throws IOException {
         Mensaje mensajeRecibido = (Mensaje) comando.getContenido();
         String receptor = mensajeRecibido.getNombreReceptor();
-        String emisor = mensajeRecibido.getEmisor().getNombreUsuario();
+        String emisor = mensajeRecibido.getEmisor();
+        Comando c;
 
-        synchronized (Servidor.class) {
-            if (estaEnDirectorio(receptor)) {
+        if (estaEnDirectorio(receptor)) {
 
-                User emisorDirectorio = Servidor.directorio.getUsuarioPorNombre(emisor);
-                User receptorDirectorio = Servidor.directorio.getUsuarioPorNombre(receptor);
+            User emisorDirectorio = Servidor.directorio.getUsuarioPorNombre(emisor);
+            User receptorDirectorio = Servidor.directorio.getUsuarioPorNombre(receptor);
 
-                if (emisorDirectorio == null) {
-                    serverLog("ERROR CRÍTICO: Emisor '" + emisor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
-                    Comando cErr = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "Error interno: tu usuario no fue encontrado.");
-                    enviarComando(cErr);
-                    return;
-                }
-                if (receptorDirectorio == null) {
-                    serverLog("ERROR CRÍTICO: Receptor '" + receptor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
-                    Comando cErr = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "Error interno: el destinatario no fue encontrado.");
-                    enviarComando(cErr);
-                    return;
-                }
+            if (emisorDirectorio == null) {
+                serverLog("ERROR CRÍTICO: Emisor '" + emisor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
+                c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "Error interno: tu usuario no fue encontrado.");
+
+            } else if (receptorDirectorio == null) {
+                serverLog("ERROR CRÍTICO: Receptor '" + receptor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
+                c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "Error interno: el destinatario no fue encontrado.");
+            } else {
 
                 Mensaje mensajeCopia = new Mensaje(mensajeRecibido);
 
@@ -105,8 +108,9 @@ public class ClientHandler implements Runnable {
                 conversacion.agregarMensaje(mensajeCopia);
                 conversacion.setUltimoMensaje(mensajeCopia);
 
-                Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensajeRecibido);
+                c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensajeRecibido);
                 enviarComando(c);
+                replicar("enviar mensaje");
 
                 ClientHandler receptorConectado = getClienteConectado(receptor);
 
@@ -115,36 +119,34 @@ public class ClientHandler implements Runnable {
                 } else {
                     Servidor.mensajesPendientes.computeIfAbsent(receptor, k -> new ArrayList<>()).add(mensajeCopia);
                     serverLog("Mensaje pendiente para " + receptor + " de " + emisorDirectorio.getNombreUsuario(), Servidor.COLOR_INFO);
-                }
-
-                if (receptorConectado == null) {
                     replicar("mensaje pendiente");
                 }
 
-            } else {
-                Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario " + receptor + " no existe");
-                enviarComando(c);
             }
+        } else {
+            c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario " + receptor + " no existe");
         }
+
+        enviarComando(c);
+
     }
 
     //Verificar si hace falta actualizar el directorio en estos casos
     // pero creo que no
     public void recibirMensaje(Mensaje mensaje) throws IOException {
-        String emisorOriginal = mensaje.getEmisor().getNombreUsuario();
+        String emisorOriginal = mensaje.getEmisor();
         boolean existeContacto;
 
-        synchronized (Servidor.class) {
-            if (this.userActual != null) {
-                existeContacto = this.userActual.getAgenda().existeContacto(emisorOriginal);
-                if (!existeContacto) {
-                    User u = getUserDirectorio(emisorOriginal);
-                    Contacto c = Agenda.crearContacto(u);
-                    this.userActual.getAgenda().agregarContacto(c);
-                }
-                this.userActual.getConversacionCon(emisorOriginal).agregarMensaje(mensaje);
+        if (this.userActual != null) {
+            existeContacto = this.userActual.getAgenda().existeContacto(emisorOriginal);
+            if (!existeContacto) {
+                User u = getUserDirectorio(emisorOriginal);
+                Contacto c = Agenda.crearContacto(u);
+                this.userActual.getAgenda().agregarContacto(c);
             }
+            this.userActual.getConversacionCon(emisorOriginal).agregarMensaje(mensaje);
         }
+
 
         Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
         enviarComando(c);
@@ -159,10 +161,10 @@ public class ClientHandler implements Runnable {
             String nombreUsuario = userActual.getNombreUsuario();
 
             List<Mensaje> mensajesARecibir;
-            synchronized (Servidor.class) {
-                mensajesARecibir = Servidor.mensajesPendientes.remove(nombreUsuario);
-                replicar("mensajes pendientes (remover)");
-            }
+
+            mensajesARecibir = Servidor.mensajesPendientes.remove(nombreUsuario);
+            replicar("mensajes pendientes (remover)");
+
 
             if (mensajesARecibir != null && !mensajesARecibir.isEmpty()) {
                 serverLog("Servidor: Enviando " + mensajesARecibir.size() + " mensajes pendientes a " + nombreUsuario, Servidor.COLOR_INFO);
@@ -176,35 +178,47 @@ public class ClientHandler implements Runnable {
     }
 
     public void removeClienteConectado() {
-        synchronized (Servidor.class) {
-            if (Servidor.clientesConectados != null && userActual != null) {
-                boolean removed = Servidor.clientesConectados.remove(this);
-                if (removed) {
-                    serverLog("Servidor: El usuario " + this.userActual.getNombreUsuario() + " se desconectó. Clientes restantes: " + Servidor.clientesConectados.size(), Servidor.COLOR_INFO);
-                }
+        if (Servidor.clientesConectados != null && userActual != null) {
+            boolean removed = Servidor.clientesConectados.remove(this);
+            if (removed) {
+                serverLog("Servidor: El usuario " + this.userActual.getNombreUsuario() + " se desconectó. Clientes restantes: " + Servidor.clientesConectados.size(), Servidor.COLOR_INFO);
             }
         }
     }
 
     private void cerrarTodo(Socket socket, ObjectInputStream ois, ObjectOutputStream oos) {
-        removeClienteConectado();
+        if (!running && this.socket != null && this.socket.isClosed()) {
+            // Si ya se llamó a shutdown() y el socket está cerrado, puede que ya se haya hecho parte de la limpieza.
+            // Sin embargo, es más seguro intentar cerrar los streams y remover de la lista.
+        }
+        running = false; // Asegurarse de que esté en false
+
+        // Remover el cliente de la lista de conectados
+        // Es importante que esto se haga ANTES de que Servidor.instanciaServidorActivo pueda ser null
+        // si la remoción depende de ello para el log, o que el log maneje el caso null.
+        removeClienteConectado(); // Ya tienes la lógica para esto y parece correcta.
+
         try {
             if (ois != null) ois.close();
+        } catch (IOException e) { /* ignora o loguea */ }
+        try {
             if (oos != null) oos.close();
+        } catch (IOException e) { /* ignora o loguea */ }
+        try {
             if (socket != null && !socket.isClosed()) socket.close();
-        } catch (IOException e) {
-            // e.printStackTrace();
-        }
-        //VER BIEN ESTO!! TODO!!
-        serverLog("Servidor: Recursos cerrados para un cliente.", Servidor.COLOR_WARNING);
-        this.userActual = null;
+        } catch (IOException e) { /* ignora o loguea */ }
+
+        // userActual se pone a null aquí, lo cual es correcto para este handler.
+        // El log ya está en removeClienteConectado.
+        // serverLog("Servidor: Recursos cerrados para un cliente.", Servidor.COLOR_WARNING); // Puedes mantenerlo si quieres
+        this.userActual = null; // Asegurar que la referencia se limpie
     }
 
     private void enviarDirectorio() throws IOException {
         Comando c;
-        synchronized (Servidor.class) {
-            c = new Comando(TipoSolicitud.OBTENER_DIRECTORIO, TipoRespuesta.OK, Servidor.directorio);
-        }
+
+        c = new Comando(TipoSolicitud.OBTENER_DIRECTORIO, TipoRespuesta.OK, Servidor.directorio);
+
         enviarComando(c);
         serverLog("Servidor: directorio enviado", Servidor.COLOR_INFO);
     }
@@ -226,53 +240,53 @@ public class ClientHandler implements Runnable {
 
     private void agregarContacto() throws IOException {
         String nombreUsuario = (String) comando.getContenido();
+        Comando c;
         if (this.userActual == null) {
-            Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Debe iniciar sesión primero.");
-            enviarComando(c);
+            c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Debe iniciar sesión primero.");
         } else {
-            synchronized (Servidor.class) {
-                if (!estaEnDirectorio(nombreUsuario)) {
-                    Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "El usuario a agregar no existe en el directorio.");
-                    enviarComando(c);
-                    serverLog("Servidor: ERROR al agregar contacto: " + nombreUsuario + " no existe.", Servidor.COLOR_ERROR);
+            if (!estaEnDirectorio(nombreUsuario)) {
+                c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "El usuario a agregar no existe en el directorio.");
+                serverLog("Servidor: ERROR al agregar contacto: " + nombreUsuario + " no existe.", Servidor.COLOR_ERROR);
+            } else {
+                User miUsuarioActualizado = Servidor.directorio.getUsuarioPorNombre(this.userActual.getNombreUsuario());
+                if (miUsuarioActualizado == null) {
+                    c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Error interno: tu usuario no se encontró.");
                 } else {
-                    User miUsuarioActualizado = Servidor.directorio.getUsuarioPorNombre(this.userActual.getNombreUsuario());
-                    if (miUsuarioActualizado == null) {
-                        Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Error interno: tu usuario no se encontró.");
-                        enviarComando(c);
+                    if (!miUsuarioActualizado.getAgenda().existeContacto(nombreUsuario)) {
+
+                        User usuarioDirectorio = Servidor.directorio.getUsuarioPorNombre(nombreUsuario);
+                        Contacto contacto = Agenda.crearContacto(usuarioDirectorio);
+
+                        miUsuarioActualizado.getAgenda().agregarContacto(contacto);
+                        this.userActual = miUsuarioActualizado;
+
+                        c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, contacto);
+                        serverLog("Servidor: Contacto " + nombreUsuario + " agregado a " + this.userActual.getNombreUsuario(), Servidor.COLOR_INFO);
+
+                        replicar("agregar contacto");
+
                     } else {
-                        if (!miUsuarioActualizado.getAgenda().existeContacto(nombreUsuario)) {
-
-                            User usuarioDirectorio = Servidor.directorio.getUsuarioPorNombre(nombreUsuario);
-                            Contacto contacto = Agenda.crearContacto(usuarioDirectorio);
-
-                            miUsuarioActualizado.getAgenda().agregarContacto(contacto);
-                            this.userActual = miUsuarioActualizado;
-
-                            Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.OK, contacto);
-                            enviarComando(c);
-                            serverLog("Servidor: Contacto " + nombreUsuario + " agregado a " + this.userActual.getNombreUsuario(), Servidor.COLOR_INFO);
-
-                            replicar("agregar contacto");
-
-                        } else {
-                            Comando c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Ya existe ese contacto en la agenda");
-                            enviarComando(c);
-                        }
+                        c = new Comando(TipoSolicitud.AGREGAR_CONTACTO, TipoRespuesta.ERROR, "Ya existe ese contacto en la agenda");
                     }
                 }
             }
         }
+        enviarComando(c);
+
     }
 
 
     //UTIL
 
-    public void enviarComando(Comando comando) throws IOException {
-        if (objectOutputStream != null) {
-            objectOutputStream.reset();
-            objectOutputStream.writeObject(comando);
-            objectOutputStream.flush();
+    public void enviarComando(Comando comando)  {
+        try {
+            if (objectOutputStream != null) {
+                objectOutputStream.reset();
+                objectOutputStream.writeObject(comando);
+                objectOutputStream.flush();
+            }
+        } catch (IOException e) {
+            serverLog("Servidor: ¡ERROR! al enviar comando al cliente", Servidor.COLOR_ERROR);
         }
     }
 
@@ -283,31 +297,28 @@ public class ClientHandler implements Runnable {
     }
 
     private static boolean estaConectado(String nombreUsuario) {
-        synchronized (Servidor.class) {
             return Servidor.clientesConectados.stream().anyMatch(
                     c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
-        }
+
     }
 
     private static boolean estaEnDirectorio(String nombreUsuario) {
-        synchronized (Servidor.class) {
-            return Servidor.directorio.getDirectorio().stream().anyMatch(
-                    u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
-        }
+
+        return Servidor.directorio.getDirectorio().stream().anyMatch(
+                u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
+
     }
 
     private static ClientHandler getClienteConectado(String nombreUsuario) {
-        synchronized (Servidor.class) {
             return Servidor.clientesConectados.stream().filter(
                     c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
-        }
+
     }
 
     private static User getUserDirectorio(String nombreUsuario) {
-        synchronized (Servidor.class) {
             return Servidor.directorio.getDirectorio().stream().filter(
                     u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
-        }
+
     }
 
     private void serverLog(String message, Color color) {
@@ -320,20 +331,99 @@ public class ClientHandler implements Runnable {
 
     //No me gusto como manejo el mensaje, despues lo tengo que cambiar
     private void replicar(String msg) {
-        serverLog("Forzando replicación tras " + msg + ".", Servidor.COLOR_REPLICATION);
-        Servidor.instanciaServidorActivo.forceStateReplication();
+        Servidor servidorActivo = Servidor.instanciaServidorActivo; // Buena práctica: copia local
+        if (servidorActivo != null && servidorActivo.isServerRunning() && servidorActivo.getCurrentRole() == ServerRole.PRIMARIO) {
+            serverLog("Forzando replicación tras " + msg + ".", Servidor.COLOR_REPLICATION);
+            servidorActivo.forceStateReplication(); // Esta es la línea problemática
+        } else {
+            // Loguea si el servidor no está en el estado correcto
+            String motivo = "Servidor no disponible o no es primario";
+            if (servidorActivo == null) motivo = "Instancia del servidor es null";
+            else if (!servidorActivo.isServerRunning()) motivo = "Servidor no está corriendo";
+            else if (servidorActivo.getCurrentRole() != ServerRole.PRIMARIO) motivo = "Servidor no es primario";
+            serverLog("ClientHandler: No se puede forzar la replicación (" + msg + "). Motivo: " + motivo, Servidor.COLOR_WARNING);
+        }
     }
 
     //Entrada de datos
+//    @Override
+//    public void run() {
+//        Object objetoRecibido;
+//
+//        while (socket.isConnected() && !socket.isClosed()) {
+//            try {
+//                objetoRecibido = objectInputStream.readObject();
+//                if (objetoRecibido instanceof Comando) {
+//                    comando = (Comando) objetoRecibido;
+//                    serverLog("Servidor: Comando recibido de " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + comando.getTipoSolicitud(), Servidor.COLOR_INFO);
+//                    switch (comando.getTipoSolicitud()) {
+//                        case ENVIAR_MENSAJE:
+//                            enviarMensaje();
+//                            break;
+//                        case OBTENER_DIRECTORIO:
+//                            enviarDirectorio();
+//                            break;
+//                        case REGISTRARSE:
+//                            registrarse();
+//                            break;
+//                        case INICIAR_SESION:
+//                            iniciarSesion();
+//                            break;
+//                        case CERRAR_SESION:
+//                            cerrarSesion();
+//                            break;
+//                        case AGREGAR_CONTACTO:
+//                            agregarContacto();
+//                            break;
+//                        // case OBTENER_CONVERSACIONES: obtenerConversaciones(); break;
+//                        default:
+//                            serverLog("Servidor: Comando no reconocido o no manejado: " + comando.getTipoSolicitud(), Servidor.COLOR_ERROR);
+//                            break;
+//                    }
+//                }
+//            } catch (IOException | ClassNotFoundException e) {
+//                serverLog("Servidor: Error de conexión con " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
+//                cerrarTodo(socket, objectInputStream, objectOutputStream);
+//                break;
+//            } catch (Exception e) {
+//                serverLog("Servidor: Excepción inesperada en el hilo del cliente " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
+//                e.printStackTrace();
+//                cerrarTodo(socket, objectInputStream, objectOutputStream);
+//                break;
+//            }
+//        }
+//        serverLog("Servidor: Hilo de cliente terminado para " + (userActual != null ? userActual.getNombreUsuario() : "cliente desconocido"), Servidor.COLOR_INFO);
+//    }
+
+    public void shutdown() {
+        this.running = false; // Indicar al bucle que se detenga
+        serverLog("ClientHandler: Iniciando apagado para " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()), Servidor.COLOR_INFO);
+        try {
+            if (socket != null && !socket.isClosed()) {
+                // Cerrar el socket puede ayudar a desbloquear objectInputStream.readObject()
+                // Es importante manejar la SocketException que esto puede causar en run().
+                socket.close();
+            }
+        } catch (IOException e) {
+            serverLog("ClientHandler: Error al cerrar socket durante shutdown: " + e.getMessage(), Servidor.COLOR_WARNING);
+        }
+        // No llames a cerrarTodo() aquí directamente, deja que el bucle run() termine y lo haga.
+    }
+
+
     @Override
     public void run() {
         Object objetoRecibido;
 
-        while (socket.isConnected() && !socket.isClosed()) {
+        // Usar la variable 'running' y verificar el estado del socket
+        while (running && socket != null && socket.isConnected() && !socket.isClosed()) {
             try {
-                objetoRecibido = objectInputStream.readObject();
+                objetoRecibido = objectInputStream.readObject(); // Puede bloquear
+                if (!running) break; // Comprobar de nuevo después de desbloquear
+
                 if (objetoRecibido instanceof Comando) {
                     comando = (Comando) objetoRecibido;
+                    // ... (tu switch)
                     serverLog("Servidor: Comando recibido de " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + comando.getTipoSolicitud(), Servidor.COLOR_INFO);
                     switch (comando.getTipoSolicitud()) {
                         case ENVIAR_MENSAJE:
@@ -360,17 +450,45 @@ public class ClientHandler implements Runnable {
                             break;
                     }
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                serverLog("Servidor: Error de conexión con " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
-                cerrarTodo(socket, objectInputStream, objectOutputStream);
-                break;
-            } catch (Exception e) {
-                serverLog("Servidor: Excepción inesperada en el hilo del cliente " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
-                e.printStackTrace();
-                cerrarTodo(socket, objectInputStream, objectOutputStream);
-                break;
+            } catch (java.net.SocketException se) {
+                if (running) { // Solo loguear como error si no es un cierre esperado
+                    serverLog("ClientHandler: SocketException con " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + se.getMessage(), Servidor.COLOR_ERROR);
+                } else {
+                    serverLog("ClientHandler: Socket cerrado (esperado durante shutdown) para " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()), Servidor.COLOR_INFO);
+                }
+                // Ya no es necesario llamar a cerrarTodo aquí, se hará en el finally
+                break; // Salir del bucle
+            } catch (java.io.EOFException eofe) {
+                // El cliente cerró la conexión abruptamente
+                if (running) {
+                    serverLog("ClientHandler: Cliente " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + " cerró la conexión (EOF).", Servidor.COLOR_WARNING);
+                }
+                break; // Salir del bucle
             }
-        }
+            catch (IOException | ClassNotFoundException e) {
+                if (running) { // Solo loguear como error si no es un cierre esperado
+                    serverLog("Servidor: Error de conexión con " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
+                }
+                // Ya no es necesario llamar a cerrarTodo aquí, se hará en el finally
+                break; // Salir del bucle
+            } catch (Exception e) { // Captura genérica, ten cuidado aquí
+                if (running) {
+                    serverLog("Servidor: Excepción inesperada en el hilo del cliente " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
+                    e.printStackTrace(); // Importante para depurar
+                }
+                // Ya no es necesario llamar a cerrarTodo aquí, se hará en el finally
+                break; // Salir del bucle
+            }
+        } // Fin del while
+
+        // Este bloque finally asegura que cerrarTodo se llama una vez al salir del bucle
+        // independientemente de cómo se salió (normal, break, excepción).
+        // Pero solo si no fue un cierre ya iniciado por shutdown() que limpia.
+        // Sin embargo, es más simple que cerrarTodo se llame siempre al final de run.
+        // if (running) { // Si 'running' sigue true, fue una desconexión inesperada
+        // }
+        cerrarTodo(socket, objectInputStream, objectOutputStream); // Asegurar limpieza
+
         serverLog("Servidor: Hilo de cliente terminado para " + (userActual != null ? userActual.getNombreUsuario() : "cliente desconocido"), Servidor.COLOR_INFO);
     }
 }

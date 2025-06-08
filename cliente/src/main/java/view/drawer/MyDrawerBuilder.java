@@ -3,7 +3,6 @@ package view.drawer;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import connection.Cliente;
-import connection.Sesion;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
 import raven.modal.drawer.item.Item;
@@ -20,7 +19,7 @@ import raven.modal.drawer.simple.header.SimpleHeaderData;
 import raven.modal.option.Option;
 import view.forms.FormDirectorio;
 import view.forms.FormSetting;
-import view.forms.MessengerPanel;
+import view.forms.Messenger.MessengerPanel;
 import view.system.AllForms;
 import view.system.Form;
 import view.system.FormManager;
@@ -85,10 +84,9 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
 
     public static MenuOption createSimpleMenuOption() {
 
-
         MenuOption simpleMenuOption = new MenuOption();
 
-        MenuItem items[] = new MenuItem[]{
+        MenuItem[] items = new MenuItem[]{
                 new Item.Label("MENSAJERÍA"),
                 new Item("Chat", "chat.svg", MessengerPanel.class),
                 new Item("Directorio", "directory.svg", FormDirectorio.class),
