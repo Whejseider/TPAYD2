@@ -72,20 +72,43 @@ public class ConcreteProductContactsXML implements AbstractProductContacts {
 
     @Override
     public void load() {
+        File directory = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        File xmlFile = new File(directory, "contactos.xml");
+
+        if (!xmlFile.exists()) {
+            System.out.println("Archivo de contactos no encontrado. No se cargarán contactos.");
+            Sesion.getInstance().getUsuarioActual().getAgenda().setContactos(null); // Me olvide de hacer esto asi que a testear
+            return;
+        }
+
         try {
-            File directory = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
-            if (directory.exists()) {
-                File xmlFile = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario() + File.separator + "contactos.xml");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(xmlFile);
 
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
+            document.getDocumentElement().normalize();
 
-                Document document = builder.parse(xmlFile);
+            NodeList nodeList = document.getElementsByTagName("contacto");
 
-                NodeList nodeList = document.getElementsByTagName("contactos");
-                for (int i = 0; i < nodeList.getLength(); i++) {
-                    Node node = nodeList.item(i);
-                    System.out.println("Element Content: " + node.getTextContent());
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element contactoElement = (Element) node;
+
+                    String alias = contactoElement.getElementsByTagName("alias").item(0).getTextContent();
+                    String nombre = contactoElement.getElementsByTagName("nombre").item(0).getTextContent();
+                    String ip = contactoElement.getElementsByTagName("ip").item(0).getTextContent();
+                    int puerto = Integer.parseInt(contactoElement.getElementsByTagName("puerto").item(0).getTextContent());
+
+                    Contacto contactoCargado = new Contacto(alias, nombre, ip, puerto);
+
+                    Sesion.getInstance().getUsuarioActual().getAgenda().agregarContacto(contactoCargado);
+
+                    System.out.println("Contacto cargado: " + contactoCargado.getAlias());
                 }
             }
         } catch (Exception e) {

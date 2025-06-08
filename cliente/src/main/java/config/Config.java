@@ -14,6 +14,8 @@ public class Config {
 
     public static String LOCAL_PASSPHRASE = "mySecurePassphrase123!";
 
+    private boolean hasSaved = false;
+
     public enum PersistenceType {
         JSON,
         XML,
@@ -75,6 +77,7 @@ public class Config {
         try (OutputStream output = new FileOutputStream(configFile)) {
             props.store(output, "Messenger App Configuration");
             System.out.println("Configuración guardada.");
+            this.hasSaved = true;
         } catch (IOException e) {
             System.err.println("Error al guardar la configuración.");
             e.printStackTrace();

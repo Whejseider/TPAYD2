@@ -175,12 +175,22 @@ public class MessengerPanelController implements IController, LeftActionListener
 
                 vista.getLeftPanel().userMessage(conversacion, mensaje);
 
+                if (conversacionActual.getMensajes().size() == 1) {
+                    ultimaFechaMostradaEnChat = null;
+                }
+
                 actualizarVistaMensaje(mensaje);
 
-                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
-                    vista.getLeftPanel().initData();
-                    vista.getLeftPanel().selectedConversation(conversacion);
-                }
+//                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
+//                    vista.getLeftPanel().initData();
+//                    vista.getLeftPanel().selectedConversation(conversacion);
+//                }
+
+                SwingUtilities.invokeLater(() -> {
+                    vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+                    vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
+                    vista.getLeftPanel().selectedConversation(conversacionActual);
+                });
 
                 messageInputFocus();
 

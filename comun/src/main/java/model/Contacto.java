@@ -14,6 +14,13 @@ public class Contacto implements Serializable {
     public Contacto() {
     }
 
+    public Contacto(String alias, String nombreUsuario, String IP, Integer puerto) {
+        this.alias = alias;
+        this.nombreUsuario = nombreUsuario;
+        this.IP = IP;
+        this.puerto = puerto;
+    }
+
     public Contacto(Contacto contactoOriginal){
         this.alias = contactoOriginal.getAlias();
         this.nombreUsuario = contactoOriginal.getNombreUsuario();

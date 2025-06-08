@@ -39,12 +39,10 @@ public class Sesion {
             System.out.println("Cargando contactos...");
             AbstractProductContacts contactsManager = factory.createProductContacts();
             contactsManager.load();
-            System.out.println("Contactos cargados.");
 
             System.out.println("Cargando conversaciones...");
             AbstractProductConversation conversationManager = factory.createProductConversation();
             conversationManager.load();
-            System.out.println("Conversaciones cargadas.");
 
         } catch (Exception e) {
             System.err.println("¡ERROR CRÍTICO! Falló la carga de datos del usuario.");
