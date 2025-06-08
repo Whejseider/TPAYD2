@@ -9,14 +9,6 @@ import interfaces.IController;
 import model.TipoRespuesta;
 import model.User;
 import network.NetworkConstants;
-import persistence.AbstractFactoryPersistence;
-import persistence.AbstractProductContacts;
-import persistence.AbstractProductConversation;
-import persistence.JSON.ConcreteFactoryJSON;
-import persistence.text.ConcreteFactoryText;
-import persistence.xml.ConcreteFactoryXML;
-import persistence.xml.ConcreteProductContactsXML;
-import persistence.xml.ConcreteProductConversationXML;
 import raven.modal.Toast;
 import view.forms.FormLogin;
 import view.manager.ToastManager;
@@ -111,6 +103,8 @@ public class LoginController implements IController, ActionListener, Authenticat
                 User user = new User(userName, puerto);
                 System.out.println(user);
 
+                Sesion.getInstance().setUsuarioActual(user);
+
                 Cliente.getInstance().iniciarSesion(user);
             }
         }
@@ -132,13 +126,12 @@ public class LoginController implements IController, ActionListener, Authenticat
     @Override
     public void onLoginSuccess(User user) {
 //        this.eventManager.removeAuthenticationListener(this);
-        Sesion.getInstance().setUsuarioActual(user);
+//        Sesion.getInstance().setUsuarioActual(user); SETEADO EN EL CLIENTE, EL CLIENTE ES LA VERDAD (PERSISTENCIA)
 //        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Bienvenido " + user.getNombreUsuario());
+        Sesion.getInstance().loadUserData();
+
         FormManager.showHome();
-        AbstractFactoryPersistence textFactory = new ConcreteFactoryText();
-        AbstractProductConversation test = textFactory.createProductConversation();
-//        test.save();
-//        test.load();
+
     }
 
     @Override

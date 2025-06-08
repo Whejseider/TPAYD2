@@ -4,9 +4,9 @@ import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.LoggingFacade;
+import config.Config;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.Drawer;
-import raven.modal.ModalDialog;
 import raven.modal.drawer.DrawerBuilder;
 import raven.modal.drawer.renderer.AbstractDrawerLineStyleRenderer;
 import raven.modal.drawer.renderer.DrawerCurvedLineStyle;
@@ -17,7 +17,6 @@ import raven.modal.option.Location;
 import utils.SystemForm;
 import view.component.AccentColorIcon;
 import view.system.Form;
-import view.system.FormManager;
 import view.themes.PanelThemes;
 
 import javax.swing.*;
@@ -39,141 +38,105 @@ public class FormSetting extends Form {
         tabbedPane.putClientProperty(FlatClientProperties.STYLE, "" +
                 "tabType:card");
 
-//        tabbedPane.addTab("Diseño", createLayoutOption());
+        tabbedPane.addTab("Encriptado", createEncryptOption());
         tabbedPane.addTab("Estilo", createStyleOption());
         add(tabbedPane, "gapy 1 0");
         add(createThemes());
     }
 
-    private JPanel createLayoutOption() {
+    private JPanel createEncryptOption() {
         JPanel panel = new JPanel(new MigLayout("wrap,fillx", "[fill]"));
-        panel.add(createWindowsLayout());
-        panel.add(createDrawerLayout());
-        panel.add(createModalDefaultOption());
+        panel.add(createEncryptionLayout());
         return panel;
     }
 
-    private Component createWindowsLayout() {
-        JPanel panel = new JPanel(new MigLayout());
-        panel.setBorder(new TitledBorder("Diseño de ventana"));
-        JCheckBox chRightToLeft = new JCheckBox("Derecha a Izquierda", !getComponentOrientation().isLeftToRight());
-        JCheckBox chFullWindow = new JCheckBox("Contenido de Ventana Completa", FlatClientProperties.clientPropertyBoolean(FormManager.getFrame().getRootPane(), FlatClientProperties.FULL_WINDOW_CONTENT, false));
-        chRightToLeft.addActionListener(e -> {
-            if (chRightToLeft.isSelected()) {
-                FormManager.getFrame().applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-            } else {
-                FormManager.getFrame().applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-            }
-            FormManager.getFrame().revalidate();
-        });
-        chFullWindow.addActionListener(e -> {
-            FormManager.getFrame().getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, chFullWindow.isSelected());
-        });
-        panel.add(chRightToLeft);
-        panel.add(chFullWindow);
-        return panel;
-    }
+    private Component createEncryptionLayout() {
+        JPanel panel = new JPanel(new MigLayout("", "[grow]", "[]10[]10[]"));
+        panel.setBorder(new TitledBorder("Configuración de la Encriptación de Mensajes"));
 
-    private Component createDrawerLayout() {
-        JPanel panel = new JPanel(new MigLayout());
-        panel.setBorder(new TitledBorder("Diseño del drawer"));
-
-        JRadioButton jrLeft = new JRadioButton("Izquierda");
-        JRadioButton jrLeading = new JRadioButton("Principal");
-        JRadioButton jrTrailing = new JRadioButton("Final");
-        JRadioButton jrRight = new JRadioButton("Derecha");
-        JRadioButton jrTop = new JRadioButton("Superior");
-        JRadioButton jrBottom = new JRadioButton("Inferior");
+        JRadioButton jrAES = new JRadioButton("AES_GCM");
+        JRadioButton jrChaCha20 = new JRadioButton("ChaCha20-poly1305");
+        JRadioButton jrBlowfish = new JRadioButton("Blowfish");
 
         ButtonGroup group = new ButtonGroup();
-        group.add(jrLeft);
-        group.add(jrLeading);
-        group.add(jrTrailing);
-        group.add(jrRight);
-        group.add(jrTop);
-        group.add(jrBottom);
+        group.add(jrAES);
+        group.add(jrChaCha20);
+        group.add(jrBlowfish);
 
-        jrLeading.setSelected(true);
+        switch (Config.getInstance().getEncryptionType()) {
+            case AES_GCM -> jrAES.setSelected(true);
+            case BLOWFISH -> jrBlowfish.setSelected(true);
+            case CHACHA20 -> jrChaCha20.setSelected(true);
+        }
 
-        jrLeft.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(drawerBuilder.getDrawerWidth(), 1f)
-                    .setLocation(Location.LEFT, Location.TOP)
-                    .setAnimateDistance(-0.7f, 0f);
-            getRootPane().revalidate();
-        });
-        jrLeading.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(drawerBuilder.getDrawerWidth(), 1f)
-                    .setLocation(Location.LEADING, Location.TOP)
-                    .setAnimateDistance(-0.7f, 0f);
-            getRootPane().revalidate();
-        });
-        jrTrailing.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(drawerBuilder.getDrawerWidth(), 1f)
-                    .setLocation(Location.TRAILING, Location.TOP)
-                    .setAnimateDistance(0.7f, 0f);
-            getRootPane().revalidate();
-        });
-        jrRight.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(drawerBuilder.getDrawerWidth(), 1f)
-                    .setLocation(Location.RIGHT, Location.TOP)
-                    .setAnimateDistance(0.7f, 0f);
-            getRootPane().revalidate();
-        });
-        jrTop.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(1f, drawerBuilder.getDrawerWidth())
-                    .setLocation(Location.LEADING, Location.TOP)
-                    .setAnimateDistance(0f, -0.7f);
-            getRootPane().revalidate();
-        });
-        jrBottom.addActionListener(e -> {
-            DrawerBuilder drawerBuilder = Drawer.getDrawerBuilder();
-            LayoutOption layoutOption = Drawer.getDrawerOption().getLayoutOption();
-            layoutOption.setSize(1f, drawerBuilder.getDrawerWidth())
-                    .setLocation(Location.LEADING, Location.BOTTOM)
-                    .setAnimateDistance(0f, 0.7f);
-            getRootPane().revalidate();
+        jrAES.addActionListener(e -> {
+            Config.getInstance().setEncryptionType(Config.EncryptionType.AES_GCM);
+            Config.getInstance().saveConfiguration();
+            System.out.println(Config.getInstance().getEncryptionType());
         });
 
-        panel.add(jrLeft);
-        panel.add(jrLeading);
-        panel.add(jrTrailing);
-        panel.add(jrRight);
-        panel.add(jrTop);
-        panel.add(jrBottom);
+        jrChaCha20.addActionListener(e -> {
+            Config.getInstance().setEncryptionType(Config.EncryptionType.CHACHA20);
+            Config.getInstance().saveConfiguration();
+            System.out.println(Config.getInstance().getEncryptionType());
+        });
+
+        jrBlowfish.addActionListener(e -> {
+            Config.getInstance().setEncryptionType(Config.EncryptionType.BLOWFISH);
+            Config.getInstance().saveConfiguration();
+            System.out.println(Config.getInstance().getEncryptionType());
+        });
+
+        JLabel lblClave = new JLabel("Clave secreta:");
+        JPasswordField txtClave = new JPasswordField(2);
+        txtClave.setText(Config.LOCAL_PASSPHRASE);
+        txtClave.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Escriba su clave secreta para la comunicación.");
+        txtClave.putClientProperty(FlatClientProperties.STYLE, "" +
+                "margin:4,10,4,10;" +
+                "arc:12;" +
+                "showRevealButton:true;");
+
+        JButton btnGuardarClave = getBtnGuardarClave(txtClave, panel);
+
+        panel.add(jrAES, "wrap");
+        panel.add(jrChaCha20, "wrap");
+        panel.add(jrBlowfish, "wrap");
+        panel.add(lblClave, "split 2");
+        panel.add(txtClave, "w 75%");
+        panel.add(btnGuardarClave);
+
         return panel;
     }
 
-    private Component createModalDefaultOption() {
-        JPanel panel = new JPanel(new MigLayout());
-        panel.setBorder(new TitledBorder("Opción Modal Predeterminada"));
-        JCheckBox chAnimation = new JCheckBox("Animación activada");
-        JCheckBox chCloseOnPressedEscape = new JCheckBox("Cerrar al presionar la tecla Escape");
-        chAnimation.setSelected(ModalDialog.getDefaultOption().isAnimationEnabled());
-        chCloseOnPressedEscape.setSelected(ModalDialog.getDefaultOption().isCloseOnPressedEscape());
+    private static JButton getBtnGuardarClave(JTextField txtClave, JPanel panel) {
+        JButton btnGuardarClave = new JButton("Guardar clave") {
+            @Override
+            public boolean isDefaultButton() {
+                return true;
+            }
+        };
 
-        chAnimation.addActionListener(e -> ModalDialog.getDefaultOption().setAnimationEnabled(chAnimation.isSelected()));
-        chCloseOnPressedEscape.addActionListener(e -> ModalDialog.getDefaultOption().setCloseOnPressedEscape(chCloseOnPressedEscape.isSelected()));
+        btnGuardarClave.putClientProperty(FlatClientProperties.STYLE, "" +
+                "margin:4,10,4,10;" +
+                "arc:12;");
 
-        panel.add(chAnimation);
-        panel.add(chCloseOnPressedEscape);
-
-        return panel;
+        btnGuardarClave.addActionListener(e -> {
+            String nuevaClave = txtClave.getText().trim();
+            if (!nuevaClave.isEmpty()) {
+                Config.LOCAL_PASSPHRASE = nuevaClave;
+                Config.getInstance().saveConfiguration();
+                JOptionPane.showMessageDialog(panel, "Clave secreta actualizada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(panel, "La clave no puede estar vacía.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        return btnGuardarClave;
     }
+
 
     private JPanel createStyleOption() {
         JPanel panel = new JPanel(new MigLayout("wrap,fillx", "[fill]"));
         panel.add(createAccentColor());
-//        panel.add(createDrawerStyle());
         return panel;
     }
 
@@ -212,97 +175,6 @@ public class FormSetting extends Form {
         updateAccentColorButtons();
         panel.add(toolBar);
         return panel;
-    }
-
-    private Component createDrawerStyle() {
-        JPanel panel = new JPanel(new MigLayout("insets 0,filly", "[][][grow,fill]", "[fill]"));
-        JPanel lineStyle = new JPanel(new MigLayout("wrap", "[200]"));
-        JPanel lineStyleOption = new JPanel(new MigLayout("wrap", "[200]"));
-        JPanel lineColorOption = new JPanel(new MigLayout("wrap", "[200]"));
-
-        lineStyle.setBorder(new TitledBorder("Estilo de línea del Drawer"));
-        lineStyleOption.setBorder(new TitledBorder("Opción del estilo de línea"));
-        lineColorOption.setBorder(new TitledBorder("Opción del color"));
-
-        ButtonGroup groupStyle = new ButtonGroup();
-        JRadioButton jrCurvedStyle = new JRadioButton("Estilo línea curvada");
-        JRadioButton jrStraightDotStyle = new JRadioButton("Estilo línea recta con puntos", true);
-        groupStyle.add(jrCurvedStyle);
-        groupStyle.add(jrStraightDotStyle);
-
-        ButtonGroup groupStyleOption = new ButtonGroup();
-        JRadioButton jrStyleOption1 = new JRadioButton("Rectángulo");
-        JRadioButton jrStyleOption2 = new JRadioButton("Elipse", true);
-        groupStyleOption.add(jrStyleOption1);
-        groupStyleOption.add(jrStyleOption2);
-
-        JCheckBox chPaintLineColor = new JCheckBox("Pintar de color la línea seleccionada");
-
-        jrCurvedStyle.addActionListener(e -> {
-            if (jrCurvedStyle.isSelected()) {
-                jrStyleOption1.setText("Línea");
-                jrStyleOption2.setText("Curva");
-                boolean round = jrStyleOption2.isSelected();
-                boolean paintSelectedLine = chPaintLineColor.isSelected();
-                setDrawerLineStyle(true, round, paintSelectedLine);
-            }
-        });
-        jrStraightDotStyle.addActionListener(e -> {
-            if (jrStraightDotStyle.isSelected()) {
-                jrStyleOption1.setText("Rectangulo");
-                jrStyleOption2.setText("Elipse");
-                boolean round = jrStyleOption2.isSelected();
-                boolean paintSelectedLine = chPaintLineColor.isSelected();
-                setDrawerLineStyle(false, round, paintSelectedLine);
-            }
-        });
-
-        jrStyleOption1.addActionListener(e -> {
-            if (jrStyleOption1.isSelected()) {
-                boolean curved = jrCurvedStyle.isSelected();
-                boolean paintSelectedLine = chPaintLineColor.isSelected();
-                setDrawerLineStyle(curved, false, paintSelectedLine);
-            }
-        });
-
-        jrStyleOption2.addActionListener(e -> {
-            if (jrStyleOption2.isSelected()) {
-                boolean curved = jrCurvedStyle.isSelected();
-                boolean paintSelectedLine = chPaintLineColor.isSelected();
-                setDrawerLineStyle(curved, true, paintSelectedLine);
-            }
-        });
-
-        chPaintLineColor.addActionListener(e -> {
-            boolean curved = jrCurvedStyle.isSelected();
-            boolean round = jrStyleOption2.isSelected();
-            boolean paintSelectedLine = chPaintLineColor.isSelected();
-            setDrawerLineStyle(curved, round, paintSelectedLine);
-        });
-
-        lineStyle.add(jrCurvedStyle);
-        lineStyle.add(jrStraightDotStyle);
-
-        lineStyleOption.add(jrStyleOption1);
-        lineStyleOption.add(jrStyleOption2);
-
-        lineColorOption.add(chPaintLineColor);
-
-        panel.add(lineStyle);
-        panel.add(lineStyleOption);
-        panel.add(lineColorOption);
-        return panel;
-    }
-
-    private void setDrawerLineStyle(boolean curved, boolean round, boolean color) {
-        AbstractDrawerLineStyleRenderer style;
-        if (curved) {
-            style = new DrawerCurvedLineStyle(round, color);
-        } else {
-            style = new DrawerStraightDotLineStyle(round, color);
-        }
-        ((SimpleDrawerBuilder) Drawer.getDrawerBuilder()).getSimpleMenuOption().getMenuStyle().setDrawerLineStyleRenderer(style);
-        ((SimpleDrawerBuilder) Drawer.getDrawerBuilder()).getDrawerMenu().repaint();
     }
 
     private void accentColorChanged(ActionEvent e) {

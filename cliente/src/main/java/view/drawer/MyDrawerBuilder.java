@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import connection.Cliente;
 import raven.extras.AvatarIcon;
+import raven.modal.Drawer;
 import raven.modal.drawer.DrawerPanel;
 import raven.modal.drawer.item.Item;
 import raven.modal.drawer.item.MenuItem;
@@ -87,6 +88,7 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
         MenuOption simpleMenuOption = new MenuOption();
 
         MenuItem[] items = new MenuItem[]{
+                new Item("", "menu.svg"),
                 new Item.Label("MENSAJERÍA"),
                 new Item("Chat", "chat.svg", MessengerPanel.class),
                 new Item("Directorio", "directory.svg", FormDirectorio.class),
@@ -123,9 +125,15 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                 System.out.println("Drawer menu seleccionado " + Arrays.toString(index));
                 Class<?> itemClass = action.getItem().getItemClass();
                 int i = index[0];
-                if (i == 1) {
+                if (i == 0) {
+                    if (Drawer.isOpen()) {
+                        Drawer.showDrawer();
+                    } else {
+                        Drawer.toggleMenuOpenMode();
+                    }
+                } else if (i == 2) {
                     Cliente.getInstance().obtenerDirectorio();
-                } else if (i == 3) {
+                } else if (i == 4) {
                     action.consume();
                     FormManager.showAbout();
                     return;

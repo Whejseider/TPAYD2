@@ -1,15 +1,20 @@
 package controller;
 
+import config.Config;
 import connection.Cliente;
 import connection.ConnectionManager;
 import connection.Sesion;
 import interfaces.*;
 import model.*;
+import persistence.AbstractFactoryPersistence;
 import raven.modal.Toast;
 import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
+import view.system.FormPersistence;
 import view.system.MainForm;
+
+import javax.swing.*;
 
 public class MainFormController implements IController, AuthenticationListener, ConnectionListener {
     private MainForm vista;
@@ -32,6 +37,14 @@ public class MainFormController implements IController, AuthenticationListener, 
 
     @Override
     public void onLoginSuccess(User user) {
+            Config config = Config.getInstance();
+            boolean configLoaded = config.loadConfiguration();
+
+            if (!configLoaded) {
+                FormPersistence formPersistence = new FormPersistence(this.vista);
+                formPersistence.setVisible(true);
+            }
+
     }
 
     @Override

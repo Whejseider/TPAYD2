@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -9,6 +10,7 @@ public class Comando implements Serializable {
     private TipoSolicitud tipoSolicitud;
     private TipoRespuesta tipoRespuesta;
     private Object contenido;
+    private List<Object> contenidos;
 
     public Comando(TipoSolicitud tipoSolicitud, Object contenido) {
         this.tipoSolicitud = tipoSolicitud;
@@ -26,6 +28,12 @@ public class Comando implements Serializable {
         this.contenido = contenido;
     }
 
+    public Comando(TipoSolicitud tipoSolicitud, TipoRespuesta tipoRespuesta, List<Object> contenidos){
+        this.tipoSolicitud = tipoSolicitud;
+        this.tipoRespuesta = tipoRespuesta;
+        this.contenidos = contenidos;
+    }
+
     public Comando(TipoSolicitud tipoSolicitud) {
         this.tipoSolicitud = tipoSolicitud;
     }
@@ -40,6 +48,22 @@ public class Comando implements Serializable {
 
     public Object getContenido() {
         return contenido;
+    }
+
+    public void setTipoSolicitud(TipoSolicitud tipoSolicitud) {
+        this.tipoSolicitud = tipoSolicitud;
+    }
+
+    public void setTipoRespuesta(TipoRespuesta tipoRespuesta) {
+        this.tipoRespuesta = tipoRespuesta;
+    }
+
+    public List<Object> getContenidos() {
+        return contenidos;
+    }
+
+    public void setContenidos(List<Object> contenidos) {
+        this.contenidos = contenidos;
     }
 
     public void setContenido(Object contenido) {

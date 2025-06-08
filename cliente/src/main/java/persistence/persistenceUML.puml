@@ -1,0 +1,112 @@
+@startuml Focused Abstract Factory
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+' factory para decidir cual usar por config
+class PersistenceFactory {
+    + {static} getFactory(): AbstractFactoryPersistence
+}
+
+' interfaces
+interface AbstractFactoryPersistence
+interface AbstractProductContacts
+interface AbstractProductConversation
+
+' La implementación concreta para JSON
+class ConcreteFactoryJSON {
+    + createProductContacts(): AbstractProductContacts
+    + createProductConversation(): AbstractProductConversation
+}
+
+class ConcreteProductContactsJSON {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+class ConcreteProductConversationJSON {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+' La implementación concreta para XML
+class ConcreteFactoryXML {
+    + createProductContacts(): AbstractProductContacts
+    + createProductConversation(): AbstractProductConversation
+}
+
+class ConcreteProductContactsXML {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+class ConcreteProductConversationXML {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+' La implementación concreta para text
+class ConcreteFactoryText {
+    + createProductContacts(): AbstractProductContacts
+    + createProductConversation(): AbstractProductConversation
+}
+
+class ConcreteProductContactsText {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+class ConcreteProductConversationText {
+    - FILE_PATH: String
+    + save(): void
+    + load(): void
+}
+
+
+' --- RELACIONES ---
+
+' TEXTO
+PersistenceFactory ..> ConcreteFactoryText : <<creates>>
+AbstractFactoryPersistence <|.. ConcreteFactoryText
+
+AbstractProductContacts <|.. ConcreteProductContactsText
+AbstractProductConversation <|.. ConcreteProductConversationText
+
+ConcreteFactoryText ..> ConcreteProductContactsText : <<creates>>
+ConcreteFactoryText ..> ConcreteProductConversationText : <<creates>>
+
+
+
+' XML
+PersistenceFactory ..> ConcreteFactoryXML : <<creates>>
+AbstractFactoryPersistence <|.. ConcreteFactoryXML
+
+AbstractProductContacts <|.. ConcreteProductContactsXML
+AbstractProductConversation <|.. ConcreteProductConversationXML
+
+ConcreteFactoryXML ..> ConcreteProductContactsXML : <<creates>>
+ConcreteFactoryXML ..> ConcreteProductConversationXML : <<creates>>
+
+
+
+' JSON
+PersistenceFactory ..> ConcreteFactoryJSON : <<creates>>
+PersistenceFactory ..> AbstractFactoryPersistence : <<returns>>
+
+
+AbstractFactoryPersistence <|.. ConcreteFactoryJSON
+
+
+AbstractProductContacts <|.. ConcreteProductContactsJSON
+AbstractProductConversation <|.. ConcreteProductConversationJSON
+
+
+ConcreteFactoryJSON ..> ConcreteProductContactsJSON : <<creates>>
+ConcreteFactoryJSON ..> ConcreteProductConversationJSON : <<creates>>
+
+
+@enduml

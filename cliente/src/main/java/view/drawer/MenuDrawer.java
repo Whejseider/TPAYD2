@@ -2,6 +2,7 @@ package view.drawer;
 
 import model.User;
 import raven.modal.Drawer;
+import raven.modal.drawer.menu.MenuOption;
 import raven.modal.drawer.simple.header.SimpleHeader;
 import raven.modal.drawer.simple.header.SimpleHeaderData;
 import view.system.FormManager;
@@ -28,6 +29,7 @@ public class MenuDrawer {
     private MenuDrawer() {
         drawerBuilder = new MyDrawerBuilder();
         Drawer.installDrawer(FormManager.getFrame(), drawerBuilder);
+        Drawer.setDrawerOpenMode(MenuOption.MenuOpenMode.COMPACT);
     }
 
     public void showDrawer() {

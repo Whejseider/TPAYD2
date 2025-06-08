@@ -5,6 +5,8 @@ import interfaces.ClientListener;
 import interfaces.ConnectionCallBack;
 import model.*;
 
+import java.util.List;
+
 public class ClientManager implements ClientListener {
     private static ClientManager instance;
     private EventManager eventManager = EventManager.getInstance();
@@ -83,8 +85,14 @@ public class ClientManager implements ClientListener {
                     break;
 
                 case RECIBIR_MENSAJE:
-                    if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Mensaje) {
-                        eventManager.notifyMessageReceivedSuccess((Mensaje) comando.getContenido());
+                    if (comando.getTipoRespuesta() == TipoRespuesta.OK) {
+                        Mensaje m = (Mensaje) comando.getContenidos().get(0);
+                        User u = (User) comando.getContenidos().get(1);
+                        if (m != null && u != null) { // hmm... que problema ?
+                            eventManager.notifyMessageReceivedSuccess(m, u);
+                        } else {
+                            eventManager.notifySendMessageFailure((String) comando.getContenido());
+                        }
                     } else {
                         eventManager.notifyMessageReceivedFailure((String) comando.getContenido());
                     }

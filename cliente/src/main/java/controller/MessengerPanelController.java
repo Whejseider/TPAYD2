@@ -90,7 +90,7 @@ public class MessengerPanelController implements IController, LeftActionListener
         });
     }
 
-    public void procesaMensajeEntrante(Mensaje mensaje) {
+    public void procesaMensajeEntrante(Mensaje mensaje, User emisor) {
 
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
         if (usuarioActual == null) return;
@@ -99,7 +99,7 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
-        Contacto contactoEmisor = usuarioActual.getAgenda().getContactoPorNombre(mensaje.getNombreEmisor());
+        Contacto contactoEmisor = Agenda.crearContacto(emisor);
         usuarioActual.getAgenda().agregarContacto(contactoEmisor);
 
         Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getNombreEmisor());
@@ -124,6 +124,11 @@ public class MessengerPanelController implements IController, LeftActionListener
             if (item != null) {
                 item.actualizarApariencia();
             }
+
+            Sesion.getInstance().saveUserData();
+
+            vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+            vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
 
         });
     }
@@ -172,7 +177,7 @@ public class MessengerPanelController implements IController, LeftActionListener
 
                 actualizarVistaMensaje(mensaje);
 
-                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null){
+                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
                     vista.getLeftPanel().initData();
                     vista.getLeftPanel().selectedConversation(conversacion);
                 }
@@ -200,7 +205,7 @@ public class MessengerPanelController implements IController, LeftActionListener
     }
 
     @Override
-    public void onMessageReceivedSuccess(Mensaje mensajeRecibido) {
+    public void onMessageReceivedSuccess(Mensaje mensajeRecibido, User user) {
         String receptor = mensajeRecibido.getNombreReceptor();
 
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
@@ -215,7 +220,7 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
-        procesaMensajeEntrante(mensajeRecibido);
+        procesaMensajeEntrante(mensajeRecibido, user);
 
     }
 
@@ -239,6 +244,8 @@ public class MessengerPanelController implements IController, LeftActionListener
 
         conversacion.agregarMensaje(mensajeEnviadoConfirmado);
         conversacion.setUltimoMensaje(mensajeEnviadoConfirmado);
+
+        Sesion.getInstance().saveUserData();
 
     }
 

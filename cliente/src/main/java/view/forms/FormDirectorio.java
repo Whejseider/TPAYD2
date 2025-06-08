@@ -61,6 +61,12 @@ public class FormDirectorio extends Form  {
 
         txtSearch = new JTextField();
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Escriba algo para comenzar a buscar");
+        txtSearch.putClientProperty(FlatClientProperties.STYLE, "" +
+                "arc:999;" +
+                "margin:5,10,5,10;" +
+                "borderWidth:0;" +
+                "background:darken($Panel.background,2%);");
+        SwingUtilities.invokeLater(txtSearch::requestFocusInWindow);
 
         panel.add(txtSearch, "width 500");
 

@@ -273,11 +273,11 @@ public class EventManager {
         });
     }
 
-    public void notifyMessageReceivedSuccess(Mensaje mensaje) {
+    public void notifyMessageReceivedSuccess(Mensaje mensaje, User user) {
         SwingUtilities.invokeLater(() -> {
             List<MessageListener> copiaListeners = new ArrayList<>(messageListeners);
             for (MessageListener listener : copiaListeners) {
-                listener.onMessageReceivedSuccess(mensaje);
+                listener.onMessageReceivedSuccess(mensaje, user);
             }
         });
     }

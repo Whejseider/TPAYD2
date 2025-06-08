@@ -32,33 +32,32 @@ public class ClientHandler implements Runnable {
     }
 
 
-
     private void iniciarSesion() throws IOException {
         User user = (User) comando.getContenido();
 
-            if (!estaEnDirectorio(user.getNombreUsuario())) {
-                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "El usuario es inexistente");
-                enviarComando(c);
-            } else {
-                if (!estaConectado(user.getNombreUsuario())) {
-                    if (verificaCredenciales(user)) {
-                        Servidor.clientesConectados.add(this);
+        if (!estaEnDirectorio(user.getNombreUsuario())) {
+            Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "El usuario es inexistente");
+            enviarComando(c);
+        } else {
+            if (!estaConectado(user.getNombreUsuario())) {
+                if (verificaCredenciales(user)) {
+                    Servidor.clientesConectados.add(this);
 
-                        this.userActual = Servidor.directorio.getUsuarioPorNombre(user.getNombreUsuario());
-                        serverLog("Servidor: Usuario conectado: " + user.getNombreUsuario(), Servidor.COLOR_INFO);
+                    this.userActual = Servidor.directorio.getUsuarioPorNombre(user.getNombreUsuario());
+                    serverLog("Servidor: Usuario conectado: " + user.getNombreUsuario(), Servidor.COLOR_INFO);
 
-                        Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, this.userActual);
-                        enviarComando(c);
-                        enviarMensajesPendientes();
-                    } else {
-                        Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Error, el usuario o el puerto son incorrectos");
-                        enviarComando(c);
-                    }
+                    Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.OK, this.userActual);
+                    enviarComando(c);
+                    enviarMensajesPendientes();
                 } else {
-                    Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Ya hay un usuario conectado con ese nombre");
+                    Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Error, el usuario o el puerto son incorrectos");
                     enviarComando(c);
                 }
+            } else {
+                Comando c = new Comando(TipoSolicitud.INICIAR_SESION, TipoRespuesta.ERROR, "Ya hay un usuario conectado con ese nombre");
+                enviarComando(c);
             }
+        }
 
     }
 
@@ -104,11 +103,11 @@ public class ClientHandler implements Runnable {
 
                 Mensaje mensajeCopia = new Mensaje(mensajeRecibido);
 
-                Conversacion conversacion = emisorDirectorio.getConversacionCon(receptorDirectorio.getNombreUsuario());
-                conversacion.agregarMensaje(mensajeCopia);
-                conversacion.setUltimoMensaje(mensajeCopia);
+//                Conversacion conversacion = emisorDirectorio.getConversacionCon(receptorDirectorio.getNombreUsuario());
+//                conversacion.agregarMensaje(mensajeCopia);
+//                conversacion.setUltimoMensaje(mensajeCopia);
 
-                c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensajeRecibido);
+                c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensajeCopia);
                 enviarComando(c);
                 replicar("enviar mensaje");
 
@@ -126,35 +125,29 @@ public class ClientHandler implements Runnable {
         } else {
             c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, "El usuario " + receptor + " no existe");
         }
-
         enviarComando(c);
-
     }
 
-    //Verificar si hace falta actualizar el directorio en estos casos
-    // pero creo que no
-    public void recibirMensaje(Mensaje mensaje) throws IOException {
+    public void recibirMensaje(Mensaje mensaje) {
         String emisorOriginal = mensaje.getNombreEmisor();
-        boolean existeContacto;
+        User userEmisor = Servidor.directorio.getUsuarioPorNombre(emisorOriginal);
+        Comando c;
 
-        if (this.userActual != null) {
-            existeContacto = this.userActual.getAgenda().existeContacto(emisorOriginal);
-            if (!existeContacto) {
-                User u = getUserDirectorio(emisorOriginal);
-                Contacto c = Agenda.crearContacto(u);
-                this.userActual.getAgenda().agregarContacto(c);
-            }
-            this.userActual.getConversacionCon(emisorOriginal).agregarMensaje(mensaje);
+        if (getUserDirectorio(mensaje.getNombreReceptor()) != null && userEmisor != null) {
+
+            List<Object> contenidos = new ArrayList<>();
+            contenidos.add(mensaje);
+            contenidos.add(userEmisor);
+
+            c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, contenidos);
+            serverLog("Servidor: Mensaje entregado a " + this.userActual.getNombreUsuario() + " de " + emisorOriginal, Servidor.COLOR_INFO);
+        } else {
+            c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.ERROR, mensaje);
+            serverLog("Servidor: Error al entregar Mensaje para " + this.userActual.getNombreUsuario() + " de " + emisorOriginal, Servidor.COLOR_ERROR);
         }
-
-
-        Comando c = new Comando(TipoSolicitud.RECIBIR_MENSAJE, TipoRespuesta.OK, mensaje);
         enviarComando(c);
 
-
-        serverLog("Servidor: Mensaje entregado a " + this.userActual.getNombreUsuario() + " de " + emisorOriginal, Servidor.COLOR_INFO);
     }
-
 
     public void enviarMensajesPendientes() throws IOException {
         if (userActual != null) {
@@ -278,7 +271,7 @@ public class ClientHandler implements Runnable {
 
     //UTIL
 
-    public void enviarComando(Comando comando)  {
+    public void enviarComando(Comando comando) {
         try {
             if (objectOutputStream != null) {
                 objectOutputStream.reset();
@@ -297,8 +290,8 @@ public class ClientHandler implements Runnable {
     }
 
     private static boolean estaConectado(String nombreUsuario) {
-            return Servidor.clientesConectados.stream().anyMatch(
-                    c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
+        return Servidor.clientesConectados.stream().anyMatch(
+                c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario));
 
     }
 
@@ -310,14 +303,14 @@ public class ClientHandler implements Runnable {
     }
 
     private static ClientHandler getClienteConectado(String nombreUsuario) {
-            return Servidor.clientesConectados.stream().filter(
-                    c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
+        return Servidor.clientesConectados.stream().filter(
+                c -> c.userActual != null && c.userActual.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
 
     }
 
     private static User getUserDirectorio(String nombreUsuario) {
-            return Servidor.directorio.getDirectorio().stream().filter(
-                    u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
+        return Servidor.directorio.getDirectorio().stream().filter(
+                u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario)).findFirst().orElse(null);
 
     }
 
@@ -464,8 +457,7 @@ public class ClientHandler implements Runnable {
                     serverLog("ClientHandler: Cliente " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + " cerró la conexión (EOF).", Servidor.COLOR_WARNING);
                 }
                 break; // Salir del bucle
-            }
-            catch (IOException | ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 if (running) { // Solo loguear como error si no es un cierre esperado
                     serverLog("Servidor: Error de conexión con " + (userActual != null ? userActual.getNombreUsuario() : socket.getRemoteSocketAddress()) + ": " + e.getMessage(), Servidor.COLOR_ERROR);
                 }
