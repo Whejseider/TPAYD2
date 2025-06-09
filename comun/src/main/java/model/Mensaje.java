@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import encryption.EncryptionType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,12 +14,14 @@ public class Mensaje implements Serializable {
     private LocalDateTime tiempo;
     private String nombreEmisor;
     private String nombreReceptor;
+    private EncryptionType encryption;
 
-    public Mensaje(String contenido, String nombreEmisor, String nombreReceptor) {
+    public Mensaje(String contenido, String nombreEmisor, String nombreReceptor, EncryptionType encryption) {
         this.contenido = contenido;
         this.nombreEmisor = nombreEmisor;
         this.nombreReceptor = nombreReceptor;
         this.tiempo = LocalDateTime.now();
+        this.encryption = encryption;
     }
 
     public Mensaje(Mensaje original) {
@@ -26,6 +29,7 @@ public class Mensaje implements Serializable {
         this.tiempo = original.tiempo;
         this.nombreReceptor = original.nombreReceptor;
         this.nombreEmisor = original.nombreEmisor;
+        this.encryption = original.encryption;
     }
 
     public Mensaje() {
@@ -41,6 +45,14 @@ public class Mensaje implements Serializable {
 
     public String getNombreEmisor() {
         return nombreEmisor;
+    }
+
+    public EncryptionType getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(EncryptionType encryption) {
+        this.encryption = encryption;
     }
 
     public void setNombreEmisor(String nombreEmisor) {

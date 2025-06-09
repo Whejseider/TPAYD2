@@ -1,15 +1,12 @@
 package encryption;
 
-import config.Config;
 import encryption.aes.EncryptionAES;
 import encryption.blowfish.EncryptionBlowfish;
 import encryption.chacha20.EncryptionChaCha20;
 
 public class EncryptionFactory {
 
-    public static EncryptionStrategy getEncryptation() {
-        Config config = Config.getInstance();
-        Config.EncryptionType type = config.getEncryptionType();
+    public static EncryptionStrategy getEncryptation(EncryptionType type) {
 
         return switch (type) {
             case AES_GCM -> {

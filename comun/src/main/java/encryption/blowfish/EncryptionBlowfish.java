@@ -1,6 +1,5 @@
 package encryption.blowfish;
 
-import config.Config;
 import encryption.EncryptionStrategy;
 
 import javax.crypto.Cipher;
@@ -15,9 +14,9 @@ public class EncryptionBlowfish implements EncryptionStrategy {
 
     public EncryptionBlowfish() {}
 
-    private SecretKeySpec generateKey() throws Exception {
+    private SecretKeySpec generateKey(String secretPhrase) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] keyBytes = md.digest(Config.LOCAL_PASSPHRASE.getBytes(StandardCharsets.UTF_8));
+        byte[] keyBytes = md.digest(secretPhrase.getBytes(StandardCharsets.UTF_8));
         // Blowfish allows keys from 32 bits up to 448 bits; use first 16 bytes (128 bits) for simplicity
         byte[] shortKey = new byte[16];
         System.arraycopy(keyBytes, 0, shortKey, 0, shortKey.length);
@@ -25,14 +24,14 @@ public class EncryptionBlowfish implements EncryptionStrategy {
     }
 
     @Override
-    public String encrypt(String mensaje) {
+    public String encrypt(String mensaje, String secretPhrase) {
         try {
             byte[] iv = new byte[LocalBlowfish.IV_LENGTH];
             SecureRandom secureRandom = new SecureRandom();
             secureRandom.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(LocalBlowfish.CIPHER_MODE);
-            SecretKeySpec key = generateKey();
+            SecretKeySpec key = generateKey(secretPhrase);
             IvParameterSpec ivSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 
@@ -50,7 +49,7 @@ public class EncryptionBlowfish implements EncryptionStrategy {
     }
 
     @Override
-    public String decrypt(String mensaje) {
+    public String decrypt(String mensaje, String secretPhrase) {
         try {
             byte[] data = Base64.getDecoder().decode(mensaje);
             byte[] iv = new byte[LocalBlowfish.IV_LENGTH];
@@ -60,7 +59,7 @@ public class EncryptionBlowfish implements EncryptionStrategy {
             System.arraycopy(data, LocalBlowfish.IV_LENGTH, encrypted, 0, encrypted.length);
 
             Cipher cipher = Cipher.getInstance(LocalBlowfish.CIPHER_MODE);
-            SecretKeySpec key = generateKey();
+            SecretKeySpec key = generateKey(secretPhrase);
             IvParameterSpec ivSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
 

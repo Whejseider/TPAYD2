@@ -1,6 +1,7 @@
 package view.system;
 
 import config.Config;
+import encryption.EncryptionType;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -9,7 +10,7 @@ import java.awt.event.WindowEvent;
 
 public class FormPersistence extends JDialog {
     private JComboBox<Config.PersistenceType> comboPersistence;
-    private JComboBox<Config.EncryptionType> comboEncryption;
+    private JComboBox<EncryptionType> comboEncryption;
     private JButton btnAceptar;
 
     public FormPersistence(Form owner) {
@@ -27,7 +28,7 @@ public class FormPersistence extends JDialog {
         add(comboPersistence);
 
         JLabel lblEncryption = new JLabel("Método de cifrado:");
-        comboEncryption = new JComboBox<>(Config.EncryptionType.values());
+        comboEncryption = new JComboBox<>(EncryptionType.values());
         add(lblEncryption);
         add(comboEncryption);
 
@@ -36,7 +37,7 @@ public class FormPersistence extends JDialog {
             Config config = Config.getInstance();
 
             config.setPersistenceType((Config.PersistenceType) comboPersistence.getSelectedItem());
-            config.setEncryptionType((Config.EncryptionType) comboEncryption.getSelectedItem());
+            config.setEncryptionType((EncryptionType) comboEncryption.getSelectedItem());
 
             config.saveConfiguration();
             dispose();

@@ -1,7 +1,10 @@
 package controller;
 
+import config.Config;
 import connection.Cliente;
 import connection.Sesion;
+import encryption.EncryptionFactory;
+import encryption.EncryptionStrategy;
 import interfaces.IController;
 import interfaces.MessageListener;
 import interfaces.SessionListener;
@@ -125,8 +128,6 @@ public class MessengerPanelController implements IController, LeftActionListener
                 item.actualizarApariencia();
             }
 
-            Sesion.getInstance().saveUserData();
-
             vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
             vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
 
@@ -167,19 +168,19 @@ public class MessengerPanelController implements IController, LeftActionListener
                 vista.getTxtMensaje().grabFocus();
             } else {
 
-                Mensaje mensaje = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual().getNombreUsuario(), conversacionActual.getContacto().getNombreUsuario());
+                Mensaje mensajeParaUI = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual().getNombreUsuario(), conversacionActual.getContacto().getNombreUsuario(), Config.getInstance().getEncryptionType());
 
                 Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(conversacionActual.getContacto().getNombreUsuario());
-                conversacion.agregarMensaje(mensaje);
-                conversacion.setUltimoMensaje(mensaje);
+                conversacion.agregarMensaje(mensajeParaUI);
+                conversacion.setUltimoMensaje(mensajeParaUI);
 
-                vista.getLeftPanel().userMessage(conversacion, mensaje);
+                vista.getLeftPanel().userMessage(conversacion, mensajeParaUI);
 
                 if (conversacionActual.getMensajes().size() == 1) {
                     ultimaFechaMostradaEnChat = null;
                 }
 
-                actualizarVistaMensaje(mensaje);
+                actualizarVistaMensaje(mensajeParaUI);
 
 //                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
 //                    vista.getLeftPanel().initData();
@@ -194,7 +195,12 @@ public class MessengerPanelController implements IController, LeftActionListener
 
                 messageInputFocus();
 
-                Cliente.getInstance().enviarMensaje(mensaje);
+                Mensaje mensajeParaEnviar = new Mensaje(mensajeParaUI);
+
+                EncryptionStrategy factory = EncryptionFactory.getEncryptation(Config.getInstance().getEncryptionType());
+                String contenidoCifrado = factory.encrypt(mensajeParaEnviar.getContenido(), Config.getInstance().getLocalPassphrase());
+                mensajeParaEnviar.setContenido(contenidoCifrado);
+                Cliente.getInstance().enviarMensaje(mensajeParaEnviar);
 
             }
         }
@@ -230,6 +236,10 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
+        EncryptionStrategy factory = EncryptionFactory.getEncryptation(mensajeRecibido.getEncryption());
+        String contenidoDescifrado = factory.decrypt(mensajeRecibido.getContenido(), Config.getInstance().getLocalPassphrase());
+        mensajeRecibido.setContenido(contenidoDescifrado);
+
         procesaMensajeEntrante(mensajeRecibido, user);
 
     }
@@ -250,13 +260,6 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
-        Conversacion conversacion = usuarioActual.getConversacionCon(receptor);
-
-        conversacion.agregarMensaje(mensajeEnviadoConfirmado);
-        conversacion.setUltimoMensaje(mensajeEnviadoConfirmado);
-
-        Sesion.getInstance().saveUserData();
-
     }
 
     @Override
@@ -266,7 +269,6 @@ public class MessengerPanelController implements IController, LeftActionListener
 
     @Override
     public void init() {
-
         this.eventManager.addMessageListener(this);
         this.eventManager.addSessionListener(this);
     }

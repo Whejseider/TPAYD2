@@ -1,6 +1,7 @@
 package persistence.xml;
 
 import connection.Sesion;
+import encryption.EncryptionType;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
@@ -66,6 +67,10 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     hora.appendChild(document.createTextNode(m.getTiempo().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
                     mensajeElement.appendChild(hora);
 
+                    Element encryptType = document.createElement("encrypt");
+                    encryptType.appendChild(document.createTextNode(m.getEncryption().toString()));
+                    mensajeElement.appendChild(encryptType);
+
                     mensajesElement.appendChild(mensajeElement);
                 }
                 conversationElement.appendChild(mensajesElement);
@@ -121,8 +126,11 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     String emisor = mensajeElement.getElementsByTagName("emisor").item(0).getTextContent();
                     String receptor = mensajeElement.getElementsByTagName("receptor").item(0).getTextContent();
                     String hora = mensajeElement.getElementsByTagName("hora").item(0).getTextContent();
+                    String encryptType = mensajeElement.getElementsByTagName("encrypt").item(0).getTextContent();
 
-                    Mensaje mensaje = new Mensaje(contenido, emisor, receptor);
+                    EncryptionType type = EncryptionType.valueOf(encryptType);
+
+                    Mensaje mensaje = new Mensaje(contenido, emisor, receptor, type);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                     mensaje.setTiempo(LocalDateTime.parse(hora, formatter));
                     conv.agregarMensaje(mensaje);

@@ -5,6 +5,7 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.LoggingFacade;
 import config.Config;
+import encryption.EncryptionType;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.Drawer;
 import raven.modal.drawer.DrawerBuilder;
@@ -70,26 +71,26 @@ public class FormSetting extends Form {
         }
 
         jrAES.addActionListener(e -> {
-            Config.getInstance().setEncryptionType(Config.EncryptionType.AES_GCM);
+            Config.getInstance().setEncryptionType(EncryptionType.AES_GCM);
             Config.getInstance().saveConfiguration();
             System.out.println(Config.getInstance().getEncryptionType());
         });
 
         jrChaCha20.addActionListener(e -> {
-            Config.getInstance().setEncryptionType(Config.EncryptionType.CHACHA20);
+            Config.getInstance().setEncryptionType(EncryptionType.CHACHA20);
             Config.getInstance().saveConfiguration();
             System.out.println(Config.getInstance().getEncryptionType());
         });
 
         jrBlowfish.addActionListener(e -> {
-            Config.getInstance().setEncryptionType(Config.EncryptionType.BLOWFISH);
+            Config.getInstance().setEncryptionType(EncryptionType.BLOWFISH);
             Config.getInstance().saveConfiguration();
             System.out.println(Config.getInstance().getEncryptionType());
         });
 
         JLabel lblClave = new JLabel("Clave secreta:");
         JPasswordField txtClave = new JPasswordField(2);
-        txtClave.setText(Config.LOCAL_PASSPHRASE);
+        txtClave.setText(Config.getInstance().getLocalPassphrase());
         txtClave.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Escriba su clave secreta para la comunicación.");
         txtClave.putClientProperty(FlatClientProperties.STYLE, "" +
                 "margin:4,10,4,10;" +
@@ -123,7 +124,7 @@ public class FormSetting extends Form {
         btnGuardarClave.addActionListener(e -> {
             String nuevaClave = txtClave.getText().trim();
             if (!nuevaClave.isEmpty()) {
-                Config.LOCAL_PASSPHRASE = nuevaClave;
+                Config.getInstance().setLocalPassphrase(nuevaClave);
                 Config.getInstance().saveConfiguration();
                 JOptionPane.showMessageDialog(panel, "Clave secreta actualizada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {

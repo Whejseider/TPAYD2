@@ -103,12 +103,8 @@ public class ClientHandler implements Runnable {
 
                 Mensaje mensajeCopia = new Mensaje(mensajeRecibido);
 
-//                Conversacion conversacion = emisorDirectorio.getConversacionCon(receptorDirectorio.getNombreUsuario());
-//                conversacion.agregarMensaje(mensajeCopia);
-//                conversacion.setUltimoMensaje(mensajeCopia);
-
                 c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.OK, mensajeCopia);
-                enviarComando(c);
+
                 replicar("enviar mensaje");
 
                 ClientHandler receptorConectado = getClienteConectado(receptor);

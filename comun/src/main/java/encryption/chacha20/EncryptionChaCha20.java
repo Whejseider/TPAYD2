@@ -1,6 +1,5 @@
 package encryption.chacha20;
 
-import config.Config;
 import encryption.EncryptionStrategy;
 
 import javax.crypto.Cipher;
@@ -25,14 +24,14 @@ public class EncryptionChaCha20 implements EncryptionStrategy {
     }
 
     @Override
-    public String encrypt(String mensaje) {
+    public String encrypt(String mensaje, String secretPhrase) {
         try {
             byte[] salt = new byte[LocalChaCha20.SALT_LENGTH];
             byte[] nonce = new byte[LocalChaCha20.NONCE_LENGTH];
             secureRandom.nextBytes(salt);
             secureRandom.nextBytes(nonce);
 
-            SecretKeySpec key = deriveKey(Config.LOCAL_PASSPHRASE, salt);
+            SecretKeySpec key = deriveKey(secretPhrase, salt);
 
             Cipher cipher = Cipher.getInstance(LocalChaCha20.CHACHA20_POLY1305);
             ChaCha20ParameterSpec paramSpec = new ChaCha20ParameterSpec(nonce, 0);
@@ -41,7 +40,6 @@ public class EncryptionChaCha20 implements EncryptionStrategy {
             byte[] plaintextBytes = mensaje.getBytes(StandardCharsets.UTF_8);
             byte[] cipherText = cipher.doFinal(plaintextBytes);
 
-            // Concatenar: salt + nonce + ciphertext
             ByteBuffer buffer = ByteBuffer.allocate(LocalChaCha20.SALT_LENGTH + LocalChaCha20.NONCE_LENGTH + cipherText.length);
             buffer.put(salt);
             buffer.put(nonce);
@@ -55,7 +53,7 @@ public class EncryptionChaCha20 implements EncryptionStrategy {
     }
 
     @Override
-    public String decrypt(String mensaje) {
+    public String decrypt(String mensaje, String secretPhrase) {
         try {
             byte[] decoded = Base64.getDecoder().decode(mensaje);
 
@@ -68,7 +66,7 @@ public class EncryptionChaCha20 implements EncryptionStrategy {
             byte[] cipherText = new byte[buffer.remaining()];
             buffer.get(cipherText);
 
-            SecretKeySpec key = deriveKey(Config.LOCAL_PASSPHRASE, salt);
+            SecretKeySpec key = deriveKey(secretPhrase, salt);
 
             Cipher cipher = Cipher.getInstance(LocalChaCha20.CHACHA20_POLY1305);
             ChaCha20ParameterSpec paramSpec = new ChaCha20ParameterSpec(nonce, 0);

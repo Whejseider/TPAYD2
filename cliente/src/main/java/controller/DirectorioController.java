@@ -139,6 +139,7 @@ public class DirectorioController implements IController, DocumentListener, Dire
             ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Contacto agregado correctamente.");
 
             cargarDirectorio();
+            Sesion.getInstance().saveUserData();
             System.out.println("DIRECTORIO: CONTACTO AGREGADO");
         }
     }

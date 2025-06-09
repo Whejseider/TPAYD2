@@ -1,6 +1,7 @@
 package config;
 
 import connection.Sesion;
+import encryption.EncryptionType;
 
 import java.io.*;
 import java.util.Properties;
@@ -12,20 +13,12 @@ public class Config {
                     File.separator + Sesion.getInstance().getUsuarioActual().getNombreUsuario() +
                     File.separator + "config.properties";
 
-    public static String LOCAL_PASSPHRASE = "mySecurePassphrase123!";
-
-    private boolean hasSaved = false;
+    public String LOCAL_PASSPHRASE = "Messenger2025";
 
     public enum PersistenceType {
         JSON,
         XML,
         TXT
-    }
-
-    public enum EncryptionType {
-        AES_GCM, //Este es el mejor
-        CHACHA20, //Este tambien esta bueno
-        BLOWFISH //Este masomenos
     }
 
     private PersistenceType persistenceType = PersistenceType.JSON; // DEFAULT
@@ -39,6 +32,16 @@ public class Config {
             instance = new Config();
         }
         return instance;
+    }
+
+    public String getLocalPassphrase() {
+        return this.LOCAL_PASSPHRASE;
+    }
+
+    public void setLocalPassphrase(String localPassphrase) {
+        if (localPassphrase != null && !localPassphrase.isEmpty()) {
+            this.LOCAL_PASSPHRASE = localPassphrase;
+        }
     }
 
     public PersistenceType getPersistenceType() {
@@ -77,7 +80,6 @@ public class Config {
         try (OutputStream output = new FileOutputStream(configFile)) {
             props.store(output, "Messenger App Configuration");
             System.out.println("Configuración guardada.");
-            this.hasSaved = true;
         } catch (IOException e) {
             System.err.println("Error al guardar la configuración.");
             e.printStackTrace();

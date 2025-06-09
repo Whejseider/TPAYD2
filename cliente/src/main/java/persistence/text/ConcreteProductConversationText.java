@@ -1,6 +1,7 @@
 package persistence.text;
 
 import connection.Sesion;
+import encryption.EncryptionType;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
@@ -41,10 +42,11 @@ public class ConcreteProductConversationText implements AbstractProductConversat
                     String receptor = mensaje.getNombreReceptor();
                     String fechaHora = mensaje.getTiempo().toString();
                     String contenido = mensaje.getContenido();
+                    String encryptType = mensaje.getEncryption().toString();
 
                     contenido = contenido.replace("|", "/");
 
-                    writer.println(emisor + "|" + receptor + "|" + fechaHora + "|" + contenido);
+                    writer.println(encryptType + "|" + emisor + "|" + receptor + "|" + fechaHora + "|" + contenido);
                 }
                 writer.println("[FIN_MENSAJES]");
                 writer.println("Notificacion=" + conversacion.getNotificacion().isTieneMensajesNuevos());
@@ -109,15 +111,15 @@ public class ConcreteProductConversationText implements AbstractProductConversat
                         nombreContactoActual = null;
                     }
                 } else if (leyendoMensajes && conversacionActual != null && !linea.isEmpty()) {
-                    String[] partes = linea.split("\\|", 4);
-                    if (partes.length == 4) {
-                        String nombreEmisor = partes[0];
-                        String nombreReceptor = partes[1];
-                        LocalDateTime fechaHora = LocalDateTime.parse(partes[2]);
-                        String texto = partes[3];
+                    String[] partes = linea.split("\\|", 5);
+                    if (partes.length == 5) {
+                        EncryptionType encryptType = EncryptionType.valueOf(partes[0]);
+                        String nombreEmisor = partes[1];
+                        String nombreReceptor = partes[2];
+                        LocalDateTime fechaHora = LocalDateTime.parse(partes[3]);
+                        String texto = partes[4];
 
-
-                        Mensaje mensaje = new Mensaje(texto, nombreEmisor, nombreReceptor);
+                        Mensaje mensaje = new Mensaje(texto, nombreEmisor, nombreReceptor, encryptType);
                         mensaje.setTiempo(fechaHora);
                         conversacionActual.getMensajes().add(mensaje);
                         conversacionActual.setUltimoMensaje(conversacionActual.getUltimoMensaje());
