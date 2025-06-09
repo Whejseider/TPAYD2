@@ -94,10 +94,12 @@ public class ClientHandler implements Runnable {
 
             if (emisorDirectorio == null) {
                 serverLog("ERROR CRÍTICO: Emisor '" + emisor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
+                mensajeRecibido.setContenido("Hubo un problema al enviar el mensaje. Usted no se encuentra registrado.");
                 c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, mensajeRecibido);
 
             } else if (receptorDirectorio == null) {
                 serverLog("ERROR CRÍTICO: Receptor '" + receptor + "' no encontrado en directorio.", Servidor.COLOR_ERROR);
+                mensajeRecibido.setContenido("Hubo un problema al enviar el mensaje. El usuario receptor no está registrado.");
                 c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, mensajeRecibido);
             } else {
 
@@ -120,6 +122,7 @@ public class ClientHandler implements Runnable {
 
             }
         } else {
+            mensajeRecibido.setContenido("Hubo un problema al enviar el mensaje. El usuario receptor no está registrado.");
             c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, TipoRespuesta.ERROR, mensajeRecibido);
         }
         enviarComando(c);

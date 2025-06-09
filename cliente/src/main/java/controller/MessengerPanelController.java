@@ -9,10 +9,12 @@ import interfaces.IController;
 import interfaces.MessageListener;
 import interfaces.SessionListener;
 import model.*;
+import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.Messenger.Item;
 import view.forms.Messenger.LeftActionListener;
 import view.forms.Messenger.MessengerPanel;
+import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
 
@@ -24,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.ErrorManager;
 
 public class MessengerPanelController implements IController, LeftActionListener, ActionListener, MessageListener, SessionListener {
     private MessengerPanel vista;
@@ -316,6 +319,7 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
+        ToastManager.getInstance().showToast(Toast.Type.ERROR, mensaje.getContenido());
         Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensaje).setStatus(MessageStatus.FAILED);
 
         mensaje.setStatus(MessageStatus.FAILED);

@@ -50,37 +50,40 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
 
                 Element mensajesElement = document.createElement("mensajes");
                 for (Mensaje m : c.getMensajes()) {
-                    Element mensajeElement = document.createElement("mensaje");
+                    if (m.getStatus() != MessageStatus.FAILED) {
 
-                    Element contenido = document.createElement("contenido");
-                    contenido.appendChild(document.createTextNode(m.getContenido()));
-                    mensajeElement.appendChild(contenido);
+                        Element mensajeElement = document.createElement("mensaje");
 
-                    Element emisor = document.createElement("emisor");
-                    emisor.appendChild(document.createTextNode(c.getUltimoMensaje().getNombreEmisor()));
-                    mensajeElement.appendChild(emisor);
+                        Element contenido = document.createElement("contenido");
+                        contenido.appendChild(document.createTextNode(m.getContenido()));
+                        mensajeElement.appendChild(contenido);
 
-                    Element receptor = document.createElement("receptor");
-                    receptor.appendChild(document.createTextNode(m.getNombreReceptor()));
-                    mensajeElement.appendChild(receptor);
+                        Element emisor = document.createElement("emisor");
+                        emisor.appendChild(document.createTextNode(c.getUltimoMensaje().getNombreEmisor()));
+                        mensajeElement.appendChild(emisor);
 
-                    Element hora = document.createElement("hora");
-                    hora.appendChild(document.createTextNode(m.getTiempo().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
-                    mensajeElement.appendChild(hora);
+                        Element receptor = document.createElement("receptor");
+                        receptor.appendChild(document.createTextNode(m.getNombreReceptor()));
+                        mensajeElement.appendChild(receptor);
 
-                    Element encryptType = document.createElement("encrypt");
-                    encryptType.appendChild(document.createTextNode(m.getEncryption().toString()));
-                    mensajeElement.appendChild(encryptType);
+                        Element hora = document.createElement("hora");
+                        hora.appendChild(document.createTextNode(m.getTiempo().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+                        mensajeElement.appendChild(hora);
 
-                    Element id = document.createElement("id");
-                    id.appendChild(document.createTextNode(m.getId()));
-                    mensajeElement.appendChild(id);
+                        Element encryptType = document.createElement("encrypt");
+                        encryptType.appendChild(document.createTextNode(m.getEncryption().toString()));
+                        mensajeElement.appendChild(encryptType);
 
-                    Element status = document.createElement("status");
-                    status.appendChild(document.createTextNode(m.getStatus().toString()));
-                    mensajeElement.appendChild(status);
+                        Element id = document.createElement("id");
+                        id.appendChild(document.createTextNode(m.getId()));
+                        mensajeElement.appendChild(id);
 
-                    mensajesElement.appendChild(mensajeElement);
+                        Element status = document.createElement("status");
+                        status.appendChild(document.createTextNode(m.getStatus().toString()));
+                        mensajeElement.appendChild(status);
+
+                        mensajesElement.appendChild(mensajeElement);
+                    }
                 }
                 conversationElement.appendChild(mensajesElement);
 

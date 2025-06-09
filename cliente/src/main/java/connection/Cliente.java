@@ -5,6 +5,8 @@ import interfaces.ClientListener;
 import model.*;
 import network.HeartbeatData;
 import network.NetworkConstants;
+import raven.modal.Toast;
+import view.manager.ToastManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -477,6 +479,7 @@ public class Cliente {
     public void registrarse(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Hubo un problema al registrarse. Compruebe la conexión o intente de nuevo en un momento.");
             triggerServerReconnect();
             return;
         }
@@ -495,6 +498,7 @@ public class Cliente {
     public void iniciarSesion(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Hubo un problema al iniciar sesión. Compruebe la conexión o intente de nuevo en un momento.");
             triggerServerReconnect();
             return;
         }
@@ -531,6 +535,7 @@ public class Cliente {
     public void obtenerDirectorio() {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Hubo un problema al obtener el Directorio. Compruebe la conexión o intente de nuevo en un momento.");
             triggerServerReconnect();
             return;
         }
@@ -549,6 +554,7 @@ public class Cliente {
     public void agregarContacto(String nombreUsuario) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Hubo un problema al agregar el contacto. Compruebe la conexión o intente de nuevo en un momento.");
             triggerServerReconnect();
             return;
         }
@@ -570,6 +576,7 @@ public class Cliente {
             if (Sesion.getInstance().getUsuarioActual() != null) {
                 Sesion.getInstance().agregarMensaje(mensaje);
             }
+            ToastManager.getInstance().showToast(Toast.Type.ERROR, "Hubo un problema al enviar el mensaje. Compruebe la conexión o intente de nuevo en un momento.");
             triggerServerReconnect();
             return;
         }

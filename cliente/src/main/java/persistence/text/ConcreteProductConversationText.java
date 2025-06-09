@@ -47,9 +47,12 @@ public class ConcreteProductConversationText implements AbstractProductConversat
                     String encryptType = mensaje.getEncryption().toString();
                     String status = mensaje.getStatus().toString();
 
-                    contenido = contenido.replace("|", "/");
+                    if (!status.equalsIgnoreCase(MessageStatus.FAILED.toString())) {
 
-                    writer.println(id + "|" + encryptType + "|" + emisor + "|" + receptor + "|" + fechaHora + "|" + contenido + "|" + status);
+                        contenido = contenido.replace("|", "/");
+
+                        writer.println(id + "|" + encryptType + "|" + emisor + "|" + receptor + "|" + fechaHora + "|" + contenido + "|" + status);
+                    }
                 }
                 writer.println("[FIN_MENSAJES]");
                 writer.println("Notificacion=" + conversacion.getNotificacion().isTieneMensajesNuevos());
