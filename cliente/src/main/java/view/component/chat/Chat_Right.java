@@ -1,5 +1,6 @@
 package view.component.chat;
 
+import model.MessageStatus;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ public class Chat_Right extends Chat_Item {
 
     private JLayeredPane layeredPane;
     private JPanel timePanel;
+    private MessageStatusIcon statusIcon;
 
     public Chat_Right(Component component) {
         super(5, 2);
@@ -25,6 +27,29 @@ public class Chat_Right extends Chat_Item {
             layeredPane.add(timePanel, lc, 0);
         }
         timePanel.add(component);
+    }
+
+    public void setMessageStatus(MessageStatus status) {
+        if (statusIcon == null) {
+            statusIcon = new MessageStatusIcon(status);
+            if (timePanel != null) {
+                timePanel.add(statusIcon);
+            }
+        } else {
+            statusIcon.setStatus(status);
+        }
+
+        if (timePanel == null) {
+            addTimePanel(new JLabel(""));
+            timePanel.add(statusIcon);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    public void updateMessageStatus(MessageStatus status) {
+        setMessageStatus(status);
     }
 
     private void init() {

@@ -5,9 +5,7 @@ import model.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * TODO PARA LSA CONEXIONES ERRORES, ETC
@@ -264,11 +262,11 @@ public class EventManager {
         });
     }
 
-    public void notifySendMessageFailure(String s) {
+    public void notifySendMessageFailure(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
             List<MessageListener> copiaListeners = new ArrayList<>(messageListeners);
             for (MessageListener listener : copiaListeners) {
-                listener.onSendMessageFailure(s);
+                listener.onSendMessageFailure(mensaje);
             }
         });
     }
@@ -282,11 +280,29 @@ public class EventManager {
         });
     }
 
-    public void notifyMessageReceivedFailure(String s) {
+    public void notifyMessageReceivedFailure(Mensaje mensaje) {
         SwingUtilities.invokeLater(() -> {
             List<MessageListener> copiaListeners = new ArrayList<>(messageListeners);
             for (MessageListener listener : copiaListeners) {
-                listener.onMessageReceivedFailure(s);
+                listener.onMessageReceivedFailure(mensaje);
+            }
+        });
+    }
+
+    public void notifyMessageDelivered(Mensaje mensaje){
+        SwingUtilities.invokeLater(() -> {
+            List<MessageListener> copiaListeners = new ArrayList<>(messageListeners);
+            for (MessageListener listener : copiaListeners) {
+                listener.onMessageDelivered(mensaje);
+            }
+        });
+    }
+
+    public void notifyMessageRead(Mensaje mensaje){
+        SwingUtilities.invokeLater(() -> {
+            List<MessageListener> copiaListeners = new ArrayList<>(messageListeners);
+            for (MessageListener listener : copiaListeners) {
+                listener.onMessageRead(mensaje);
             }
         });
     }

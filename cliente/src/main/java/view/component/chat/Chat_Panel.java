@@ -2,6 +2,7 @@ package view.component.chat;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import model.Mensaje;
+import model.MessageStatus;
 import net.miginfocom.swing.MigLayout;
 import utils.AutoWrapText;
 import utils.ScrollBar;
@@ -9,12 +10,16 @@ import utils.ScrollBar;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Chat_Panel extends JPanel {
 
     private JPanel body;
     private JScrollPane sp;
     private JPanel messageWrapperPanel;
+
+    private Map<String, Chat_Right> messageComponents = new HashMap<>();
 
     public Chat_Panel() {
         init();
@@ -25,11 +30,9 @@ public class Chat_Panel extends JPanel {
         body.setOpaque(false);
         body.putClientProperty(FlatClientProperties.STYLE, "background:$Chat.background");
 
-
         messageWrapperPanel = new JPanel(new BorderLayout());
         messageWrapperPanel.setOpaque(false);
         messageWrapperPanel.add(body, BorderLayout.NORTH);
-
 
         sp = new JScrollPane(messageWrapperPanel);
         sp.setBorder(null);
@@ -38,7 +41,6 @@ public class Chat_Panel extends JPanel {
         sp.getViewport().setOpaque(false);
         sp.setOpaque(false);
         sp.putClientProperty(FlatClientProperties.STYLE, "background:$Chat.background");
-
 
         setLayout(new BorderLayout());
         add(sp, BorderLayout.CENTER);
@@ -76,9 +78,6 @@ public class Chat_Panel extends JPanel {
         Chat_Left item = new Chat_Left(contentComponent);
 
         item.addTimePanel(createTimeLabel(mensaje.getTiempoFormateado()));
-//        if (mensaje.getEmisor() != null && !mensaje.getEmisor().getNombreUsuario().isEmpty()) {
-//            item.addUserName(mensaje.getEmisor().getNombreUsuario());
-//        }
         item.setLevel(0);
 
         body.add(item, "wrap, w 100::80%");
@@ -92,11 +91,32 @@ public class Chat_Panel extends JPanel {
 
         item.addTimePanel(createTimeLabel(mensaje.getTiempoFormateado()));
 
+        MessageStatus status = mensaje.getStatus() != null ? mensaje.getStatus() : MessageStatus.PENDING;
+        item.setMessageStatus(status);
+
         item.setLevel(0);
+
+        String messageId = getMessageId(mensaje);
+        messageComponents.put(messageId, item);
 
         body.add(item, "wrap, al right, w 100::80%");
         refreshMessages();
         scrollToBottom();
+    }
+
+
+    public void updateMessageStatus(Mensaje mensaje) {
+        String messageId = getMessageId(mensaje);
+        Chat_Right messageComponent = messageComponents.get(messageId);
+
+        if (messageComponent != null && mensaje.getStatus() != null) {
+            messageComponent.updateMessageStatus(mensaje.getStatus());
+        }
+    }
+
+
+    private String getMessageId(Mensaje mensaje) {
+        return mensaje.getId();
     }
 
     public void addDate(String date) {
@@ -127,7 +147,12 @@ public class Chat_Panel extends JPanel {
 
     public void clearMessages() {
         body.removeAll();
+        messageComponents.clear();
         refreshMessages();
+    }
+
+    public Chat_Right getMessage(Mensaje mensaje) {
+        return messageComponents.get(mensaje.getId());
     }
 
 }

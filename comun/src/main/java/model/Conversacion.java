@@ -1,8 +1,8 @@
 package model;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -70,6 +70,17 @@ public class Conversacion implements Serializable {
         if (mensaje != null && !mensajes.contains(mensaje)) {
             mensajes.add(mensaje);
         }
+    }
+
+    public Mensaje getMensajePorId(Mensaje mensaje){
+        if (mensaje != null){
+            for (Mensaje m : mensajes){
+                if (m.getId().equals(mensaje.getId())){
+                    return m;
+                }
+            }
+        }
+        return null;
     }
 
 

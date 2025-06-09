@@ -1,11 +1,7 @@
 package controller;
 
-import connection.Cliente;
 import interfaces.ClientListener;
-import interfaces.ConnectionCallBack;
 import model.*;
-
-import java.util.List;
 
 public class ClientManager implements ClientListener {
     private static ClientManager instance;
@@ -80,7 +76,7 @@ public class ClientManager implements ClientListener {
                     if (comando.getTipoRespuesta() == TipoRespuesta.OK && comando.getContenido() instanceof Mensaje) {
                         eventManager.notifySendMessageSuccess((Mensaje) comando.getContenido());
                     } else {
-                        eventManager.notifySendMessageFailure((String) comando.getContenido());
+                        eventManager.notifySendMessageFailure((Mensaje) comando.getContenido());
                     }
                     break;
 
@@ -91,11 +87,19 @@ public class ClientManager implements ClientListener {
                         if (m != null && u != null) { // hmm... que problema ?
                             eventManager.notifyMessageReceivedSuccess(m, u);
                         } else {
-                            eventManager.notifySendMessageFailure((String) comando.getContenido());
+                            eventManager.notifySendMessageFailure((Mensaje) comando.getContenido());
                         }
                     } else {
-                        eventManager.notifyMessageReceivedFailure((String) comando.getContenido());
+                        eventManager.notifyMessageReceivedFailure((Mensaje) comando.getContenido());
                     }
+                    break;
+
+                case CONFIRMAR_ENTREGA_MENSAJE:
+                    eventManager.notifyMessageDelivered((Mensaje) comando.getContenido());
+                    break;
+
+                case CONFIRMAR_LECTURA_MENSAJE:
+                    eventManager.notifyMessageRead((Mensaje) comando.getContenido());
                     break;
 
                 case AGREGAR_CONTACTO:

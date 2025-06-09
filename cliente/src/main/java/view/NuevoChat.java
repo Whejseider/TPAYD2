@@ -15,8 +15,8 @@ public class NuevoChat extends JDialog {
     private DefaultListModel<Contacto> listModel;
     private NuevoChatController controlador;
 
-    public NuevoChat() throws HeadlessException {
-        super();
+    public NuevoChat(Frame owner) throws HeadlessException {
+        super(owner);
         this.setContentPane(this.pane);
         this.setTitle("Nuevo Chat");
         this.setLocationRelativeTo(null);

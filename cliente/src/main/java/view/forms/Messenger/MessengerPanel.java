@@ -3,15 +3,12 @@ package view.forms.Messenger;
 import interfaces.IController;
 import model.Contacto;
 import model.Conversacion;
-import utils.ChatListRenderer;
-import utils.SystemForm;
 import view.component.chat.Chat_Panel;
 import view.component.chat.TextPaneCustom;
 import view.forms.FormChat;
 import view.system.Form;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 

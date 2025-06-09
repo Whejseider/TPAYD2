@@ -1,13 +1,6 @@
 package view.system;
 
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.miginfocom.swing.MigLayout;
-import raven.modal.Drawer;
-import view.component.FormSearchButton;
-import view.component.MemoryBar;
-import view.component.RefreshLine;
-import view.icons.SVGIconUIColor;
 
 import javax.swing.*;
 import java.awt.*;

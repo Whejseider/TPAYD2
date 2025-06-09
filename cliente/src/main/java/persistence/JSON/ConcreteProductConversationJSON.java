@@ -6,11 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import connection.Sesion;
 import model.Contacto;
 import model.Conversacion;
+import model.Mensaje;
+import model.MessageStatus;
 import persistence.AbstractProductConversation;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -22,7 +25,29 @@ public class ConcreteProductConversationJSON implements AbstractProductConversat
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        Map<String, Conversacion> conversaciones = Sesion.getInstance().getUsuarioActual().getConversaciones();
+        Map<String, Conversacion> conversacionesOriginales = Sesion.getInstance().getUsuarioActual().getConversaciones();
+        Map<String, Conversacion> conversacionesFiltradas = new HashMap<>();
+
+        for (Map.Entry<String, Conversacion> entry : conversacionesOriginales.entrySet()) {
+            String contacto = entry.getKey();
+            Conversacion original = entry.getValue();
+
+            Conversacion copia = new Conversacion();
+            copia.setContacto(original.getContacto());
+
+            List<Mensaje> mensajesFiltrados = original.getMensajes().stream()
+                    .filter(m -> m.getStatus() != MessageStatus.FAILED)
+                    .toList();
+            copia.setMensajes(mensajesFiltrados);
+
+            if (!mensajesFiltrados.isEmpty()) {
+                copia.setUltimoMensaje(mensajesFiltrados.get(mensajesFiltrados.size() - 1));
+            } else {
+                copia.setUltimoMensaje(null);
+            }
+
+            conversacionesFiltradas.put(contacto, copia);
+        }
 
         File userDir = new File(FILE_PATH + Sesion.getInstance().getUsuarioActual().getNombreUsuario());
         if (!userDir.exists()) {
@@ -31,14 +56,15 @@ public class ConcreteProductConversationJSON implements AbstractProductConversat
 
         try {
             File conversationsFile = new File(userDir, "conversaciones.json");
-            mapper.writerWithDefaultPrettyPrinter().writeValue(conversationsFile, conversaciones);
-            System.out.println("Conversaciones guardadas exitosamente.");
+            mapper.writerWithDefaultPrettyPrinter().writeValue(conversationsFile, conversacionesFiltradas);
+            System.out.println("Conversaciones guardadas exitosamente (sin mensajes FAILED).");
 
         } catch (IOException e) {
             System.err.println("Error al guardar las conversaciones al archivo JSON.");
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void load() {

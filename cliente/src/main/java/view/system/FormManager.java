@@ -13,8 +13,8 @@ import utils.UndoRedo;
 import view.component.About;
 import view.drawer.MenuDrawer;
 import view.forms.FormError;
-import view.forms.FormRegister;
 import view.forms.FormLogin;
+import view.forms.FormRegister;
 import view.forms.Messenger.MessengerPanel;
 
 import javax.swing.*;

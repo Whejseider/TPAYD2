@@ -1,7 +1,6 @@
 package connection;
 
 import interfaces.ConnectionCallBack;
-import model.TipoRespuesta;
 import raven.modal.Toast;
 import view.forms.FormError;
 import view.manager.ToastManager;

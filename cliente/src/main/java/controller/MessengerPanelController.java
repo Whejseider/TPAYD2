@@ -9,12 +9,10 @@ import interfaces.IController;
 import interfaces.MessageListener;
 import interfaces.SessionListener;
 import model.*;
-import raven.modal.Toast;
 import view.NuevoChat;
 import view.forms.Messenger.Item;
 import view.forms.Messenger.LeftActionListener;
 import view.forms.Messenger.MessengerPanel;
-import view.manager.ToastManager;
 import view.system.Form;
 import view.system.FormManager;
 
@@ -109,6 +107,8 @@ public class MessengerPanelController implements IController, LeftActionListener
         conversacion.agregarMensaje(mensaje);
         conversacion.setUltimoMensaje(conversacion.getUltimoMensaje());
 
+        Cliente.getInstance().confirmarEntregaMensaje(mensaje);
+
         SwingUtilities.invokeLater(() -> {
 
             vista.getLeftPanel().userMessage(conversacion, mensaje);
@@ -117,6 +117,7 @@ public class MessengerPanelController implements IController, LeftActionListener
                     conversacionActual.getContacto().getNombreUsuario().equals(contactoEmisor.getNombreUsuario())) {
                 actualizarVistaMensaje(mensaje);
                 conversacion.getNotificacion().setTieneMensajesNuevos(false);
+                Cliente.getInstance().confirmarLecturaMensaje(mensaje);
             } else {
                 if (conversacion.getNotificacion() != null) {
                     conversacion.getNotificacion().setTieneMensajesNuevos(true);
@@ -206,7 +207,7 @@ public class MessengerPanelController implements IController, LeftActionListener
         }
 
         if (e.getSource() == this.vista.getLeftPanel().getBtnNuevoChat()) {
-            NuevoChat nuevoChat = new NuevoChat();
+            NuevoChat nuevoChat = new NuevoChat(FormManager.getFrame());
             NuevoChatController nuevoChatController = new NuevoChatController(nuevoChat);
             nuevoChatController.setMessengerController(this);
             nuevoChat.setControlador(nuevoChatController);
@@ -228,16 +229,37 @@ public class MessengerPanelController implements IController, LeftActionListener
 
         if (usuarioActual == null) {
             System.err.println("MessengerPanelController: usuarioActualEnSesion es null en onMessageReceivedSuccess");
+            Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getUltimoMensaje().setStatus(MessageStatus.FAILED);
+
+            SwingUtilities.invokeLater(() -> {
+                if (vista.getChat() != null && conversacionActual != null) {
+                    vista.getChat().updateMessageStatus(mensajeRecibido);
+                }
+            });
             return;
         }
 
         if (!usuarioActual.getNombreUsuario().equals(receptor)) {
             System.err.println("MessengerPanelController: Mensaje recibido para un usuario diferente al de la sesión actual. Ignorando.");
+            Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getUltimoMensaje().setStatus(MessageStatus.FAILED);
+
+            SwingUtilities.invokeLater(() -> {
+                if (vista.getChat() != null && conversacionActual != null) {
+                    vista.getChat().updateMessageStatus(mensajeRecibido);
+                }
+            });
             return;
         }
 
         if (mensajeRecibido.getEncryption() != Config.getInstance().getEncryptionType()) {
             System.err.println("MessengerPanelController: El mensaje recibido utiliza otro tipo de algoritmo de encriptación!");
+            Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getUltimoMensaje().setStatus(MessageStatus.FAILED);
+
+            SwingUtilities.invokeLater(() -> {
+                if (vista.getChat() != null && conversacionActual != null) {
+                    vista.getChat().updateMessageStatus(mensajeRecibido);
+                }
+            });
             return;
         }
 
@@ -250,7 +272,7 @@ public class MessengerPanelController implements IController, LeftActionListener
     }
 
     @Override
-    public void onMessageReceivedFailure(String s) {
+    public void onMessageReceivedFailure(Mensaje s) {
 //        Toast.show(vista, Toast.Type.ERROR, s);
     }
 
@@ -265,11 +287,80 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
+        Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensajeEnviadoConfirmado).setStatus(MessageStatus.SENT);
+
+        mensajeEnviadoConfirmado.setStatus(MessageStatus.SENT);
+
+        SwingUtilities.invokeLater(() -> {
+            if (vista.getChat() != null && conversacionActual != null) {
+                vista.getChat().updateMessageStatus(mensajeEnviadoConfirmado);
+            }
+        });
     }
 
     @Override
-    public void onSendMessageFailure(String s) {
-        ToastManager.getInstance().showToast(Toast.Type.ERROR, s);
+    public void onSendMessageFailure(Mensaje mensaje) {
+        String emisor = mensaje.getNombreEmisor();
+        String receptor = mensaje.getNombreReceptor();
+
+        User usuarioActual = Sesion.getInstance().getUsuarioActual();
+
+        if (usuarioActual == null || !usuarioActual.getNombreUsuario().equals(emisor)) {
+            System.err.println("MessengerPanelController: Confirmación de mensaje para un emisor/sesión incorrecto.");
+            return;
+        }
+
+        Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensaje).setStatus(MessageStatus.FAILED);
+
+        mensaje.setStatus(MessageStatus.FAILED);
+
+        SwingUtilities.invokeLater(() -> {
+            if (vista.getChat() != null && conversacionActual != null) {
+                vista.getChat().updateMessageStatus(mensaje);
+            }
+        });
+    }
+
+    @Override
+    public void onMessageDelivered(Mensaje mensaje) {
+        String receptor = mensaje.getNombreReceptor();
+
+        SwingUtilities.invokeLater(() -> {
+
+            if (Sesion.getInstance().getUsuarioActual() == null) return;
+
+            Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor);
+            if (conversacion != null) {
+                mensaje.setStatus(MessageStatus.DELIVERED);
+                Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensaje).setStatus(MessageStatus.DELIVERED);
+                User user = Sesion.getInstance().getUsuarioActual();
+
+                if (conversacionActual != null &&
+                        conversacionActual.getContacto().getNombreUsuario().equals(receptor)) {
+                    vista.getChat().updateMessageStatus(mensaje);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onMessageRead(Mensaje mensaje) {
+        String receptor = mensaje.getNombreReceptor();
+        SwingUtilities.invokeLater(() -> {
+            User usuarioActual = Sesion.getInstance().getUsuarioActual();
+            if (usuarioActual == null) return;
+
+            Conversacion conversacion = usuarioActual.getConversacionCon(receptor);
+            if (conversacion != null) {
+                mensaje.setStatus(MessageStatus.READ);
+                Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensaje).setStatus(MessageStatus.READ);
+
+                if (conversacionActual != null &&
+                        conversacionActual.getContacto().getNombreUsuario().equals(receptor)) {
+                    vista.getChat().updateMessageStatus(mensaje);
+                }
+            }
+        });
     }
 
     @Override
@@ -293,6 +384,14 @@ public class MessengerPanelController implements IController, LeftActionListener
             if (!conversacion.getMensajes().isEmpty()) {
 
                 conversacion.getNotificacion().setTieneMensajesNuevos(false);
+
+                for (Mensaje mensaje : conversacion.getMensajes()) {
+                    if (!mensaje.esMio(Sesion.getInstance().getUsuarioActual()) &&
+                            mensaje.getStatus() != MessageStatus.READ) {
+                        Cliente.getInstance().confirmarLecturaMensaje(mensaje);
+                    }
+                }
+
                 Item itemSeleccionado = vista.getLeftPanel().getSelectedConversation(conversacion);
                 if (itemSeleccionado != null) {
                     itemSeleccionado.actualizarApariencia();

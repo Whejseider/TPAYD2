@@ -14,7 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-import static encryption.chacha20.LocalChaCha20.*;
+import static encryption.chacha20.LocalChaCha20.ENCRYPT_ALGO;
+import static encryption.chacha20.LocalChaCha20.NONCE_LEN;
 
 public class EncryptionChaCha20 implements EncryptionStrategy {
 

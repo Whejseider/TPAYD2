@@ -322,6 +322,42 @@ public class Cliente {
         }
     }
 
+    public void confirmarEntregaMensaje(Mensaje mensaje) {
+        if (!isConectadoYActivo()) {
+            notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            attemptReconnect();
+            return;
+        }
+        try {
+            Comando c = new Comando(TipoSolicitud.CONFIRMAR_ENTREGA_MENSAJE, mensaje);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            System.err.println("Cliente: IOException al confirmar entrega mensaje: " + e.getMessage());
+            notificarErrorConexionPerdida("Error al confirmar entrega mensaje: " + e.getClass().getSimpleName());
+            cerrarTodo(false);
+            attemptReconnect();
+        }
+    }
+
+    public void confirmarLecturaMensaje(Mensaje mensaje) {
+        if (!isConectadoYActivo()) {
+            notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            attemptReconnect();
+            return;
+        }
+        try {
+            Comando c = new Comando(TipoSolicitud.CONFIRMAR_LECTURA_MENSAJE, mensaje);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            System.err.println("Cliente: IOException al confirmar lectura mensaje: " + e.getMessage());
+            notificarErrorConexionPerdida("Error al confirmar lectura mensaje: " + e.getClass().getSimpleName());
+            cerrarTodo(false);
+            attemptReconnect();
+        }
+    }
+
     public void registrarse(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");

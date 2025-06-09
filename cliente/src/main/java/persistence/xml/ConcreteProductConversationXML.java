@@ -5,6 +5,7 @@ import encryption.EncryptionType;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
+import model.MessageStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -71,6 +72,14 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     encryptType.appendChild(document.createTextNode(m.getEncryption().toString()));
                     mensajeElement.appendChild(encryptType);
 
+                    Element id = document.createElement("id");
+                    id.appendChild(document.createTextNode(m.getId()));
+                    mensajeElement.appendChild(id);
+
+                    Element status = document.createElement("status");
+                    status.appendChild(document.createTextNode(m.getStatus().toString()));
+                    mensajeElement.appendChild(status);
+
                     mensajesElement.appendChild(mensajeElement);
                 }
                 conversationElement.appendChild(mensajesElement);
@@ -127,12 +136,17 @@ public class ConcreteProductConversationXML implements AbstractProductConversati
                     String receptor = mensajeElement.getElementsByTagName("receptor").item(0).getTextContent();
                     String hora = mensajeElement.getElementsByTagName("hora").item(0).getTextContent();
                     String encryptType = mensajeElement.getElementsByTagName("encrypt").item(0).getTextContent();
+                    String id = mensajeElement.getElementsByTagName("id").item(0).getTextContent();
+                    String status = mensajeElement.getElementsByTagName("status").item(0).getTextContent();
+
 
                     EncryptionType type = EncryptionType.valueOf(encryptType);
 
                     Mensaje mensaje = new Mensaje(contenido, emisor, receptor, type);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                     mensaje.setTiempo(LocalDateTime.parse(hora, formatter));
+                    mensaje.setId(id);
+                    mensaje.setStatus(MessageStatus.valueOf(status));
                     conv.agregarMensaje(mensaje);
                 }
 

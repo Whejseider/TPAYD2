@@ -2,8 +2,8 @@ package view.forms;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import view.component.chat.Chat_Panel;
 import view.component.chat.Chat_Bottom;
+import view.component.chat.Chat_Panel;
 import view.component.chat.Chat_Title;
 import view.system.Form;
 

@@ -16,7 +16,6 @@ public class Chat_Item extends JPanel {
     protected final int borderSize;
     protected final int type;
     protected int level;
-    protected JLabel labelName;
 
     public Chat_Item(int borderSize, int type) {
         this.borderSize = borderSize;
@@ -31,26 +30,6 @@ public class Chat_Item extends JPanel {
                 "border:" + borderKey + ";" +
                 "background:$Chat.background;" +
                 "foreground:" + backgroundKey);
-    }
-
-    /**
-     * Lo dejo por las dudas
-     * @param userName
-     */
-    public void addUserName(String userName) {
-        if (userName == null) {
-            if (labelName != null) {
-                remove(labelName);
-                labelName = null;
-            }
-        } else {
-            labelName = new JLabel(userName);
-            labelName.putClientProperty(FlatClientProperties.STYLE, "" +
-                    "border:0,5,0,5;" +
-                    "foreground:$Component.accentColor;" +
-                    "font:bold");
-            add(labelName, 0);
-        }
     }
 
     @Override

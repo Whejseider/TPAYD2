@@ -12,8 +12,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class PanelThemes extends JPanel {
 

@@ -1,8 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.MapSerializer;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;

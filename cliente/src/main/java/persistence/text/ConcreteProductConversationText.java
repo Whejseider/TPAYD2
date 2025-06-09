@@ -5,6 +5,7 @@ import encryption.EncryptionType;
 import model.Contacto;
 import model.Conversacion;
 import model.Mensaje;
+import model.MessageStatus;
 import persistence.AbstractProductConversation;
 
 import java.io.*;
@@ -38,15 +39,17 @@ public class ConcreteProductConversationText implements AbstractProductConversat
                 writer.println("Nombre_Contacto=" + contactoNombre);
                 writer.println("[MENSAJES]");
                 for (Mensaje mensaje : conversacion.getMensajes()) {
+                    String id = mensaje.getId();
                     String emisor = mensaje.getNombreEmisor();
                     String receptor = mensaje.getNombreReceptor();
                     String fechaHora = mensaje.getTiempo().toString();
                     String contenido = mensaje.getContenido();
                     String encryptType = mensaje.getEncryption().toString();
+                    String status = mensaje.getStatus().toString();
 
                     contenido = contenido.replace("|", "/");
 
-                    writer.println(encryptType + "|" + emisor + "|" + receptor + "|" + fechaHora + "|" + contenido);
+                    writer.println(id + "|" + encryptType + "|" + emisor + "|" + receptor + "|" + fechaHora + "|" + contenido + "|" + status);
                 }
                 writer.println("[FIN_MENSAJES]");
                 writer.println("Notificacion=" + conversacion.getNotificacion().isTieneMensajesNuevos());
@@ -111,16 +114,20 @@ public class ConcreteProductConversationText implements AbstractProductConversat
                         nombreContactoActual = null;
                     }
                 } else if (leyendoMensajes && conversacionActual != null && !linea.isEmpty()) {
-                    String[] partes = linea.split("\\|", 5);
-                    if (partes.length == 5) {
-                        EncryptionType encryptType = EncryptionType.valueOf(partes[0]);
-                        String nombreEmisor = partes[1];
-                        String nombreReceptor = partes[2];
-                        LocalDateTime fechaHora = LocalDateTime.parse(partes[3]);
-                        String texto = partes[4];
+                    String[] partes = linea.split("\\|", 7);
+                    if (partes.length == 7) {
+                        String id = partes[0];
+                        EncryptionType encryptType = EncryptionType.valueOf(partes[1]);
+                        String nombreEmisor = partes[2];
+                        String nombreReceptor = partes[3];
+                        LocalDateTime fechaHora = LocalDateTime.parse(partes[4]);
+                        String texto = partes[5];
+                        MessageStatus status = MessageStatus.valueOf(partes[6]);
 
                         Mensaje mensaje = new Mensaje(texto, nombreEmisor, nombreReceptor, encryptType);
                         mensaje.setTiempo(fechaHora);
+                        mensaje.setId(id);
+                        mensaje.setStatus(status);
                         conversacionActual.getMensajes().add(mensaje);
                         conversacionActual.setUltimoMensaje(conversacionActual.getUltimoMensaje());
                     }

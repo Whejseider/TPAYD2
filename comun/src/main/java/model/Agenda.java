@@ -1,7 +1,6 @@
 package model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -36,11 +35,6 @@ public class Agenda implements Serializable {
             this.contactos.add(contacto);
         }
     }
-
-//    public void agregarContacto(User user) {
-//        Contacto c = crearContacto(user);
-//        this.contactos.add(c);
-//    }
 
     public static Contacto crearContacto(User user) {
         Contacto c = new Contacto();
