@@ -11,7 +11,7 @@ public class MessageStatusIcon extends JComponent {
 
     private MessageStatus status;
     private static final int ICON_SIZE = 18;
-    private static final int TICK_SIZE = 14;
+    private static final int TICK_SIZE = 24;
 
     public MessageStatusIcon(MessageStatus status) {
         this.status = status;

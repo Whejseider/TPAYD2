@@ -100,10 +100,6 @@ public class MessengerPanelController implements IController, LeftActionListener
         User usuarioActual = Sesion.getInstance().getUsuarioActual();
         if (usuarioActual == null) return;
 
-        if (mensaje.getNombreEmisor().equals(usuarioActual.getNombreUsuario())) {
-            return;
-        }
-
         Contacto contactoEmisor = Agenda.crearContacto(emisor);
         usuarioActual.getAgenda().agregarContacto(contactoEmisor);
 
