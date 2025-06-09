@@ -116,6 +116,10 @@ public class ClientManager implements ClientListener {
                     }
                     break;
 
+                case PING:
+                    System.out.println("ClientManager (SERVIDOR): PONG");
+                    break;
+
                 default:
                     System.out.println("ADVERTENCIA: Tipo de acción no manejada: " + comando.getTipoSolicitud());
             }

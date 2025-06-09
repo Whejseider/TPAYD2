@@ -36,7 +36,7 @@ public class Messenger extends JFrame  {
                     Sesion.getInstance().saveUserData();
                     Config.getInstance().saveConfiguration();
                 }
-                Cliente.getInstance().cerrarTodo(true);
+                Cliente.clearInstance();
             }
         });
     }

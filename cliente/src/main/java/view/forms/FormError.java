@@ -77,7 +77,7 @@ public class FormError extends Form {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                Cliente.getInstance().attemptReconnect();
+                Cliente.getInstance().attemptConnection();
                 return null;
             }
 

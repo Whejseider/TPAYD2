@@ -258,7 +258,7 @@ public class ClientHandler implements Runnable {
         User emisor = Servidor.directorio.getUsuarioPorNombre(mensaje.getNombreEmisor());
         if (emisor != null) {
             ClientHandler clientHandler = getClienteConectado(emisor.getNombreUsuario());
-            if (clientHandler != null ) {
+            if (clientHandler != null) {
                 Comando c = new Comando(TipoSolicitud.CONFIRMAR_LECTURA_MENSAJE, TipoRespuesta.OK, mensaje);
                 clientHandler.enviarComando(c);
             }
@@ -399,6 +399,9 @@ public class ClientHandler implements Runnable {
                         case CONFIRMAR_LECTURA_MENSAJE:
                             confirmarLecturaMensaje((Mensaje) ((Comando) objetoRecibido).getContenido());
                             break;
+                        case PING:
+                            pong();
+                            break;
                         default:
                             serverLog("Servidor: Comando no reconocido o no manejado: " + comando.getTipoSolicitud(), Servidor.COLOR_ERROR);
                             break;
@@ -436,6 +439,11 @@ public class ClientHandler implements Runnable {
         cerrarTodo(socket, objectInputStream, objectOutputStream);
 
         serverLog("Servidor: Hilo de cliente terminado para " + (userActual != null ? userActual.getNombreUsuario() : "cliente desconocido"), Servidor.COLOR_INFO);
+    }
+
+    private void pong() {
+        Comando c = new Comando(TipoSolicitud.PING, TipoRespuesta.PONG);
+        enviarComando(c);
     }
 
 }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.fv</groupId>
         <artifactId>TPAYD2</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>comun</artifactId>

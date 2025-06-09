@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -170,41 +171,7 @@ public class MessengerPanelController implements IController, LeftActionListener
             if (contenido.isEmpty() || conversacionActual == null) {
                 vista.getTxtMensaje().grabFocus();
             } else {
-
-                Mensaje mensajeParaUI = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual().getNombreUsuario(), conversacionActual.getContacto().getNombreUsuario(), Config.getInstance().getEncryptionType());
-
-                Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(conversacionActual.getContacto().getNombreUsuario());
-                conversacion.agregarMensaje(mensajeParaUI);
-                conversacion.setUltimoMensaje(mensajeParaUI);
-
-                vista.getLeftPanel().userMessage(conversacion, mensajeParaUI);
-
-                if (conversacionActual.getMensajes().size() == 1) {
-                    ultimaFechaMostradaEnChat = null;
-                }
-
-                actualizarVistaMensaje(mensajeParaUI);
-
-//                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
-//                    vista.getLeftPanel().initData();
-//                    vista.getLeftPanel().selectedConversation(conversacion);
-//                }
-
-                SwingUtilities.invokeLater(() -> {
-                    vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
-                    vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
-                    vista.getLeftPanel().selectedConversation(conversacionActual);
-                });
-
-                messageInputFocus();
-
-                Mensaje mensajeParaEnviar = new Mensaje(mensajeParaUI);
-
-                EncryptionCreator creator = EncryptionCreatorProvider.getCreator(Config.getInstance().getEncryptionType());
-                String contenidoCifrado = creator.encryptMessage(mensajeParaEnviar.getContenido(), Config.getInstance().getLocalPassphrase());
-                mensajeParaEnviar.setContenido(contenidoCifrado);
-                Cliente.getInstance().enviarMensaje(mensajeParaEnviar);
-
+                enviarMensaje(contenido);
             }
         }
 
@@ -216,6 +183,43 @@ public class MessengerPanelController implements IController, LeftActionListener
             nuevoChat.display();
         }
 
+    }
+
+    private void enviarMensaje(String contenido) {
+        Mensaje mensajeParaUI = new Mensaje(contenido, Sesion.getInstance().getUsuarioActual().getNombreUsuario(), conversacionActual.getContacto().getNombreUsuario(), Config.getInstance().getEncryptionType());
+
+        Conversacion conversacion = Sesion.getInstance().getUsuarioActual().getConversacionCon(conversacionActual.getContacto().getNombreUsuario());
+        conversacion.agregarMensaje(mensajeParaUI);
+        conversacion.setUltimoMensaje(mensajeParaUI);
+
+        vista.getLeftPanel().userMessage(conversacion, mensajeParaUI);
+
+        if (conversacionActual.getMensajes().size() == 1) {
+            ultimaFechaMostradaEnChat = null;
+        }
+
+        actualizarVistaMensaje(mensajeParaUI);
+
+//                if (vista.getLeftPanel().getSelectedConversation(conversacion) == null) {
+//                    vista.getLeftPanel().initData();
+//                    vista.getLeftPanel().selectedConversation(conversacion);
+//                }
+
+        SwingUtilities.invokeLater(() -> {
+            vista.getLeftPanel().getScroll().getScrollRefreshModel().stop();
+            vista.getLeftPanel().getScroll().getScrollRefreshModel().resetPage();
+            vista.getLeftPanel().selectedConversation(conversacionActual);
+        });
+
+        messageInputFocus();
+
+        Mensaje mensajeParaEnviar = new Mensaje(mensajeParaUI);
+
+        EncryptionCreator creator = EncryptionCreatorProvider.getCreator(Config.getInstance().getEncryptionType());
+        String contenidoCifrado = creator.encryptMessage(mensajeParaEnviar.getContenido(), Config.getInstance().getLocalPassphrase());
+        mensajeParaEnviar.setContenido(contenidoCifrado);
+
+        Cliente.getInstance().enviarMensaje(mensajeParaEnviar);
     }
 
     private void messageInputFocus() {
@@ -437,7 +441,6 @@ public class MessengerPanelController implements IController, LeftActionListener
                 return;
             }
 
-
             String nombreContactoConversacionActual = null;
             if (this.conversacionActual != null && this.conversacionActual.getContacto() != null) {
                 nombreContactoConversacionActual = this.conversacionActual.getContacto().getNombreUsuario();
@@ -472,6 +475,11 @@ public class MessengerPanelController implements IController, LeftActionListener
                 ultimaFechaMostradaEnChat = null;
                 vista.mostrarContactoInfo(null);
             }
+
+            for (Mensaje mensaje : Sesion.getInstance().getMensajesPendientes()) { // Esto cambiarlo más adelante si hay tiempo, capaz para la reentrega, porque no anda, va, cambie como funciona el cliente y no entro aca todavía
+                enviarMensaje(mensaje.getContenido());
+            }
+            Sesion.getInstance().setMensajesPendientes(new ArrayList<>());
         });
     }
 }

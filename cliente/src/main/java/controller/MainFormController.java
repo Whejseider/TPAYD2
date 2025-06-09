@@ -112,17 +112,26 @@ public class MainFormController implements IController, AuthenticationListener, 
         } else {
             FormManager.showLogin();
         }
-        ConnectionManager.getInstance().checkOnReconnection();
+//        ConnectionManager.getInstance().checkOnReconnection();
 
         if (exito) {
-            EventManager.getInstance().notifySessionReloaded();
+            Config config = Config.getInstance();
+            boolean configLoaded = config.loadConfiguration();
+
+            if (!configLoaded) {
+                SwingUtilities.invokeLater(() -> {
+                    FormPersistence formPersistence = new FormPersistence(FormManager.getFrame());
+                    formPersistence.setVisible(true);
+                    EventManager.getInstance().notifySessionReloaded();
+                });
+            }
         }
 
-        if (ConnectionManager.getInstance().getFormError() != null && ConnectionManager.getInstance().getFormError().isVisible()) {
-            ConnectionManager.getInstance().getFormError().setVisible(false);
-        }
-        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Reconectado exitosamente");
-        ConnectionManager.getInstance().setFormError(null);
+//        if (ConnectionManager.getInstance().getFormError() != null && ConnectionManager.getInstance().getFormError().isVisible()) {
+//            ConnectionManager.getInstance().getFormError().setVisible(false);
+//        }
+        ToastManager.getInstance().showToast(Toast.Type.SUCCESS, "Conectado exitosamente");
+//        ConnectionManager.getInstance().setFormError(null);
 
 //        Cliente.getInstance().startPeriodicServerCheck();
     }
@@ -130,22 +139,22 @@ public class MainFormController implements IController, AuthenticationListener, 
     @Override
     public void onConnectionLost(String s) {
 //        Sesion.getInstance().setUsuarioActual(null);
-        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
-        if (ConnectionManager.getInstance().getFormError() == null || !ConnectionManager.getInstance().getFormError().isVisible()) {
-            ConnectionManager.getInstance().showError(this::callBackConnection, true, "Fallo al reconectar con el servidor");
-        } else {
-            if (ConnectionManager.getInstance().getFormError().isVisible()) {
-                ConnectionManager.getInstance().getFormError().showReconnectOptions(true);
-            }
-        }
-        Cliente.getInstance().stopPeriodicServerCheck();
+//        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
+//        if (ConnectionManager.getInstance().getFormError() == null || !ConnectionManager.getInstance().getFormError().isVisible()) {
+//            ConnectionManager.getInstance().showError(this::callBackConnection, true, "Fallo al reconectar con el servidor");
+//        } else {
+//            if (ConnectionManager.getInstance().getFormError().isVisible()) {
+//                ConnectionManager.getInstance().getFormError().showReconnectOptions(true);
+//            }
+//        }
+//        Cliente.getInstance().stopPeriodicServerCheck();
     }
 
     @Override
     public void onConnectionAttemptFailure(String s) {
 //        Sesion.getInstance().setUsuarioActual(null);
-        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
-        Cliente.getInstance().stopPeriodicServerCheck();
+//        ConnectionManager.getInstance().showError(this::callBackConnection, true, s);
+//        Cliente.getInstance().stopPeriodicServerCheck();
     }
 
     private void callBackConnection() {

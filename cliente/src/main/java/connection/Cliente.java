@@ -14,32 +14,42 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Cliente {
 
     private Socket socket;
-    private ObjectInputStream objectInputStream; //Entrada
-    private ObjectOutputStream objectOutputStream; //Salida
+    private ObjectInputStream objectInputStream;
+    private ObjectOutputStream objectOutputStream;
     private Comando comando;
     private ClientListener clientListener = ClientManager.getInstance();
     public static Cliente cliente;
 
     private volatile boolean activo = true;
-
     private volatile boolean reconectando = false;
+    private final AtomicBoolean monitorConnectionActive = new AtomicBoolean(false);
 
     private static String lastKnownPrimaryIp = null;
     private static int lastKnownPrimaryPort = -1;
-    private static final int CONNECTION_TIMEOUT_MS = 5000; // 5 segundos para timeouts de conexión
-    private static final int SERVER_CHECK_INTERVAL_SECONDS = 3; // 3 segundos para chequear la conexión con el servidor, es muy poco pero es lo que hay (el monitor nos da el servidor primario)
-    private static final int RECONNECT_DELAY_MS = 3000; // 3 segundos de espera antes de intentar reconectar
-    private ScheduledExecutorService scheduler;
+
+    // Timeouts y delays
+    private static final int CONNECTION_TIMEOUT_MS = 5000;
+    private static final int SERVER_CHECK_INTERVAL_SECONDS = 10;
+    private static final int MONITOR_CHECK_INTERVAL_SECONDS = 5; // Chequear monitor más seguido
+    private static final int RECONNECT_DELAY_MS = 3000;
+    private static final int MONITOR_RECONNECT_DELAY_MS = 2000; // Sin suso todaiva
+    private static final int MAX_RECONNECT_ATTEMPTS = 3;
+    private static final int EXTENDED_RECONNECT_DELAY_MS = 10000; // Si falla mucho, esperar más
+
+    private ScheduledExecutorService serverCheckScheduler;
+    private ScheduledExecutorService monitorCheckScheduler;
+    private ScheduledExecutorService reconnectScheduler;
 
     private Cliente() {
     }
 
     public static Cliente getInstance() {
-        if (cliente == null ) {
+        if (cliente == null) {
             cliente = new Cliente();
         }
         return cliente;
@@ -58,83 +68,257 @@ public class Cliente {
         }
     }
 
-    public void startPeriodicServerCheck() {
-        if (scheduler != null && !scheduler.isShutdown()) {
-            System.out.println("Cliente: La verificación periódica ya está en ejecución.");
+    // Chequea el monitor constantemente para saber cuál es el servidor primario
+    public void startMonitorConnectionCheck() {
+        if (monitorCheckScheduler != null && !monitorCheckScheduler.isShutdown()) {
+            System.out.println("Cliente: El monitoreo del monitor ya está en ejecución.");
             return;
         }
 
-        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        monitorCheckScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setDaemon(true);
-            t.setName("PrimaryServerChecker");
+            t.setName("MonitorConnectionChecker");
             return t;
         });
 
-        System.out.println("Cliente: Iniciando verificación periódica del servidor primario...");
+        System.out.println("Cliente: Iniciando verificación constante del monitor...");
 
-        scheduler.scheduleAtFixedRate(() -> {
+        monitorCheckScheduler.scheduleAtFixedRate(() -> {
+            try {
+                HeartbeatData primaryInfo = queryMonitorForPrimaryServer();
+
+                if (primaryInfo != null) {
+                    monitorConnectionActive.set(true);
+
+                    String monitorIp = primaryInfo.getPrimaryClientIp();
+                    int monitorPort = primaryInfo.getPrimaryClientPort();
+
+                    if (monitorIp != null && !monitorIp.equals("DESCONOCIDO_NINGUNO") && monitorPort != -1) {
+                        // Si cambió el servidor primario, actualizar
+                        if (!monitorIp.equals(lastKnownPrimaryIp) || monitorPort != lastKnownPrimaryPort) {
+                            System.out.println("Cliente: Monitor informó nuevo servidor primario: " + monitorIp + ":" + monitorPort);
+                            lastKnownPrimaryIp = monitorIp;
+                            lastKnownPrimaryPort = monitorPort;
+
+                            // Si estamos conectados a otro servidor, reconectar
+                            if (socket != null && socket.isConnected() &&
+                                    (!socket.getInetAddress().getHostAddress().equals(monitorIp) ||
+                                            socket.getPort() != monitorPort)) {
+                                System.out.println("Cliente: Reconectando al nuevo servidor primario informado por monitor...");
+                                triggerServerReconnect();
+                            }
+                        }
+                    }
+                } else {
+                    if (monitorConnectionActive.get()) {
+                        System.out.println("Cliente: Se perdió la conexión con el monitor.");
+                        monitorConnectionActive.set(false);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Cliente: Error en verificación del monitor: " + e.getMessage());
+                monitorConnectionActive.set(false);
+            }
+        }, 0, MONITOR_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    // Chequea que el servidor esté vivo cada tanto
+    public void startPeriodicServerCheck() {
+        if (serverCheckScheduler != null && !serverCheckScheduler.isShutdown()) {
+            System.out.println("Cliente: La verificación periódica del servidor ya está en ejecución.");
+            return;
+        }
+
+        serverCheckScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            t.setName("ServerConnectionChecker");
+            return t;
+        });
+
+        System.out.println("Cliente: Iniciando verificación periódica del servidor...");
+
+        serverCheckScheduler.scheduleAtFixedRate(() -> {
             try {
                 if (reconectando) {
-                    System.out.println("Cliente: Verificación periódica - Reconexión en curso, saltando verificación");
+                    System.out.println("Cliente: Verificación servidor - Reconexión en curso, saltando verificación");
                     return;
                 }
 
                 if (!isConectadoYActivo()) {
-                    System.out.println("Cliente: Verificación periódica - Detectó conexión inactiva, intentando reconectar...");
-                    attemptReconnect();
+                    System.out.println("Cliente: Verificación servidor - Detectó conexión inactiva, intentando reconectar...");
+                    triggerServerReconnect();
                     return;
                 }
 
-                HeartbeatData primaryInfo = queryMonitorForPrimaryServer();
+                // Verificar que estemos conectados al servidor correcto
+                if (monitorConnectionActive.get() && lastKnownPrimaryIp != null && lastKnownPrimaryPort != -1) {
+                    if (socket != null && socket.isConnected() &&
+                            (!socket.getInetAddress().getHostAddress().equals(lastKnownPrimaryIp) ||
+                                    socket.getPort() != lastKnownPrimaryPort)) {
 
-                if (primaryInfo != null) {
-                    String monitorIp = primaryInfo.getPrimaryClientIp();
-                    int monitorPort = primaryInfo.getPrimaryClientPort();
-
-                    boolean needReconnect = false;
-
-                    if (socket != null &&
-                            ((!socket.getInetAddress().getHostAddress().equals(monitorIp)) ||
-                                    (socket.getPort() != monitorPort))) {
-
-                        System.out.println("Cliente: Detectado cambio de servidor primario. " +
-                                "Actual: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort() +
-                                ", Nuevo: " + monitorIp + ":" + monitorPort);
-                        needReconnect = true;
+                        System.out.println("Cliente: Detectado que no estamos conectados al servidor primario correcto. Reconectando...");
+                        triggerServerReconnect();
+                        return;
                     }
-
-                    if (needReconnect) {
-                        System.out.println("Cliente: Reconectando al nuevo servidor primario...");
-                        lastKnownPrimaryIp = monitorIp;
-                        lastKnownPrimaryPort = monitorPort;
-
-                        cerrarTodo(false);
-
-                        if (clientListener != null) {
-                            Comando informacionCmd = new Comando(
-                                    TipoSolicitud.CONECTARSE_SERVIDOR,
-                                    TipoRespuesta.INFORMATION,
-                                    "Reconectando al nuevo servidor primario...");
-                            clientListener.onResponse(informacionCmd);
-                        }
-
-                        attemptReconnect();
-                    } else {
-                        System.out.println("Cliente: Verificación periódica - Conectado al servidor primario correcto.");
-                    }
-                } else {
-                    System.out.println("Cliente: Verificación periódica - No se pudo obtener información del servidor primario.");
-                    Comando c = new Comando(TipoSolicitud.CONECTARSE_SERVIDOR, TipoRespuesta.ERROR, "No se pudo establecer la conexión con el servidor.");
-                    clientListener.onResponse(c);
                 }
+
+                // Mandar un ping para ver si el servidor responde
+                if (!sendPingToServer()) {
+                    System.out.println("Cliente: Ping al servidor falló. Iniciando reconexión...");
+                    triggerServerReconnect();
+                }
+
             } catch (Exception e) {
-                System.err.println("Cliente: Error en verificación periódica: " + e.getMessage());
+                System.err.println("Cliente: Error en verificación periódica del servidor: " + e.getMessage());
             }
         }, SERVER_CHECK_INTERVAL_SECONDS, SERVER_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
-    public void stopPeriodicServerCheck() {
+    // Proceso que se fija si hay que reconectar
+    public void startReconnectProcess() {
+        if (reconnectScheduler != null && !reconnectScheduler.isShutdown()) {
+            return;
+        }
+
+        reconnectScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            t.setName("ReconnectProcess");
+            return t;
+        });
+
+        System.out.println("Cliente: Iniciando proceso de reconexión constante...");
+
+        reconnectScheduler.scheduleAtFixedRate(() -> {
+            try {
+                // Si no hay conexión al servidor, reconectar
+                if (!isConectadoYActivo() && !reconectando) {
+                    System.out.println("Cliente: Proceso de reconexión - Detectó falta de conexión al servidor");
+                    attemptReconnectWithRetries();
+                }
+
+                // Info del estado del monitor
+                if (!monitorConnectionActive.get()) {
+                    System.out.println("Cliente: Proceso de reconexión - Sin conexión al monitor");
+                }
+
+            } catch (Exception e) {
+                System.err.println("Cliente: Error en proceso de reconexión: " + e.getMessage());
+            }
+        }, RECONNECT_DELAY_MS / 1000, RECONNECT_DELAY_MS / 1000, TimeUnit.SECONDS);
+    }
+
+    // Ping simple al servidor para ver si está vivo
+    private boolean sendPingToServer() {
+        if (!isConectadoYActivo()) {
+            return false;
+        }
+
+        try {
+            // Usar un comando liviano que ya existe
+            Comando pingCmd = new Comando(TipoSolicitud.PING);
+            objectOutputStream.writeObject(pingCmd);
+            objectOutputStream.flush();
+
+            // La respuesta se maneja en el hilo de escucha
+            return true;
+        } catch (IOException e) {
+            System.err.println("Cliente: Error al enviar ping al servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Dispara reconexión en otro hilo
+    private void triggerServerReconnect() {
+        if (!reconectando) {
+            new Thread(this::attemptReconnectWithRetries, "ServerReconnectTrigger").start();
+        }
+    }
+
+    // Reconectar con reintentos
+    private void attemptReconnectWithRetries() {
+        if (reconectando) {
+            return;
+        }
+
+        reconectando = true;
+        int attempts = 0;
+
+        try {
+            while (activo && attempts < MAX_RECONNECT_ATTEMPTS) {
+                attempts++;
+                System.out.println("Cliente: Intento de reconexión " + attempts + "/" + MAX_RECONNECT_ATTEMPTS);
+
+                Socket nuevoSocket = attemptConnection();
+
+                if (nuevoSocket != null) {
+                    System.out.println("Cliente: Reconexión exitosa en intento " + attempts);
+                    if (ConnectSuccess(nuevoSocket)) return;
+                }
+
+                // Esperar antes del siguiente intento
+                Thread.sleep(RECONNECT_DELAY_MS);
+            }
+
+            // Si fallan los intentos rápidos, seguir con intentos más espaciados
+            System.out.println("Cliente: Agotados los intentos rápidos. Continuando con intentos espaciados...");
+
+            while (activo) {
+                Thread.sleep(EXTENDED_RECONNECT_DELAY_MS);
+
+                Socket nuevoSocket = attemptConnection();
+                if (nuevoSocket != null) {
+                    System.out.println("Cliente: Reconexión exitosa después de intentos espaciados");
+                    if (ConnectSuccess(nuevoSocket)) return;
+                }
+            }
+
+        } catch (InterruptedException e) {
+            System.err.println("Cliente: Proceso de reconexión interrumpido");
+            Thread.currentThread().interrupt();
+        } finally {
+            reconectando = false;
+        }
+    }
+
+    private boolean ConnectSuccess(Socket nuevoSocket) {
+        cerrarConexionSolamente(); // Solo cerrar socket y streams, NO los schedulers
+        init(nuevoSocket);
+
+        if (isConectadoYActivo()) {
+            escuchar();
+
+            // Reiniciar solo el scheduler de verificación del servidor
+            stopScheduler(serverCheckScheduler, "ServerCheck");
+            startPeriodicServerCheck();
+
+            if (clientListener != null) {
+                Comando informacionCmd = new Comando(
+                        TipoSolicitud.CONECTARSE_SERVIDOR,
+                        TipoRespuesta.INFORMATION,
+                        "Reconectado exitosamente al servidor.");
+                clientListener.onResponse(informacionCmd);
+            }
+
+            reconectando = false;
+            return true;
+        }
+        return false;
+    }
+
+    public void stopAllSchedulers() {
+        stopScheduler(serverCheckScheduler, "ServerCheck");
+        stopScheduler(monitorCheckScheduler, "MonitorCheck");
+        stopScheduler(reconnectScheduler, "Reconnect");
+
+        serverCheckScheduler = null;
+        monitorCheckScheduler = null;
+        reconnectScheduler = null;
+    }
+
+    private void stopScheduler(ScheduledExecutorService scheduler, String name) {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
             try {
@@ -145,13 +329,11 @@ public class Cliente {
                 scheduler.shutdownNow();
                 Thread.currentThread().interrupt();
             }
-            System.out.println("Cliente: Verificación periódica detenida.");
+            System.out.println("Cliente: " + name + " scheduler detenido.");
         }
-        scheduler = null;
     }
 
     private HeartbeatData queryMonitorForPrimaryServer() {
-        System.out.println("Cliente: Consultando al Monitor ("+ NetworkConstants.IP_MONITOR_DEFAULT +":"+ NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT + ") por información del servidor primario...");
         try (Socket monitorSocket = new Socket()) {
             monitorSocket.connect(new java.net.InetSocketAddress(NetworkConstants.IP_MONITOR_DEFAULT, NetworkConstants.PUERTO_CONSULTA_CLIENTE_A_MONITOR_DEFAULT), CONNECTION_TIMEOUT_MS);
             monitorSocket.setSoTimeout(CONNECTION_TIMEOUT_MS);
@@ -167,25 +349,12 @@ public class Cliente {
                     if (info.getPrimaryClientIp() != null &&
                             !info.getPrimaryClientIp().equals("DESCONOCIDO_NINGUNO") &&
                             info.getPrimaryClientPort() != -1) {
-                        System.out.println("Cliente: Monitor respondió. Primario en: " + info.getPrimaryClientIp() + ":" + info.getPrimaryClientPort());
                         return info;
-                    } else {
-                        System.out.println("Cliente: Monitor informó que no hay primario disponible (info recibida: " +
-                                info.getPrimaryClientIp() + ":" + info.getPrimaryClientPort() + ")");
-                        cerrarTodo(false);
-                        return null;
                     }
-                } else {
-                    System.out.println("Cliente: Respuesta inesperada del monitor (esperaba HeartbeatData): " +
-                            (response != null ? response.getClass().getName() : "null"));
-                    cerrarTodo(true);
                 }
             }
-        } catch (SocketTimeoutException e) {
-            System.err.println("Cliente: Timeout al consultar al Monitor: " + e.getMessage());
-        }
-        catch (IOException | ClassNotFoundException e) {
-            System.err.println("Cliente: Error al consultar al Monitor: " + e.getMessage());
+        } catch (Exception e) {
+            // No imprimir error para evitar spam
         }
         return null;
     }
@@ -193,90 +362,62 @@ public class Cliente {
     public Socket attemptConnection() {
         Socket newSocket;
 
+        // 1. Intentar con último primario conocido (si no es el default)
         if (lastKnownPrimaryIp != null && lastKnownPrimaryPort != -1 &&
-                ! (lastKnownPrimaryIp.equals(NetworkConstants.IP_DEFAULT) && lastKnownPrimaryPort == NetworkConstants.PUERTO_CLIENTES_DEFAULT) ) {
-            System.out.println("Cliente: Intentando conectar al último primario conocido: " + lastKnownPrimaryIp + ":" + lastKnownPrimaryPort);
+                !(lastKnownPrimaryIp.equals(NetworkConstants.IP_DEFAULT) && lastKnownPrimaryPort == NetworkConstants.PUERTO_CLIENTES_DEFAULT)) {
             try {
                 newSocket = new Socket();
                 newSocket.connect(new java.net.InetSocketAddress(lastKnownPrimaryIp, lastKnownPrimaryPort), CONNECTION_TIMEOUT_MS);
-                System.out.println("Cliente: Conectado exitosamente al último primario conocido.");
                 return newSocket;
             } catch (IOException e) {
-                System.err.println("Cliente: Fallo al conectar al último primario conocido: " + e.getMessage());
-                // Aca antes tenia lastknown ip y puerto (-1, null)
+                // Fallar silenciosamente y continuar
             }
         }
 
+        // 2. Preguntar al monitor por info fresca
         HeartbeatData primaryInfoFromMonitor = queryMonitorForPrimaryServer();
-
         if (primaryInfoFromMonitor != null && primaryInfoFromMonitor.getPrimaryClientIp() != null && primaryInfoFromMonitor.getPrimaryClientPort() != -1) {
             String monitorIp = primaryInfoFromMonitor.getPrimaryClientIp();
             int monitorPort = primaryInfoFromMonitor.getPrimaryClientPort();
 
-            System.out.println("Cliente: Intentando conectar al primario (info del Monitor): " + monitorIp + ":" + monitorPort);
             try {
                 newSocket = new Socket();
                 newSocket.connect(new java.net.InetSocketAddress(monitorIp, monitorPort), CONNECTION_TIMEOUT_MS);
-                System.out.println("Cliente: Conectado exitosamente a " + monitorIp + ":" + monitorPort);
                 lastKnownPrimaryIp = monitorIp;
                 lastKnownPrimaryPort = monitorPort;
                 return newSocket;
             } catch (IOException e) {
-                System.err.println("Cliente: Fallo al conectar a " + monitorIp + ":" + monitorPort + " (info del Monitor) - " + e.getMessage());
+                // Fallar silenciosamente y continuar
             }
-        } else {
-            System.out.println("Cliente: No se obtuvo información válida del Monitor o no hay primario según Monitor.");
         }
 
-        System.out.println("Cliente: Intentando conectar a la dirección por defecto: " + NetworkConstants.IP_DEFAULT + ":" + NetworkConstants.PUERTO_CLIENTES_DEFAULT);
+        // 3. Intentar dirección por defecto
         try {
             newSocket = new Socket();
             newSocket.connect(new java.net.InetSocketAddress(NetworkConstants.IP_DEFAULT, NetworkConstants.PUERTO_CLIENTES_DEFAULT), CONNECTION_TIMEOUT_MS);
-            System.out.println("Cliente: Conectado exitosamente a la dirección por defecto.");
             lastKnownPrimaryIp = NetworkConstants.IP_DEFAULT;
             lastKnownPrimaryPort = NetworkConstants.PUERTO_CLIENTES_DEFAULT;
             return newSocket;
         } catch (IOException e) {
-            System.err.println("Cliente: Fallo al conectar a la dirección por defecto - " + e.getMessage());
+            // Fallar silenciosamente
         }
 
-        System.err.println("Cliente: No se pudo conectar a ningún servidor después de todos los intentos.");
         return null;
-    }
-
-    public void attemptReconnect() {
-        if (reconectando) {
-            System.out.println("Cliente: Reconexión ya en curso, ignorando solicitud redundante");
-            return;
-        }
-        reconectando = true;
-        System.out.println("Cliente: Programando intento de reconexión en " + RECONNECT_DELAY_MS + "ms");
-
-        new Thread(() -> {
-            try {
-
-                Thread.sleep(RECONNECT_DELAY_MS);
-
-                System.out.println("Cliente: Ejecutando intento de reconexión programado");
-                connectToServer();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println("Cliente: Intento de reconexión interrumpido: " + e.getMessage());
-            } finally {
-                reconectando = false;
-            }
-        }).start();
     }
 
     public void connectToServer() {
         if (socket != null && socket.isConnected() && !socket.isClosed()) {
             System.out.println("Cliente: Ya conectado.");
-            return ;
+            return;
         }
 
-        System.out.println("Cliente: No conectado o conexión cerrada. Intentando (re)conectar...");
-        cerrarTodo(false);
+        System.out.println("Cliente: Iniciando conexión al servidor...");
+        cerrarConexionSolamente(); // Solo cerrar conexión anterior, no los schedulers
         activo = true;
+
+        // Iniciar monitoreo solo si no están activos
+        startMonitorConnectionCheck();
+        startReconnectProcess();
 
         Socket newSocket = attemptConnection();
 
@@ -284,7 +425,6 @@ public class Cliente {
             this.init(newSocket);
             if (this.socket != null && this.socket.isConnected()) {
                 this.escuchar();
-
                 startPeriodicServerCheck();
 
                 System.out.println("Cliente: Conexión establecida y escuchando.");
@@ -292,40 +432,16 @@ public class Cliente {
                 if (clientListener != null) {
                     clientListener.onResponse(c);
                 }
-            } else {
-                System.err.println("Cliente: Socket obtenido pero falló la inicialización de streams.");
             }
         } else {
-            System.err.println("Cliente: Fallo en attemptConnection().");
-            if (clientListener != null) {
-                Comando errorCmd = new Comando(TipoSolicitud.CONECTARSE_SERVIDOR, TipoRespuesta.ERROR, "No se pudo conectar a ningún servidor.");
-                clientListener.onResponse(errorCmd);
-            }
-        }
-    }
-
-    public void enviarMensaje(Mensaje mensaje) {
-        if (!isConectadoYActivo()) {
-            notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
-            return;
-        }
-        try {
-            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, mensaje);
-            objectOutputStream.writeObject(c);
-            objectOutputStream.flush();
-        } catch (IOException e) {
-            System.err.println("Cliente: IOException al enviar mensaje: " + e.getMessage());
-            notificarErrorConexionPerdida("Error al enviar mensaje: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            System.err.println("Cliente: Fallo en conexión inicial. El proceso de reconexión continuará automáticamente.");
         }
     }
 
     public void confirmarEntregaMensaje(Mensaje mensaje) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -335,15 +451,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al confirmar entrega mensaje: " + e.getMessage());
             notificarErrorConexionPerdida("Error al confirmar entrega mensaje: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
     public void confirmarLecturaMensaje(Mensaje mensaje) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -353,15 +469,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al confirmar lectura mensaje: " + e.getMessage());
             notificarErrorConexionPerdida("Error al confirmar lectura mensaje: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
     public void registrarse(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -371,15 +487,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al enviar mensaje de registro: " + e.getMessage());
             notificarErrorConexionPerdida("Error al registrarse: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
-    public void iniciarSesion(User user){
+    public void iniciarSesion(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -389,15 +505,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al enviar mensaje de inicio de sesión: " + e.getMessage());
             notificarErrorConexionPerdida("Error al iniciar sesión: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
-    public void cerrarSesion(User user){
+    public void cerrarSesion(User user) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -407,15 +523,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al enviar mensaje de cierre de sesión: " + e.getMessage());
             notificarErrorConexionPerdida("Error al cerrar sesión: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
-    public void obtenerDirectorio(){
+    public void obtenerDirectorio() {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -425,15 +541,15 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al enviar mensaje de obtener directorio: " + e.getMessage());
             notificarErrorConexionPerdida("Error al obtener el directorio: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
     public void agregarContacto(String nombreUsuario) {
         if (!isConectadoYActivo()) {
             notificarErrorConexionPerdida("No conectado. Intente reconectar.");
-            attemptReconnect();
+            triggerServerReconnect();
             return;
         }
         try {
@@ -443,15 +559,32 @@ public class Cliente {
         } catch (IOException e) {
             System.err.println("Cliente: IOException al enviar mensaje de agregar contacto: " + e.getMessage());
             notificarErrorConexionPerdida("Error al agregar un contacto: " + e.getClass().getSimpleName());
-            cerrarTodo(false);
-            attemptReconnect();
+            cerrarConexionSolamente();
+            triggerServerReconnect();
         }
     }
 
-    /**
-     * Escucha conexiones del servidor
-     * luego las gestiona con el patrón listener/observer
-     */
+    public void enviarMensaje(Mensaje mensaje) {
+        if (!isConectadoYActivo()) {
+            notificarErrorConexionPerdida("No conectado. Intente reconectar.");
+            if (Sesion.getInstance().getUsuarioActual() != null) {
+                Sesion.getInstance().agregarMensaje(mensaje);
+            }
+            triggerServerReconnect();
+            return;
+        }
+        try {
+            Comando c = new Comando(TipoSolicitud.ENVIAR_MENSAJE, mensaje);
+            objectOutputStream.writeObject(c);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            System.err.println("Cliente: IOException al enviar mensaje: " + e.getMessage());
+            notificarErrorConexionPerdida("Error al enviar mensaje: " + e.getClass().getSimpleName());
+            cerrarConexionSolamente(); // Solo cerrar conexión, mantener schedulers
+            triggerServerReconnect();
+        }
+    }
+
     public void escuchar() {
         activo = true;
 
@@ -468,43 +601,27 @@ public class Cliente {
                     respuesta = (Comando) objectInputStream.readObject();
                     if (clientListener != null) {
                         clientListener.onResponse(respuesta);
-                    } else {
-                        System.err.println("Cliente: clientListener es nulo. No se puede procesar respuesta.");
                     }
                 } catch (SocketTimeoutException e) {
-//                    cerrarTodo(true);
-                }
-                catch (java.io.EOFException | java.net.SocketException e) {
-
-                    System.err.println("Cliente: Conexión cerrada por el servidor o error de socket: " + e.getMessage());
+                    // Timeout normal, continuar
+                } catch (java.io.EOFException | java.net.SocketException e) {
+                    System.err.println("Cliente: Conexión cerrada por el servidor: " + e.getMessage());
                     if (activo) {
-                        notificarErrorConexionPerdida("Se perdió la conexión con el servidor: " + e.getClass().getSimpleName());
-                        cerrarTodo(true);
-//                        attemptReconnect();
-                    }
-                    break;
-                }
-                catch (IOException | ClassNotFoundException e) {
-                    System.err.println("Cliente: Error en hilo de escucha: " + e.getMessage());
-                    if (activo) {
-                        notificarErrorConexionPerdida("Error de comunicación: " + e.getClass().getSimpleName());
-                        cerrarTodo(true);
-//                        attemptReconnect();
+                        notificarErrorConexionPerdida("Se perdió la conexión con el servidor");
+                        cerrarConexionSolamente(); // Solo cerrar conexión, mantener schedulers
                     }
                     break;
                 } catch (Exception e) {
-                    System.err.println("Cliente: Error inesperado en hilo de escucha: " + e.getMessage());
-                    e.printStackTrace();
+                    System.err.println("Cliente: Error en hilo de escucha: " + e.getMessage());
                     if (activo) {
-                        notificarErrorConexionPerdida("Error inesperado: " + e.getClass().getSimpleName());
-                        cerrarTodo(true);
-//                        attemptReconnect();
+                        notificarErrorConexionPerdida("Error de comunicación");
+                        cerrarConexionSolamente(); // Solo cerrar conexión, mantener schedulers
                     }
                     break;
                 }
             }
-            System.out.println("Cliente: Hilo de escucha terminado. Activo: " + activo);
-        }).start();
+            System.out.println("Cliente: Hilo de escucha terminado.");
+        }, "ClienteListenerThread").start();
     }
 
     private void notificarErrorConexionPerdida(String mensaje) {
@@ -514,42 +631,47 @@ public class Cliente {
         }
     }
 
-    public void cerrarTodo(boolean fuePorErrorInesperado) {
-
-        if (!fuePorErrorInesperado) {
-            stopPeriodicServerCheck();
-        }
-
-        if (!activo && !fuePorErrorInesperado) {
-            return;
-        }
-        System.out.println("Cliente: cerrando todo. Activo era: " + activo + ", fuePorError: " + fuePorErrorInesperado);
-        activo = false;
+    // Cierra solo la conexión del servidor pero mantiene los schedulers vivos
+    private void cerrarConexionSolamente() {
+        System.out.println("Cliente: Cerrando solo la conexión del servidor...");
 
         try {
             if (objectInputStream != null) objectInputStream.close();
-        } catch (IOException ignored) { }
+        } catch (IOException ignored) {}
         try {
             if (objectOutputStream != null) objectOutputStream.close();
-        } catch (IOException ignored) {  }
+        } catch (IOException ignored) {}
         try {
             if (socket != null && !socket.isClosed()) socket.close();
-        } catch (IOException ignored) {  }
+        } catch (IOException ignored) {}
 
         objectInputStream = null;
         objectOutputStream = null;
         socket = null;
 
-        if (fuePorErrorInesperado) {
-            System.out.println("Cliente: Recursos cerrados después de un error inesperado.");
-        } else {
-            System.out.println("Cliente: Recursos cerrados.");
+        System.out.println("Cliente: Conexión del servidor cerrada, schedulers mantenidos activos.");
+    }
+
+    public void cerrarTodo(boolean fuePorErrorInesperado) {
+        if (!fuePorErrorInesperado) {
+            stopAllSchedulers();
         }
+
+        if (!activo && !fuePorErrorInesperado) {
+            return;
+        }
+
+        System.out.println("Cliente: cerrando todo. Activo era: " + activo + ", fuePorError: " + fuePorErrorInesperado);
+        activo = false;
+
+        cerrarConexionSolamente();
+
+        System.out.println("Cliente: Recursos cerrados.");
     }
 
     public static void clearInstance() {
         if (cliente != null) {
-            cliente.stopPeriodicServerCheck();
+            cliente.stopAllSchedulers();
             cliente.cerrarTodo(false);
             cliente = null;
         }
@@ -561,27 +683,15 @@ public class Cliente {
         return activo && socket != null && socket.isConnected() && !socket.isClosed() && objectOutputStream != null;
     }
 
-    public Socket getSocket() {
-        return socket;
+    public boolean isMonitorConnected() {
+        return monitorConnectionActive.get();
     }
 
-    public void setSocket(Socket socket) {
-        this.socket = socket;
-    }
-
-    public ClientListener getClientListener() {
-        return clientListener;
-    }
-
-    public void setClientListener(ClientListener clientListener) {
-        this.clientListener = clientListener;
-    }
-
-    public Comando getComando() {
-        return comando;
-    }
-
-    public void setComando(Comando comando) {
-        this.comando = comando;
-    }
+    // Getters y setters
+    public Socket getSocket() { return socket; }
+    public void setSocket(Socket socket) { this.socket = socket; }
+    public ClientListener getClientListener() { return clientListener; }
+    public void setClientListener(ClientListener clientListener) { this.clientListener = clientListener; }
+    public Comando getComando() { return comando; }
+    public void setComando(Comando comando) { this.comando = comando; }
 }

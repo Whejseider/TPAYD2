@@ -1,16 +1,21 @@
 package connection;
 
+import model.Mensaje;
 import model.User;
 import persistence.AbstractFactoryPersistence;
 import persistence.AbstractProductContacts;
 import persistence.AbstractProductConversation;
 import persistence.PersistenceFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * De aca controlo la sesión del usuario para que las demás clases puedan acceder siempre
  */
 public class Sesion {
     private User usuarioActual;
+    private List<Mensaje> mensajesPendientes = new ArrayList<Mensaje>();
     private static Sesion instance;
 
     public Sesion() {
@@ -29,6 +34,20 @@ public class Sesion {
 
     public User getUsuarioActual() {
         return this.usuarioActual;
+    }
+
+    public List<Mensaje> getMensajesPendientes() {
+        return mensajesPendientes;
+    }
+
+    public void setMensajesPendientes(List<Mensaje> mensajesPendientes) {
+        this.mensajesPendientes = mensajesPendientes;
+    }
+
+    public void agregarMensaje(Mensaje mensaje) {
+        if (!this.mensajesPendientes.contains(mensaje)) {
+            this.mensajesPendientes.add(mensaje);
+        }
     }
 
     public void loadUserData() {

@@ -41,6 +41,7 @@ public class FormManager {
             showHome();
         } else {
             System.out.println("FormManager: No hay sesión activa, verificando conexión inicial...");
+            showLogin();
             Cliente.getInstance().connectToServer();
         }
     }

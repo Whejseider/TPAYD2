@@ -5,4 +5,5 @@ public enum TipoRespuesta {
     ERROR,
     UPDATE,
     INFORMATION,
+    PONG
 }

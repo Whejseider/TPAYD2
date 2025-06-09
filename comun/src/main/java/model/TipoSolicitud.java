@@ -14,6 +14,7 @@ public enum TipoSolicitud {
     ELIMINAR_CONTACTO,
     OBTENER_CONVERSACIONES,
     CONEXION_PERDIDA,
+    PING,
     ACTUALIZAR_USUARIO
 }
 
