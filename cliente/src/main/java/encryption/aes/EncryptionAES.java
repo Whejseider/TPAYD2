@@ -3,9 +3,7 @@ package encryption.aes;
 import encryption.EncryptionStrategy;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -15,8 +13,6 @@ import java.util.Base64;
 import static encryption.aes.LocalAES.*;
 
 public class EncryptionAES implements EncryptionStrategy {
-
-    private final SecureRandom secureRandom = new SecureRandom();
 
     private SecretKeySpec generateAesKeyFromPassphrase(String secretPhrase) throws Exception {
         MessageDigest sha256 = MessageDigest.getInstance(SHA_CRYPT);

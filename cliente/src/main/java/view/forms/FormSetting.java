@@ -7,14 +7,6 @@ import com.formdev.flatlaf.util.LoggingFacade;
 import config.Config;
 import encryption.EncryptionType;
 import net.miginfocom.swing.MigLayout;
-import raven.modal.Drawer;
-import raven.modal.drawer.DrawerBuilder;
-import raven.modal.drawer.renderer.AbstractDrawerLineStyleRenderer;
-import raven.modal.drawer.renderer.DrawerCurvedLineStyle;
-import raven.modal.drawer.renderer.DrawerStraightDotLineStyle;
-import raven.modal.drawer.simple.SimpleDrawerBuilder;
-import raven.modal.option.LayoutOption;
-import raven.modal.option.Location;
 import utils.SystemForm;
 import view.component.AccentColorIcon;
 import view.system.Form;
@@ -128,7 +120,7 @@ public class FormSetting extends Form {
                 Config.getInstance().saveConfiguration();
                 JOptionPane.showMessageDialog(panel, "Clave secreta actualizada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(panel, "La clave no puede estar vacía.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, "La clave no puede estar vacía o contener menos de 8 caractéres.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         return btnGuardarClave;

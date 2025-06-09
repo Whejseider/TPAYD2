@@ -3,8 +3,8 @@ package controller;
 import config.Config;
 import connection.Cliente;
 import connection.Sesion;
-import encryption.EncryptionFactory;
-import encryption.EncryptionStrategy;
+import encryption.factory.EncryptionCreator;
+import encryption.factory.EncryptionCreatorProvider;
 import interfaces.IController;
 import interfaces.MessageListener;
 import interfaces.SessionListener;
@@ -197,8 +197,8 @@ public class MessengerPanelController implements IController, LeftActionListener
 
                 Mensaje mensajeParaEnviar = new Mensaje(mensajeParaUI);
 
-                EncryptionStrategy factory = EncryptionFactory.getEncryptation(Config.getInstance().getEncryptionType());
-                String contenidoCifrado = factory.encrypt(mensajeParaEnviar.getContenido(), Config.getInstance().getLocalPassphrase());
+                EncryptionCreator creator = EncryptionCreatorProvider.getCreator(Config.getInstance().getEncryptionType());
+                String contenidoCifrado = creator.encryptMessage(mensajeParaEnviar.getContenido(), Config.getInstance().getLocalPassphrase());
                 mensajeParaEnviar.setContenido(contenidoCifrado);
                 Cliente.getInstance().enviarMensaje(mensajeParaEnviar);
 
@@ -241,8 +241,8 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
-        EncryptionStrategy factory = EncryptionFactory.getEncryptation(Config.getInstance().getEncryptionType());
-        String contenidoDescifrado = factory.decrypt(mensajeRecibido.getContenido(), Config.getInstance().getLocalPassphrase());
+        EncryptionCreator factory = EncryptionCreatorProvider.getCreator(Config.getInstance().getEncryptionType());
+        String contenidoDescifrado = factory.decryptMessage(mensajeRecibido.getContenido(), Config.getInstance().getLocalPassphrase());
         mensajeRecibido.setContenido(contenidoDescifrado);
 
         procesaMensajeEntrante(mensajeRecibido, user);
