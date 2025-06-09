@@ -84,7 +84,7 @@ public class LeftPanel extends JPanel {
         JLabel lblTitle = new JLabel("CHATS");
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 16f));
 
-        btnNuevoChat = new JButton(new FlatSVGIcon("fv/icons/copy.svg", 0.5f));
+        btnNuevoChat = new JButton(new FlatSVGIcon("fv/icons/newchat.svg", 0.5f));
         btnNuevoChat.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnNuevoChat.putClientProperty(FlatClientProperties.STYLE, "" +
                 "arc:999;" +

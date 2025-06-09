@@ -37,13 +37,16 @@ public class MainFormController implements IController, AuthenticationListener, 
 
     @Override
     public void onLoginSuccess(User user) {
-            Config config = Config.getInstance();
-            boolean configLoaded = config.loadConfiguration();
+        Config config = Config.getInstance();
+        boolean configLoaded = config.loadConfiguration();
 
-            if (!configLoaded) {
-                FormPersistence formPersistence = new FormPersistence(this.vista);
+        if (!configLoaded) {
+            SwingUtilities.invokeLater(() -> {
+                FormPersistence formPersistence = new FormPersistence(FormManager.getFrame());
                 formPersistence.setVisible(true);
-            }
+            });
+
+        }
 
     }
 

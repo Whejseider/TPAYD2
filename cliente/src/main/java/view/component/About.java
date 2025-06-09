@@ -58,7 +58,7 @@ public class About extends JPanel {
                 "hecho con las librerías FlatLaf Look and Feel y MigLayout library.<br><br>" +
                 "Se basa en una conexión por socket cliente-servidor, con el servidor centralizado.<br><br>" +
                 "Para el código de fuente, visitar <a href=\"https://github.com/DJ-Raven/swing-modal-dialog/\">GitHub TPAYD2.</a><br><br>" +
-                "<a href=\"https://github.com/AgusC02\">Manuel Gracia</a> - <a href=\"https://github.com/Whejseider\">Franco Vallone</a><br>";
+                "<a href=\"https://github.com/AgusC02\">Agustín Cerdá</a> - <a href=\"https://github.com/Whejseider\">Franco Vallone</a><br>";
 
         return text;
     }

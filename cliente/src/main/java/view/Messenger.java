@@ -32,8 +32,10 @@ public class Messenger extends JFrame  {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                Sesion.getInstance().saveUserData();
-                Config.getInstance().saveConfiguration();
+                if (Sesion.getInstance().getUsuarioActual() != null) {
+                    Sesion.getInstance().saveUserData();
+                    Config.getInstance().saveConfiguration();
+                }
                 Cliente.getInstance().cerrarTodo(true);
             }
         });

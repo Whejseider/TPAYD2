@@ -236,7 +236,12 @@ public class MessengerPanelController implements IController, LeftActionListener
             return;
         }
 
-        EncryptionStrategy factory = EncryptionFactory.getEncryptation(mensajeRecibido.getEncryption());
+        if (mensajeRecibido.getEncryption() != Config.getInstance().getEncryptionType()) {
+            System.err.println("MessengerPanelController: El mensaje recibido utiliza otro tipo de algoritmo de encriptación!");
+            return;
+        }
+
+        EncryptionStrategy factory = EncryptionFactory.getEncryptation(Config.getInstance().getEncryptionType());
         String contenidoDescifrado = factory.decrypt(mensajeRecibido.getContenido(), Config.getInstance().getLocalPassphrase());
         mensajeRecibido.setContenido(contenidoDescifrado);
 
