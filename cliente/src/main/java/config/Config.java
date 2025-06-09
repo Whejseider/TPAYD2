@@ -39,7 +39,7 @@ public class Config {
     }
 
     public void setLocalPassphrase(String localPassphrase) {
-        if (localPassphrase != null && localPassphrase.length() < 8) {
+        if (localPassphrase != null && localPassphrase.length() >= 8) {
             this.LOCAL_PASSPHRASE = localPassphrase;
         }
     }
