@@ -104,6 +104,7 @@ public class MessengerPanelController implements IController, LeftActionListener
         usuarioActual.getAgenda().agregarContacto(contactoEmisor);
 
         Conversacion conversacion = usuarioActual.getConversacionCon(mensaje.getNombreEmisor());
+        mensaje.setStatus(MessageStatus.DELIVERED);
         conversacion.agregarMensaje(mensaje);
         conversacion.setUltimoMensaje(conversacion.getUltimoMensaje());
 
@@ -117,6 +118,7 @@ public class MessengerPanelController implements IController, LeftActionListener
                     conversacionActual.getContacto().getNombreUsuario().equals(contactoEmisor.getNombreUsuario())) {
                 actualizarVistaMensaje(mensaje);
                 conversacion.getNotificacion().setTieneMensajesNuevos(false);
+                mensaje.setStatus(MessageStatus.READ);
                 Cliente.getInstance().confirmarLecturaMensaje(mensaje);
             } else {
                 if (conversacion.getNotificacion() != null) {
@@ -333,7 +335,6 @@ public class MessengerPanelController implements IController, LeftActionListener
             if (conversacion != null) {
                 mensaje.setStatus(MessageStatus.DELIVERED);
                 Sesion.getInstance().getUsuarioActual().getConversacionCon(receptor).getMensajePorId(mensaje).setStatus(MessageStatus.DELIVERED);
-                User user = Sesion.getInstance().getUsuarioActual();
 
                 if (conversacionActual != null &&
                         conversacionActual.getContacto().getNombreUsuario().equals(receptor)) {
@@ -388,6 +389,7 @@ public class MessengerPanelController implements IController, LeftActionListener
                 for (Mensaje mensaje : conversacion.getMensajes()) {
                     if (!mensaje.esMio(Sesion.getInstance().getUsuarioActual()) &&
                             mensaje.getStatus() != MessageStatus.READ) {
+                        mensaje.setStatus(MessageStatus.READ);
                         Cliente.getInstance().confirmarLecturaMensaje(mensaje);
                     }
                 }

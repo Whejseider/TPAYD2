@@ -258,7 +258,7 @@ public class ClientHandler implements Runnable {
         User emisor = Servidor.directorio.getUsuarioPorNombre(mensaje.getNombreEmisor());
         if (emisor != null) {
             ClientHandler clientHandler = getClienteConectado(emisor.getNombreUsuario());
-            if (clientHandler != null && mensaje.getStatus() != MessageStatus.READ) {
+            if (clientHandler != null ) {
                 Comando c = new Comando(TipoSolicitud.CONFIRMAR_LECTURA_MENSAJE, TipoRespuesta.OK, mensaje);
                 clientHandler.enviarComando(c);
             }
@@ -269,7 +269,7 @@ public class ClientHandler implements Runnable {
         User emisor = Servidor.directorio.getUsuarioPorNombre(mensaje.getNombreEmisor());
         if (emisor != null) {
             ClientHandler clientHandler = getClienteConectado(emisor.getNombreUsuario());
-            if (clientHandler != null && mensaje.getStatus() != MessageStatus.DELIVERED) {
+            if (clientHandler != null) {
                 Comando c = new Comando(TipoSolicitud.CONFIRMAR_ENTREGA_MENSAJE, TipoRespuesta.OK, mensaje);
                 clientHandler.enviarComando(c);
             }
